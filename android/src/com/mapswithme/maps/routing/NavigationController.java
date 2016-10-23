@@ -63,6 +63,8 @@ public class NavigationController
 
   private final SearchWheel mSearchWheel;
 
+  private final ExternalDisplay mExtDisplay;
+
   private boolean mShowTimeLeft = true;
 
   private double mNorth;
@@ -211,8 +213,11 @@ public class NavigationController
 
     if (Framework.nativeGetRouter() == Framework.ROUTER_TYPE_PEDESTRIAN)
       updatePedestrian(info);
-    else
+    else {
       updateVehicle(info);
+      mExtDisplay.updateVehicle(info);
+    }
+
 
     boolean hasStreet = !TextUtils.isEmpty(info.nextStreet);
     UiUtils.showIf(hasStreet, mStreetFrame);

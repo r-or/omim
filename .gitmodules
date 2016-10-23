@@ -7,3 +7,6 @@
 [submodule "3party/Alohalytics"]
 	path = 3party/Alohalytics
 	url = git://github.com/mapsme/Alohalytics.git
+[submodule "android/src/com/mapswithme/maps/3rdparty/android-async-http"]
+	path = android/src/com/mapswithme/maps/3rdparty/android-async-http
+	url = https://github.com/loopj/android-async-http.git
