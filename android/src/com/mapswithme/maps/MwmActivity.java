@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StyleRes;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -28,6 +29,7 @@ import com.mapswithme.maps.api.ParsedMwmRequest;
 import com.mapswithme.maps.api.ParsedRoutingData;
 import com.mapswithme.maps.api.ParsedUrlMwmRequest;
 import com.mapswithme.maps.api.RoutePoint;
+import com.mapswithme.maps.uber.Uber;
 import com.mapswithme.maps.uber.UberInfo;
 import com.mapswithme.maps.base.BaseMwmFragmentActivity;
 import com.mapswithme.maps.base.OnBackPressListener;
@@ -138,6 +140,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private boolean mIsFragmentContainer;
   private boolean mIsFullscreen;
   private boolean mIsFullscreenAnimating;
+  private boolean mIsAppearMenuLater;
 
   private FloatingSearchToolbarController mSearchController;
 
@@ -380,7 +383,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
   }
 
   @Override
-  public int getThemeResourceId(String theme)
+  @StyleRes
+  public int getThemeResourceId(@NonNull String theme)
   {
     if (ThemeUtils.isDefaultTheme(theme))
       return R.style.MwmTheme_MainActivity;
@@ -447,6 +451,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   {
     mPositionChooser = findViewById(R.id.position_chooser);
     final Toolbar toolbar = (Toolbar) mPositionChooser.findViewById(R.id.toolbar_position_chooser);
+    UiUtils.extendViewWithStatusBar(toolbar);
     UiUtils.showHomeUpButton(toolbar);
     toolbar.setNavigationOnClickListener(new OnClickListener()
     {
@@ -889,7 +894,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   private void adjustZoomButtons()
   {
-    UiUtils.showIf(showZoomButtons(), mNavZoomIn, mNavZoomOut);
+    UiUtils.showIf(showZoomButtons() && !mIsFullscreen, mNavZoomIn, mNavZoomOut);
     // TODO animate zoom buttons & myposition
   }
 
@@ -941,7 +946,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
 
     if (!closePlacePage() && !closeSidePanel() &&
-        !RoutingController.get().cancel() && !closePositionChooser())
+        (mNavigationController != null && !mNavigationController.cancel()) && !closePositionChooser())
     {
       try
       {
@@ -1023,11 +1028,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
       request.setPointData(object.getLat(), object.getLon(), object.getTitle(), object.getApiId());
       object.setSubtitle(request.getCallerName(MwmApplication.get()).toString());
     }
-    else if (MapObject.isOfType(MapObject.MY_POSITION, object) &&
-             RoutingController.get().isNavigating())
-    {
-      return;
-    }
 
     setFullscreen(false);
 
@@ -1088,6 +1088,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
           adjustRuler(0, menuHeight);
 
           mIsFullscreenAnimating = false;
+          if (mIsAppearMenuLater)
+          {
+            appearMenu(menu);
+            mIsAppearMenuLater = false;
+          }
         }
       });
       if (showZoomButtons())
@@ -1098,20 +1103,28 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
     else
     {
-      Animations.appearSliding(menu.getFrame(), Animations.BOTTOM, new Runnable()
+      if (!mIsFullscreenAnimating)
+        appearMenu(menu);
+      else
+        mIsAppearMenuLater = true;
+    }
+  }
+
+  private void appearMenu(BaseMenu menu)
+  {
+    Animations.appearSliding(menu.getFrame(), Animations.BOTTOM, new Runnable()
+    {
+      @Override
+      public void run()
       {
-        @Override
-        public void run()
-        {
-          adjustCompass(0, 0);
-          adjustRuler(0, 0);
-        }
-      });
-      if (showZoomButtons())
-      {
-        Animations.appearSliding(mNavZoomOut, Animations.RIGHT, null);
-        Animations.appearSliding(mNavZoomIn, Animations.RIGHT, null);
+        adjustCompass(0, 0);
+        adjustRuler(0, 0);
       }
+    });
+    if (showZoomButtons())
+    {
+      Animations.appearSliding(mNavZoomOut, Animations.RIGHT, null);
+      Animations.appearSliding(mNavZoomIn, Animations.RIGHT, null);
     }
   }
 
@@ -1321,7 +1334,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     {
       mNavigationController.show(true);
       mSearchController.hide();
-      mMainMenu.setState(MainMenu.State.NAVIGATION, false);
+      mMainMenu.setState(MainMenu.State.NAVIGATION, false, mIsFullscreen);
       return;
     }
 
@@ -1332,18 +1345,18 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
     else if (RoutingController.get().isPlanning())
     {
-      mMainMenu.setState(MainMenu.State.ROUTE_PREPARE, false);
+      mMainMenu.setState(MainMenu.State.ROUTE_PREPARE, false, mIsFullscreen);
       return;
     }
 
-    mMainMenu.setState(MainMenu.State.MENU, false);
+    mMainMenu.setState(MainMenu.State.MENU, false, mIsFullscreen);
   }
 
   private void adjustMenuLineFrameVisibility()
   {
     final RoutingController controller = RoutingController.get();
 
-    if (controller.isBuilt() || controller.isUberInfoObtained())
+    if (controller.isBuilt() || controller.isUberRequestHandled())
     {
       mMainMenu.showLineFrame(true);
       return;
@@ -1397,6 +1410,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mPlacePage.refreshViews();
     mNavigationController.show(show);
     mOnmapDownloader.updateState(false);
+    adjustCompass(0, UiUtils.getCompassYOffset(this));
   }
 
   @Override
@@ -1441,6 +1455,21 @@ public class MwmActivity extends BaseMwmFragmentActivity
     else
     {
       mRoutingPlanInplaceController.showUberInfo(info);
+    }
+  }
+
+  @Override
+  public void onUberError(@NonNull Uber.ErrorCode code)
+  {
+    if (mIsFragmentContainer)
+    {
+      RoutingPlanFragment fragment = (RoutingPlanFragment) getFragment(RoutingPlanFragment.class);
+      if (fragment != null)
+        fragment.showUberError(code);
+    }
+    else
+    {
+      mRoutingPlanInplaceController.showUberError(code);
     }
   }
 

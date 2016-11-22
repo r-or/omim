@@ -71,6 +71,8 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
 
 @property(weak, nonatomic) MWMNavigationDashboardEntity * navigationInfo;
 
+@property(copy, nonatomic) NSString * routingErrorMessage;
+
 @property(weak, nonatomic) IBOutlet UILabel * speedLabel;
 @property(weak, nonatomic) IBOutlet UILabel * timeLabel;
 @property(weak, nonatomic) IBOutlet UILabel * distanceLabel;
@@ -140,6 +142,9 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
 
 - (void)updateNavigationInfo:(MWMNavigationDashboardEntity *)info
 {
+  if ([MWMRouter isTaxi])
+    return;
+
   NSDictionary * routingNumberAttributes = @{
     NSForegroundColorAttributeName : [UIColor blackPrimaryText],
     NSFontAttributeName : [UIFont bold24]
@@ -339,7 +344,7 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
 - (void)menuActionAddPlace
 {
   [Statistics logEvent:kStatEditorAddClick withParameters:@{kStatValue : kStatMenu}];
-  [[PushNotificationManager pushManager] setTags:@{ @"editor_add_discovered" : @YES }];
+  GetPlatform().GetMarketingService().SendPushWooshTag(marketing::kEditorAddDiscovered);
   self.state = self.restoreState;
   [self.delegate addPlace:NO hasPoint:NO point:m2::PointD()];
 }
@@ -415,6 +420,7 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
   [Statistics logEvent:kStatMenu withParameters:@{kStatButton : kStatBookmarks}];
   [Alohalytics logEvent:kAlohalyticsTapEventKey withValue:@"bookmarks"];
   self.state = self.restoreState;
+  [self.delegate closeInfoScreens];
   [self.controller openBookmarks];
 }
 
@@ -520,7 +526,10 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
 
   if (state == MWMBottomMenuStateInactive || state == MWMBottomMenuStateRouting)
   {
-    self.p2pButton.selected = NO;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      self.p2pButton.selected =
+          ([MWMNavigationDashboardManager manager].state == MWMNavigationDashboardStatePrepare);
+    });
     view.state = self.restoreState = state;
     return;
   }
@@ -532,6 +541,9 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
     self.restoreState = state;
   else
     view.state = state;
+
+  if (state == MWMBottomMenuStateRoutingError)
+    self.estimateLabel.text = self.routingErrorMessage;
 }
 
 - (MWMBottomMenuState)state { return ((MWMBottomMenuView *)self.view).state; }

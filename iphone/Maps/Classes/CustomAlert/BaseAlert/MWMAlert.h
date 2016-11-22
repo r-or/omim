@@ -27,7 +27,6 @@ using TMWMDownloadBlock = void (^)(storage::TCountriesVec const &, TMWMVoidBlock
 + (MWMAlert *)deleteMapProhibitedAlert;
 + (MWMAlert *)unsavedEditsAlertWithOkBlock:(TMWMVoidBlock)okBlock;
 + (MWMAlert *)locationServiceNotSupportedAlert;
-+ (MWMAlert *)locationNotFoundAlertWithOkBlock:(TMWMVoidBlock)okBlock;
 + (MWMAlert *)incorrectFeauturePositionAlert;
 + (MWMAlert *)internalErrorAlert;
 + (MWMAlert *)notEnoughSpaceAlert;
@@ -47,7 +46,7 @@ using TMWMDownloadBlock = void (^)(storage::TCountriesVec const &, TMWMVoidBlock
 + (MWMAlert *)osmAuthAlert;
 + (MWMAlert *)personalInfoWarningAlertWithBlock:(TMWMVoidBlock)block;
 + (MWMAlert *)trackWarningAlertWithCancelBlock:(TMWMVoidBlock)block;
-- (void)close;
+- (void)close:(TMWMVoidBlock)completion;
 
 - (void)setNeedsCloseAlertAfterEnterBackground;
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation;

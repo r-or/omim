@@ -13,6 +13,8 @@
 #import "MapsAppDelegate.h"
 #import "Statistics.h"
 
+#include "platform/platform.hpp"
+
 namespace
 {
 NSString * const kRoutePreviewXibName = @"MWMRoutePreview";
@@ -108,6 +110,7 @@ using TInfoDisplays = NSHashTable<__kindof TInfoDisplay>;
   if (IPAD && self.state != MWMNavigationDashboardStateNavigation)
     [self.delegate routePreviewDidChangeFrame:{}];
   [[MWMRouter router] stop];
+  self.taxiDataSource = nil;
 }
 
 #pragma mark - MWMTaxiDataSource
@@ -155,21 +158,33 @@ using TInfoDisplays = NSHashTable<__kindof TInfoDisplay>;
   if (![MWMRouter isTaxi])
     return;
 
+  auto showError = ^(NSString * errorMessage)
+  {
+    [self.routePreview stateError];
+    [self.routePreview router:routing::RouterType::Taxi setState:MWMCircularProgressStateFailed];
+    [self setMenuErrorStateWithErrorMessage:errorMessage];
+  };
+
   auto r = [MWMRouter router];
   auto const & start = r.startPoint;
   auto const & finish = r.finishPoint;
   if (start.IsValid() && finish.IsValid())
   {
+    if (!Platform::IsConnected())
+    {
+      [[MapViewController controller].alertController presentNoConnectionAlert];
+      showError(L(@"dialog_taxi_offline"));
+      return;
+    }
     [self.taxiDataSource requestTaxiFrom:start to:finish completion:^
     {
       [self setMenuState:MWMBottomMenuStateGo];
       [self.routePreview stateReady];
+      [self setRouteBuilderProgress:100.];
     }
-    failure:^
+    failure:^(NSString * errorMessage)
     {
-      [self.routePreview stateError];
-      [self.routePreview router:routing::RouterType::Taxi setState:MWMCircularProgressStateFailed];
-      [self setMenuState:MWMBottomMenuStateRoutingError];
+      showError(errorMessage);
     }];
   }
 }
@@ -197,6 +212,12 @@ using TInfoDisplays = NSHashTable<__kindof TInfoDisplay>;
   auto t = self.startButtonTitle;
   [startButton setTitle:t forState:UIControlStateNormal];
   [startButton setTitle:t forState:UIControlStateDisabled];
+}
+
+- (void)setMenuErrorStateWithErrorMessage:(NSString *)message
+{
+  [self.delegate setRoutingErrorMessage:message];
+  [self setMenuState:MWMBottomMenuStateRoutingError];
 }
 
 - (void)setMenuState:(MWMBottomMenuState)menuState
@@ -286,7 +307,9 @@ using TInfoDisplays = NSHashTable<__kindof TInfoDisplay>;
 - (void)addInfoDisplay:(TInfoDisplay)infoDisplay { [self.infoDisplays addObject:infoDisplay]; }
 - (NSString *)startButtonTitle
 {
-  return [MWMRouter isTaxi] ? L(@"taxi_order") : L(@"p2p_start");
+  if (![MWMRouter isTaxi])
+    return L(@"p2p_start");
+  return self.taxiDataSource.isTaxiInstalled ? L(@"taxi_order") : L(@"install_app");
 }
 #pragma mark - Properties
 

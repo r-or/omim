@@ -1,3 +1,5 @@
+project(platform_tests_support)
+
 set(
   SRC
   scoped_dir.cpp
@@ -6,8 +8,10 @@ set(
   scoped_file.hpp
   scoped_mwm.cpp
   scoped_mwm.hpp
+  test_socket.cpp
+  test_socket.hpp
   writable_dir_changer.cpp
   writable_dir_changer.hpp
 )
 
-add_library(platform_tests_support ${SRC})
+add_library(${PROJECT_NAME} ${SRC})

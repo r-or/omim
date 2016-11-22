@@ -47,7 +47,7 @@
     <item name="android:visibility">invisible</item>
     <item name="android:background">?selectableItemBackgroundBorderless</item>
     <item name="centerDrawable">@android:color/transparent</item>
-    <item name="wheelProgressColor">?routingButtonPressedHint</item>
+    <item name="wheelProgressColor">?routingButtonHint</item>
     <item name="wheelSecondaryColor">@android:color/transparent</item>
     <item name="wheelThickness">@dimen/margin_eighth</item>
   </style>
@@ -83,6 +83,10 @@
   <style name="MwmWidget.ToolbarStyle.Light">
     <item name="android:titleTextAppearance" tools:targetApi="lollipop">@style/MwmTextAppearance.Toolbar.Title.Light</item>
     <item name="titleTextAppearance">@style/MwmTextAppearance.Toolbar.Title.Light</item>
+  </style>
+
+  <style name="MwmWidget.ToolbarStyle.NoElevation">
+    <item name="android:elevation" tools:ignore="NewApi">0dp</item>
   </style>
 
   <style name="MwmWidget.ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">

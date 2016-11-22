@@ -173,9 +173,8 @@ extern NSString * const kBookmarksChangedNotification;
   [Statistics logEvent:kStatEventName(kStatPlacePage, kStatBuildRoute)
         withParameters:@{kStatValue : kStatDestination}];
   [Alohalytics logEvent:kAlohalyticsTapEventKey withValue:@"ppRoute"];
-  // Taxi can't be best router.
   auto r = [MWMRouter router];
-  [r buildToPoint:self.target bestRouter:![MWMRouter isTaxi]];
+  [r buildToPoint:self.target bestRouter:YES];
   [self hidePlacePage];
 }
 
@@ -218,15 +217,13 @@ extern NSString * const kBookmarksChangedNotification;
   {
     stat[kStatProvider] = kStatBooking;
     stat[kStatHotel] = data.sponsoredId;
-    stat[kStatHotelLat] = @(latLon.lat);
-    stat[kStatHotelLon] = @(latLon.lon);
+    stat[kStatHotelLocation] = makeLocationEventValue(latLon.lat, latLon.lon);
   }
   else
   {
     stat[kStatProvider] = kStatOpentable;
     stat[kStatRestaurant] = data.sponsoredId;
-    stat[kStatRestaurantLat] = @(latLon.lat);
-    stat[kStatRestaurantLon] = @(latLon.lon);
+    stat[kStatRestaurantLocation] = makeLocationEventValue(latLon.lat, latLon.lon);
   }
 
   NSString * eventName = isBooking ? kPlacePageHotelBook : kPlacePageRestaurantBook;

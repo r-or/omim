@@ -27,6 +27,7 @@
 #define METADATA_FILE_TAG "meta"
 #define METADATA_INDEX_FILE_TAG "metaidx"
 #define ALTITUDES_FILE_TAG "altitudes"
+#define ROUTING_FILE_TAG "routing"
 #define FEATURE_OFFSETS_FILE_TAG "offs"
 #define RANKS_FILE_TAG "ranks"
 #define REGION_INFO_FILE_TAG "rgninfo"
@@ -38,6 +39,8 @@
 #define ROUTING_EDGEID_FILE_TAG "infinity"
 #define ROUTING_SHORTCUTS_FILE_TAG  "skoda"
 #define ROUTING_CROSS_CONTEXT_TAG "chrysler"
+
+#define ROUTING_FILE_TAG "routing"
 
 #define ROUTING_FTSEG_FILE_TAG  "ftseg"
 #define ROUTING_NODEIND_TO_FTSEGIND_FILE_TAG  "node2ftseg"
@@ -72,6 +75,8 @@
 #define EXTERNAL_RESOURCES_FILE "external_resources.txt"
 
 #define GPS_TRACK_FILENAME "gps_track.dat"
+
+#define TRAFFIC_FILE_EXTENSION ".traffic"
 
 #define REPLACED_TAGS_FILE "replaced_tags.txt"
 #define MIXED_TAGS_FILE "mixed_tags.txt"

@@ -118,6 +118,7 @@ FrontendRenderer::FrontendRenderer(Params const & params)
   , m_framebuffer(new Framebuffer())
   , m_transparentLayer(new TransparentLayer())
   , m_gpsTrackRenderer(new GpsTrackRenderer(bind(&FrontendRenderer::PrepareGpsTrackPoints, this, _1)))
+  , m_drapeApiRenderer(new DrapeApiRenderer())
   , m_overlayTree(new dp::OverlayTree())
   , m_enablePerspectiveInNavigation(false)
   , m_enable3dBuildings(params.m_allow3dBuildings)
@@ -741,7 +742,7 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
   case Message::UpdateTraffic:
     {
       ref_ptr<UpdateTrafficMessage> msg = message;
-      m_trafficRenderer->UpdateTraffic(msg->GetSegmentsData());
+      m_trafficRenderer->UpdateTraffic(msg->GetSegmentsColoring());
       break;
     }
 
@@ -756,6 +757,29 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
     {
       ref_ptr<FlushTrafficDataMessage> msg = message;
       m_trafficRenderer->AddRenderData(make_ref(m_gpuProgramManager), msg->AcceptTrafficData());
+      break;
+    }
+
+  case Message::ClearTrafficData:
+    {
+      ref_ptr<ClearTrafficDataMessage> msg = message;
+      m_trafficRenderer->Clear(msg->GetMwmId());
+      break;
+    }
+  case Message::DrapeApiFlush:
+    {
+      ref_ptr<DrapeApiFlushMessage> msg = message;
+      m_drapeApiRenderer->AddRenderProperties(make_ref(m_gpuProgramManager), msg->AcceptProperties());
+      break;
+    }
+
+  case Message::DrapeApiRemove:
+    {
+      ref_ptr<DrapeApiRemoveMessage> msg = message;
+      if (msg->NeedRemoveAll())
+        m_drapeApiRenderer->Clear();
+      else
+        m_drapeApiRenderer->RemoveRenderProperty(msg->GetId());
       break;
     }
 
@@ -804,6 +828,8 @@ void FrontendRenderer::UpdateGLResources()
     m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread, move(recacheRouteMsg),
                               MessagePriority::Normal);
   }
+
+  m_trafficRenderer->ClearGLDependentResources();
 
   // Request new tiles.
   ScreenBase screen = m_userEventStream.GetCurrentScreen();
@@ -1130,6 +1156,8 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
   m_routeRenderer->RenderRouteSigns(modelView, make_ref(m_gpuProgramManager), m_generalUniforms);
 
   m_myPositionController->Render(modelView, m_currentZoomLevel, make_ref(m_gpuProgramManager), m_generalUniforms);
+
+  m_drapeApiRenderer->Render(modelView, make_ref(m_gpuProgramManager), m_generalUniforms);
 
   if (m_guiRenderer != nullptr)
     m_guiRenderer->Render(make_ref(m_gpuProgramManager), modelView);
@@ -1579,7 +1607,8 @@ void FrontendRenderer::OnContextDestroy()
   m_myPositionController->ResetRenderShape();
   m_routeRenderer->ClearGLDependentResources();
   m_gpsTrackRenderer->ClearRenderData();
-  m_trafficRenderer->Clear();
+  m_trafficRenderer->ClearGLDependentResources();
+  m_drapeApiRenderer->Clear();
 
 #ifdef RENDER_DEBUG_RECTS
   dp::DebugRectRenderer::Instance().Destroy();
@@ -1745,6 +1774,7 @@ void FrontendRenderer::ReleaseResources()
   m_routeRenderer.reset();
   m_framebuffer.reset();
   m_transparentLayer.reset();
+  m_trafficRenderer.reset();
 
   m_gpuProgramManager.reset();
   m_contextFactory->getDrawContext()->doneCurrent();

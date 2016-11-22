@@ -12,40 +12,12 @@
 
 string Platform::UniqueClientId() const
 {
-  string res;
-  if (!settings::Get("UniqueClientID", res))
-  {
-    JNIEnv * env = jni::GetEnv();
-    if (!env)
-      return string();
-
-    jclass uuidClass = env->FindClass("java/util/UUID");
-    ASSERT(uuidClass, ("Can't find java class java/util/UUID"));
-
-    jmethodID randomUUIDId = jni::GetStaticMethodID(env, uuidClass, "randomUUID", "()Ljava/util/UUID;");
-    jobject uuidInstance = env->CallStaticObjectMethod(uuidClass, randomUUIDId);
-    ASSERT(uuidInstance, ("UUID.randomUUID() returned NULL"));
-
-    jmethodID toStringId = env->GetMethodID(uuidClass, "toString", "()Ljava/lang/String;");
-    ASSERT(toStringId, ("Can't find java/util/UUID.toString() method"));
-
-    jstring uuidString = (jstring)env->CallObjectMethod(uuidInstance, toStringId);
-    ASSERT(uuidString, ("UUID.toString() returned NULL"));
-
-    char const * uuidUtf8 = env->GetStringUTFChars(uuidString, 0);
-
-    if (uuidUtf8 != 0)
-    {
-      res = uuidUtf8;
-      env->ReleaseStringUTFChars(uuidString, uuidUtf8);
-    }
-
-    res = HashUniqueID(res);
-
-    settings::Set("UniqueClientID", res);
-  }
-
-  return res;
+  JNIEnv * env = jni::GetEnv();
+  static jmethodID const getInstallationId = jni::GetStaticMethodID(env, g_utilsClazz, "getInstallationId",
+                                                                    "()Ljava/lang/String;");
+  static jstring const installationId = (jstring)env->CallStaticObjectMethod(g_utilsClazz, getInstallationId);
+  static string const result = jni::ToNativeString(env, installationId);
+  return result;
 }
 
 string Platform::GetMemoryInfo() const
@@ -67,41 +39,6 @@ string Platform::GetMemoryInfo() const
 void Platform::RunOnGuiThread(TFunctor const & fn)
 {
   android::Platform::Instance().RunOnGuiThread(fn);
-}
-
-void Platform::SendPushWooshTag(string const & tag)
-{
-  SendPushWooshTag(tag, vector<string>{ "1" });
-}
-
-void Platform::SendPushWooshTag(string const & tag, string const & value)
-{
-  SendPushWooshTag(tag, vector<string>{ value });
-}
-
-void Platform::SendPushWooshTag(string const & tag, vector<string> const & values)
-{
-  android::Platform::Instance().SendPushWooshTag(tag, values);
-}
-
-void Platform::SendMarketingEvent(string const & tag, map<string, string> const & params)
-{
-  JNIEnv * env = jni::GetEnv();
-  if (env == nullptr)
-    return;
-
-  string eventData = tag;
-
-  for (auto const & item : params)
-  {
-    eventData.append("_" + item.first + "_" + item.second);
-  }
-
-  static jmethodID const myTrackerTrackEvent =
-      env->GetStaticMethodID(g_myTrackerClazz, "trackEvent", "(Ljava/lang/String;)V");
-
-  env->CallStaticVoidMethod(g_myTrackerClazz, myTrackerTrackEvent,
-                            jni::TScopedLocalRef(env, jni::ToJavaString(env, eventData)).get());
 }
 
 Platform::EConnectionType Platform::ConnectionStatus()
@@ -130,6 +67,7 @@ namespace android
     jclass const functorProcessClass = env->GetObjectClass(functorProcessObject);
     m_functorProcessMethod = env->GetMethodID(functorProcessClass, "forwardToMainThread", "(J)V");
     m_sendPushWooshTagsMethod = env->GetMethodID(functorProcessClass, "sendPushWooshTags", "(Ljava/lang/String;[Ljava/lang/String;)V");
+    m_myTrackerTrackMethod = env->GetStaticMethodID(g_myTrackerClazz, "trackEvent", "(Ljava/lang/String;)V");
 
     string const flavor = jni::ToNativeString(env, flavorName);
     string const build = jni::ToNativeString(env, buildType);
@@ -230,6 +168,18 @@ namespace android
                         jni::TScopedLocalRef(env, jni::ToJavaString(env, tag)).get(),
                         jni::TScopedLocalObjectArrayRef(env, jni::ToJavaStringArray(env, values)).get());
   }
+
+  void Platform::SendMarketingEvent(string const & tag, map<string, string> const & params)
+  {
+    JNIEnv * env = jni::GetEnv();
+    string eventData = tag;
+    for (auto const & item : params)
+      eventData.append("_" + item.first + "_" + item.second);
+
+    env->CallStaticVoidMethod(g_myTrackerClazz, m_myTrackerTrackMethod,
+                              jni::TScopedLocalRef(env, jni::ToJavaString(env, eventData)).get());
+  }
+
 } // namespace android
 
 Platform & GetPlatform()

@@ -1,8 +1,8 @@
 #import "MWMRateAlert.h"
-#import <MessageUI/MFMailComposeViewController.h>
 #import <sys/utsname.h>
 #import "AppInfo.h"
 #import "MWMAlertViewController.h"
+#import "MWMMailViewController.h"
 #import "Statistics.h"
 #import "UIColor+MapsMeColor.h"
 
@@ -107,7 +107,7 @@ static NSString * const kStatisticsEvent = @"Rate Alert";
 {
   [Statistics logEvent:kStatisticsEvent withParameters:@{kStatAction : kStatClose}];
   [Alohalytics logEvent:kRateAlertEventName withValue:@"notNowTap"];
-  [self close];
+  [self close:nil];
 }
 
 - (IBAction)rateTap
@@ -121,20 +121,16 @@ static NSString * const kStatisticsEvent = @"Rate Alert";
   {
     [[UIApplication sharedApplication] rateVersionFrom:@"ios_pro_popup"];
     [Alohalytics logEvent:kRateAlertEventName withValue:@"fiveStar"];
-    [self close];
-    [self setupAlreadyRatedInUserDefaults];
+    [self close:^{
+      auto ud = [NSUserDefaults standardUserDefaults];
+      [ud setBool:YES forKey:kUDAlreadyRatedKey];
+      [ud synchronize];
+    }];
   }
   else
   {
     [self sendFeedback];
   }
-}
-
-- (void)setupAlreadyRatedInUserDefaults
-{
-  auto ud = [NSUserDefaults standardUserDefaults];
-  [ud setBool:YES forKey:kUDAlreadyRatedKey];
-  [ud synchronize];
 }
 
 - (void)sendFeedback
@@ -144,7 +140,7 @@ static NSString * const kStatisticsEvent = @"Rate Alert";
   self.alpha = 0.;
   MWMAlertViewController * alertController = self.alertController;
   alertController.view.alpha = 0.;
-  if ([MFMailComposeViewController canSendMail])
+  if ([MWMMailViewController canSendMail])
   {
     struct utsname systemInfo;
     uname(&systemInfo);
@@ -164,7 +160,7 @@ static NSString * const kStatisticsEvent = @"Rate Alert";
     NSString * text = [NSString stringWithFormat:@"\n\n\n\n- %@ (%@)\n- MAPS.ME %@\n- %@/%@",
                                                  device, [UIDevice currentDevice].systemVersion,
                                                  bundleVersion, language, country];
-    MFMailComposeViewController * mailController = [[MFMailComposeViewController alloc] init];
+    MWMMailViewController * mailController = [[MWMMailViewController alloc] init];
     mailController.mailComposeDelegate = self;
     [mailController setSubject:[NSString stringWithFormat:@"%@ : %@", L(@"rating_just_rated"),
                                                           @(self.selectedTag)]];
@@ -196,7 +192,7 @@ static NSString * const kStatisticsEvent = @"Rate Alert";
       dismissViewControllerAnimated:YES
                          completion:^{
                            [Statistics logEvent:kStatEventName(kStatisticsEvent, kStatClose)];
-                           [self close];
+                           [self close:nil];
                          }];
 }
 

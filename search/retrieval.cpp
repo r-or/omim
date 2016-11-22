@@ -8,6 +8,7 @@
 #include "search/search_trie.hpp"
 #include "search/token_slice.hpp"
 
+#include "indexer/classificator.hpp"
 #include "indexer/feature.hpp"
 #include "indexer/feature_algo.hpp"
 #include "indexer/feature_data.hpp"
@@ -26,6 +27,7 @@
 
 #include "std/algorithm.hpp"
 
+using namespace strings;
 using osm::Editor;
 
 namespace search
@@ -40,8 +42,8 @@ public:
   {
   }
 
-  template <typename TValue>
-  void operator()(TValue const & value)
+  template <typename Value>
+  void operator()(Value const & value)
   {
     if ((++m_counter & 0xFF) == 0)
       BailIfCancelled(m_cancellable);
@@ -75,16 +77,16 @@ public:
            binary_search(m_modified.begin(), m_modified.end(), featureIndex);
   }
 
-  template <typename TFn>
-  void ForEachModifiedOrCreated(TFn && fn)
+  template <typename Fn>
+  void ForEachModifiedOrCreated(Fn && fn)
   {
     ForEach(m_modified, fn);
     ForEach(m_created, fn);
   }
 
 private:
-  template <typename TFn>
-  void ForEach(vector<uint32_t> const & features, TFn & fn)
+  template <typename Fn>
+  void ForEach(vector<uint32_t> const & features, Fn & fn)
   {
     auto & editor = Editor::Instance();
     for (auto const index : features)
@@ -107,70 +109,62 @@ unique_ptr<coding::CompressedBitVector> SortFeaturesAndBuildCBV(vector<uint64_t>
   return coding::CompressedBitVectorBuilder::FromBitPositions(move(features));
 }
 
-// Checks that any from the |second| matches any from the |first|.  In
-// ambiguous case when |second| is empty, returns true.
-template <class TComp, class T>
-bool IsFirstMatchesSecond(vector<T> const & first, vector<T> const & second, TComp const & comp)
+template <typename DFA>
+bool MatchesByName(vector<UniString> const & tokens, vector<DFA> const & dfas)
 {
-  if (second.empty())
-    return true;
-
-  for (auto const & s : second)
+  for (auto const & dfa : dfas)
   {
-    for (auto const & f : first)
+    for (auto const & token : tokens)
     {
-      if (comp(f, s))
+      auto it = dfa.Begin();
+      DFAMove(it, token);
+      if (it.Accepts())
         return true;
     }
   }
+
   return false;
 }
 
-bool MatchFeatureByNameAndType(FeatureType const & ft, QueryParams const & params)
+template <typename DFA>
+bool MatchesByType(feature::TypesHolder const & types, vector<DFA> const & dfas)
 {
-  using namespace strings;
+  if (dfas.empty())
+    return false;
 
-  auto const prefixMatch = [](UniString const & s1, UniString const & s2) {
-    return StartsWith(s1, s2);
-  };
+  auto const & c = classif();
 
-  auto const fullMatch = [](UniString const & s1, UniString const & s2) { return s1 == s2; };
+  for (auto const & type : types)
+  {
+    UniString const s = FeatureTypeToString(c.GetIndexForType(type));
 
+    for (auto const & dfa : dfas)
+    {
+      auto it = dfa.Begin();
+      DFAMove(it, s);
+      if (it.Accepts())
+        return true;
+    }
+  }
+
+  return false;
+}
+
+template <typename DFA>
+bool MatchFeatureByNameAndType(FeatureType const & ft, SearchTrieRequest<DFA> const & request)
+{
   feature::TypesHolder th(ft);
 
   bool matched = false;
-  ft.ForEachName([&](int8_t lang, string const & utf8Name)
+  ft.ForEachName([&](int8_t lang, string const & name)
   {
-    if (utf8Name.empty() || !params.IsLangExist(lang))
+    if (name.empty() || !request.IsLangExist(lang))
       return true /* continue ForEachName */;
 
-    vector<UniString> nameTokens;
-    NormalizeAndTokenizeString(utf8Name, nameTokens, Delimiters());
-
-    for (size_t i = 0; i < params.GetNumTokens(); ++i)
-    {
-      auto const isPrefix = params.IsPrefixToken(i);
-      auto const & syms = params.GetTokens(i);
-
-      if (!IsFirstMatchesSecond(nameTokens, syms, isPrefix ? prefixMatch : fullMatch))
-      {
-        // Checks types in case of names mismatch.
-        auto const & types = params.m_types[i];
-        auto typeMatched = false;
-
-        for (auto const & type : types)
-        {
-          if (th.Has(type))
-          {
-            typeMatched = true;
-            break;
-          }
-        }
-
-        if (!typeMatched)
-          return true /* continue ForEachName */;
-      }
-    }
+    vector<UniString> tokens;
+    NormalizeAndTokenizeString(name, tokens, Delimiters());
+    if (!MatchesByName(tokens, request.m_names) && !MatchesByType(th, request.m_categories))
+      return true /* continue ForEachName */;
 
     matched = true;
     return false /* break ForEachName */;
@@ -182,7 +176,7 @@ bool MatchFeatureByNameAndType(FeatureType const & ft, QueryParams const & param
 bool MatchFeatureByPostcode(FeatureType const & ft, TokenSlice const & slice)
 {
   string const postcode = ft.GetMetadata().Get(feature::Metadata::FMD_POSTCODE);
-  vector<strings::UniString> tokens;
+  vector<UniString> tokens;
   NormalizeAndTokenizeString(postcode, tokens, Delimiters());
   if (slice.Size() > tokens.size())
     return false;
@@ -201,45 +195,48 @@ bool MatchFeatureByPostcode(FeatureType const & ft, TokenSlice const & slice)
   return true;
 }
 
-template<typename TValue>
-using TrieRoot = trie::Iterator<ValueList<TValue>>;
+template<typename Value>
+using TrieRoot = trie::Iterator<ValueList<Value>>;
 
-template <typename TValue, typename TFn>
-void WithSearchTrieRoot(MwmValue & value, TFn && fn)
+template <typename Value, typename Fn>
+void WithSearchTrieRoot(MwmValue & value, Fn && fn)
 {
   serial::CodingParams codingParams(trie::GetCodingParams(value.GetHeader().GetDefCodingParams()));
   ModelReaderPtr searchReader = value.m_cont.GetReader(SEARCH_INDEX_FILE_TAG);
 
-  auto const trieRoot = trie::ReadTrie<SubReaderWrapper<Reader>, ValueList<TValue>>(
-      SubReaderWrapper<Reader>(searchReader.GetPtr()), SingleValueSerializer<TValue>(codingParams));
+  auto const trieRoot = trie::ReadTrie<SubReaderWrapper<Reader>, ValueList<Value>>(
+      SubReaderWrapper<Reader>(searchReader.GetPtr()), SingleValueSerializer<Value>(codingParams));
 
   return fn(*trieRoot);
 }
 
 // Retrieves from the search index corresponding to |value| all
 // features matching to |params|.
-template <typename TValue>
+template <typename Value, typename DFA>
 unique_ptr<coding::CompressedBitVector> RetrieveAddressFeaturesImpl(
-    MwmContext const & context, my::Cancellable const & cancellable, QueryParams const & params)
+    MwmContext const & context, my::Cancellable const & cancellable,
+    SearchTrieRequest<DFA> const & request)
 {
   EditedFeaturesHolder holder(context.GetId());
   vector<uint64_t> features;
   FeaturesCollector collector(cancellable, features);
 
-  WithSearchTrieRoot<TValue>(context.m_value, [&](TrieRoot<TValue> const & root) {
+  WithSearchTrieRoot<Value>(context.m_value, [&](TrieRoot<Value> const & root) {
     MatchFeaturesInTrie(
-        params, root,
+        request, root,
         [&holder](uint32_t featureIndex) { return !holder.ModifiedOrDeleted(featureIndex); },
         collector);
   });
+
   holder.ForEachModifiedOrCreated([&](FeatureType & ft, uint64_t index) {
-    if (MatchFeatureByNameAndType(ft, params))
+    if (MatchFeatureByNameAndType(ft, request))
       features.push_back(index);
   });
+
   return SortFeaturesAndBuildCBV(move(features));
 }
 
-template <typename TValue>
+template <typename Value>
 unique_ptr<coding::CompressedBitVector> RetrievePostcodeFeaturesImpl(
     MwmContext const & context, my::Cancellable const & cancellable, TokenSlice const & slice)
 {
@@ -247,7 +244,7 @@ unique_ptr<coding::CompressedBitVector> RetrievePostcodeFeaturesImpl(
   vector<uint64_t> features;
   FeaturesCollector collector(cancellable, features);
 
-  WithSearchTrieRoot<TValue>(context.m_value, [&](TrieRoot<TValue> const & root) {
+  WithSearchTrieRoot<Value>(context.m_value, [&](TrieRoot<Value> const & root) {
     MatchPostcodesInTrie(
         slice, root,
         [&holder](uint32_t featureIndex) { return !holder.ModifiedOrDeleted(featureIndex); },
@@ -288,28 +285,28 @@ unique_ptr<coding::CompressedBitVector> RetrieveGeometryFeaturesImpl(
 template <typename T>
 struct RetrieveAddressFeaturesAdaptor
 {
-  template <typename... TArgs>
-  unique_ptr<coding::CompressedBitVector> operator()(TArgs &&... args)
+  template <typename... Args>
+  unique_ptr<coding::CompressedBitVector> operator()(Args &&... args)
   {
-    return RetrieveAddressFeaturesImpl<T>(forward<TArgs>(args)...);
+    return RetrieveAddressFeaturesImpl<T>(forward<Args>(args)...);
   }
 };
 
 template <typename T>
 struct RetrievePostcodeFeaturesAdaptor
 {
-  template <typename... TArgs>
-  unique_ptr<coding::CompressedBitVector> operator()(TArgs &&... args)
+  template <typename... Args>
+  unique_ptr<coding::CompressedBitVector> operator()(Args &&... args)
   {
-    return RetrievePostcodeFeaturesImpl<T>(forward<TArgs>(args)...);
+    return RetrievePostcodeFeaturesImpl<T>(forward<Args>(args)...);
   }
 };
 
 template <template <typename> class T>
 struct Selector
 {
-  template <typename... TArgs>
-  unique_ptr<coding::CompressedBitVector> operator()(MwmContext const & context, TArgs &&... args)
+  template <typename... Args>
+  unique_ptr<coding::CompressedBitVector> operator()(MwmContext const & context, Args &&... args)
   {
     version::MwmTraits mwmTraits(context.m_value.GetMwmVersion().GetFormat());
 
@@ -317,25 +314,33 @@ struct Selector
         version::MwmTraits::SearchIndexFormat::FeaturesWithRankAndCenter)
     {
       T<FeatureWithRankAndCenter> t;
-      return t(context, forward<TArgs>(args)...);
+      return t(context, forward<Args>(args)...);
     }
     if (mwmTraits.GetSearchIndexFormat() ==
         version::MwmTraits::SearchIndexFormat::CompressedBitVector)
     {
       T<FeatureIndexValue> t;
-      return t(context, forward<TArgs>(args)...);
+      return t(context, forward<Args>(args)...);
     }
     return unique_ptr<coding::CompressedBitVector>();
   }
 };
 }  // namespace
 
-unique_ptr<coding::CompressedBitVector> RetrieveAddressFeatures(MwmContext const & context,
-                                                                my::Cancellable const & cancellable,
-                                                                QueryParams const & params)
+unique_ptr<coding::CompressedBitVector> RetrieveAddressFeatures(
+    MwmContext const & context, my::Cancellable const & cancellable,
+    SearchTrieRequest<LevenshteinDFA> const & request)
 {
   Selector<RetrieveAddressFeaturesAdaptor> selector;
-  return selector(context, cancellable, params);
+  return selector(context, cancellable, request);
+}
+
+unique_ptr<coding::CompressedBitVector> RetrieveAddressFeatures(
+    MwmContext const & context, my::Cancellable const & cancellable,
+    SearchTrieRequest<PrefixDFAModifier<LevenshteinDFA>> const & request)
+{
+  Selector<RetrieveAddressFeaturesAdaptor> selector;
+  return selector(context, cancellable, request);
 }
 
 unique_ptr<coding::CompressedBitVector> RetrievePostcodeFeatures(

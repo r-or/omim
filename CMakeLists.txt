@@ -9,13 +9,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 find_package(Threads)
 
 find_package(Qt5Core REQUIRED)
-find_package(Qt5Network REQUIRED)
 find_package(Qt5Gui REQUIRED)
+find_package(Qt5Network REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Widgets REQUIRED)
-
-if (APPLE)
-  find_library(APL_SYSCON SystemConfiguration)
-endif()
 
 find_library(LIBZ NAMES z)
 if (LIBZ STREQUAL "LIBZ-NOTFOUND")
@@ -39,12 +36,16 @@ include_directories(
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   add_definitions(-DDEBUG)
 endif()
 
-if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+  add_definitions(-DRELEASE)
 endif()
 
 if (NOT NO_TESTS)
@@ -111,27 +112,52 @@ function(omim_link_libraries target)
   endif()
 endfunction()
 
+function(append VAR)
+  set(${VAR} ${${VAR}} ${ARGN} PARENT_SCOPE)
+endfunction()
+
+macro(check_pybindings)
+  if (NOT PYBINDINGS)
+    message("Skipping " + ${PROJECT_NAME} + " because the PYBINDINGS variale is not set or is set to FALSE")
+    return()
+  endif()
+endmacro()
+
 # End of functions for subdirectories
 
 # Include subdirectories
 add_subdirectory(3party/jansson)
 add_subdirectory(3party/minizip)
-add_subdirectory(3party/liboauthcpp)
-add_subdirectory(3party/pugixml)
-add_subdirectory(3party/succinct)
-add_subdirectory(3party/tomcrypt)
-
+add_subdirectory(3party/freetype)
+add_subdirectory(3party/fribidi)
+add_subdirectory(3party/expat)
+add_subdirectory(map)
+add_subdirectory(drape)
 
 add_compile_options(
   "-Wall"
   "-std=c++11"
 )
 
+add_subdirectory(3party/protobuf)
+add_subdirectory(3party/liboauthcpp)
+add_subdirectory(3party/pugixml)
+add_subdirectory(3party/succinct)
+add_subdirectory(3party/osrm)
+add_subdirectory(3party/gmock)
+add_subdirectory(qt_tstfrm)
 add_subdirectory(base)
 add_subdirectory(coding)
 add_subdirectory(geometry)
 add_subdirectory(platform)
 add_subdirectory(3party/opening_hours)
 add_subdirectory(stats)
+add_subdirectory(drape_frontend)
 add_subdirectory(storage)
 add_subdirectory(editor)
+add_subdirectory(indexer)
+add_subdirectory(routing)
+add_subdirectory(search)
+add_subdirectory(tracking)
+add_subdirectory(traffic)
+add_subdirectory(partners_api)

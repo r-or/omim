@@ -1,7 +1,7 @@
 #import "MWMAboutController.h"
-#import <MessageUI/MFMailComposeViewController.h>
 #import "AppInfo.h"
 #import "LinkCell.h"
+#import "MWMMailViewController.h"
 #import "Statistics.h"
 #import "WebViewController.h"
 
@@ -26,6 +26,8 @@ extern NSString * const kAlohalyticsTapEventKey;
 @property(weak, nonatomic) IBOutlet LinkCell * rateCell;
 @property(weak, nonatomic) IBOutlet LinkCell * copyrightCell;
 
+@property(nonatomic) IBOutlet UIView * headerView;
+
 @end
 
 @implementation MWMAboutController
@@ -34,6 +36,9 @@ extern NSString * const kAlohalyticsTapEventKey;
 {
   [super viewDidLoad];
   self.title = L(@"about_menu_title");
+
+  [[NSBundle mainBundle] loadNibNamed:@"MWMAboutControllerHeader" owner:self options:nil];
+  self.tableView.tableHeaderView = self.headerView;
 
   AppInfo * appInfo = [AppInfo sharedInfo];
 
@@ -99,9 +104,9 @@ extern NSString * const kAlohalyticsTapEventKey;
 
 - (void)sendEmailWithText:(NSString *)text subject:(NSString *)subject toRecipient:(NSString *)email
 {
-  if ([MFMailComposeViewController canSendMail])
+  if ([MWMMailViewController canSendMail])
   {
-    MFMailComposeViewController * vc = [[MFMailComposeViewController alloc] init];
+    MWMMailViewController * vc = [[MWMMailViewController alloc] init];
     vc.mailComposeDelegate = self;
     [vc setSubject:subject];
     [vc setMessageBody:text isHTML:NO];

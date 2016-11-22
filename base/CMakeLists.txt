@@ -1,3 +1,5 @@
+project(base)
+
 set(
   SRC
   SRC_FIRST.hpp
@@ -18,10 +20,13 @@ set(
   const_helper.hpp
   deferred_task.cpp
   deferred_task.hpp
+  dfa_helpers.hpp
   exception.cpp
   exception.hpp
   gmtime.cpp
   gmtime.hpp
+  levenshtein_dfa.cpp
+  levenshtein_dfa.hpp
   limited_priority_queue.hpp
   logging.cpp
   logging.hpp
@@ -69,14 +74,17 @@ set(
   threaded_container.hpp
   threaded_list.hpp
   threaded_priority_queue.hpp
+  internal/message.cpp
+  internal/message.hpp
   timegm.cpp
   timegm.hpp
   timer.cpp
   timer.hpp
+  uni_string_dfa.cpp
+  uni_string_dfa.hpp
   worker_thread.hpp
-  internal/message.cpp
 )
 
-add_library(base ${SRC})
+add_library(${PROJECT_NAME} ${SRC})
 
 omim_add_test_subdirectory(base_tests)

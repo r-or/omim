@@ -30,9 +30,9 @@ protected:
     return engine;
   }
 
-  unique_ptr<routing::IVehicleModelFactory> CreateModelFactory() override
+  unique_ptr<routing::VehicleModelFactory> CreateModelFactory() override
   {
-    unique_ptr<routing::IVehicleModelFactory> factory(
+    unique_ptr<routing::VehicleModelFactory> factory(
         new SimplifiedModelFactory<routing::BicycleModel>());
     return factory;
   }
@@ -45,7 +45,7 @@ UNIT_CLASS_TEST(BicycleTest, Smoke)
   TestRouters(start, final);
 }
 
-UNIT_CLASS_TEST(BicycleTest, MailRuOfficeToUlSimanova5K2)
+UNIT_CLASS_TEST(BicycleTest, RussiaMoscow_Test1)
 {
   m2::PointD const start = MercatorBounds::FromLatLon(55.79828, 37.53710);
   m2::PointD const final = MercatorBounds::FromLatLon(55.79956, 37.54115);

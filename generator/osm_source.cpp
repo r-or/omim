@@ -24,9 +24,8 @@
 
 #include "base/stl_helpers.hpp"
 
+#include "coding/file_name_utils.hpp"
 #include "coding/parse_xml.hpp"
-
-#include "std/fstream.hpp"
 
 #include "defines.hpp"
 
@@ -54,7 +53,6 @@ uint64_t SourceReader::Read(char * buffer, uint64_t bufferSize)
   m_file->read(buffer, bufferSize);
   return m_file->gcount();
 }
-
 
 namespace
 {
@@ -138,10 +136,12 @@ public:
   void AddRelation(TKey id, RelationElement const & e)
   {
     string const & relationType = e.GetType();
-    if (!(relationType == "multipolygon" || relationType == "route" ||
-          relationType == "boundary" || relationType == "associatedStreet" ||
-          relationType == "building"))
+    if (!(relationType == "multipolygon" || relationType == "route" || relationType == "boundary" ||
+          relationType == "associatedStreet" || relationType == "building" ||
+          relationType == "restriction"))
+    {
       return;
+    }
 
     m_relations.Write(id, e);
     AddToIndex(m_nodeToRelations, id, e.nodes);
@@ -267,6 +267,7 @@ class MainFeaturesEmitter : public EmitterBase
 {
   using TWorldGenerator = WorldMapGenerator<feature::FeaturesCollector>;
   using TCountriesGenerator = CountryMapGenerator<feature::Polygonizer<feature::FeaturesCollector>>;
+
   unique_ptr<TCountriesGenerator> m_countries;
   unique_ptr<TWorldGenerator> m_world;
 
@@ -305,7 +306,6 @@ public:
     , m_failOnCoasts(info.m_failOnCoasts)
     , m_bookingDataset(info.m_bookingDatafileName, info.m_bookingReferenceDir)
     , m_opentableDataset(info.m_opentableDatafileName, info.m_opentableReferenceDir)
-
   {
     Classificator const & c = classif();
 
@@ -336,7 +336,7 @@ public:
           new feature::FeaturesCollector(info.GetTmpFileName(WORLD_COASTS_FILE_NAME)));
 
     if (info.m_splitByPolygons || !info.m_fileName.empty())
-      m_countries.reset(new TCountriesGenerator(info));
+      m_countries = make_unique<TCountriesGenerator>(info);
 
     if (info.m_createWorld)
       m_world.reset(new TWorldGenerator(info));
@@ -688,7 +688,7 @@ bool GenerateFeaturesImpl(feature::GenerateInfo & info, EmitterBase & emitter)
     // TODO(mgsergio): Get rid of EmitterBase template parameter.
     OsmToFeatureTranslator<EmitterBase, TDataCache> parser(
         emitter, cache, info.m_makeCoasts ? classif().GetCoastType() : 0,
-        info.GetAddressesFileName());
+        info.GetAddressesFileName(), info.GetIntermediateFileName(info.m_restrictions, ""));
 
     TagAdmixer tagAdmixer(info.GetIntermediateFileName("ways", ".csv"),
                           info.GetIntermediateFileName("towns", ".csv"));

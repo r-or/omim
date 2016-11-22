@@ -6,12 +6,14 @@
 #include "map/user_mark.hpp"
 
 #include "defines.hpp"
+#include "private.h"
 
+#include "routing/car_router.hpp"
 #include "routing/online_absent_fetcher.hpp"
-#include "routing/osrm_router.hpp"
 #include "routing/road_graph_router.hpp"
 #include "routing/route.hpp"
 #include "routing/routing_algorithm.hpp"
+#include "routing/routing_helpers.hpp"
 
 #include "search/downloader_search_callback.hpp"
 #include "search/editor_delegate.hpp"
@@ -122,6 +124,8 @@ char const kAllowAutoZoom[] = "AutoZoom";
 
 double const kDistEqualQueryMeters = 100.0;
 
+size_t constexpr kMaxTrafficCacheSizeBytes = 256 /* Mb */ * 1024 * 1024;
+
 // Must correspond SearchMarkType.
 vector<string> kSearchMarks =
 {
@@ -158,17 +162,6 @@ void CancelQuery(weak_ptr<search::ProcessorHandle> & handle)
     queryHandle->Cancel();
   handle.reset();
 }
-
-class StubSocket final : public platform::Socket
-{
-public:
-  // Socket overrides
-  bool Open(string const & host, uint16_t port) override { return false; }
-  void Close() override {}
-  bool Read(uint8_t * data, uint32_t count) override { return false; }
-  bool Write(uint8_t const * data, uint32_t count) override { return false; }
-  void SetTimeout(uint32_t milliseconds) override {}
-};
 }  // namespace
 
 pair<MwmSet::MwmId, MwmSet::RegResult> Framework::RegisterMap(
@@ -180,6 +173,7 @@ pair<MwmSet::MwmId, MwmSet::RegResult> Framework::RegisterMap(
 
 void Framework::OnLocationError(TLocationError /*error*/)
 {
+  m_trafficManager.UpdateMyPosition(TrafficManager::MyPosition());
   CallDrapeFunction(bind(&df::DrapeEngine::LoseLocation, _1));
 }
 
@@ -245,12 +239,12 @@ bool Framework::IsTrackingReporterEnabled() const
   if (m_currentRouterType != routing::RouterType::Vehicle)
     return false;
 
-  if (!m_routingSession.IsOnRoute())
+  if (!m_routingSession.IsFollowing())
     return false;
 
-  bool allowStat = false;
-  UNUSED_VALUE(settings::Get(tracking::Reporter::kEnabledSettingsKey, allowStat));
-  return allowStat;
+  bool enableTracking = false;
+  UNUSED_VALUE(settings::Get(tracking::Reporter::kEnableTrackingKey, enableTracking));
+  return enableTracking;
 }
 
 void Framework::OnUserPositionChanged(m2::PointD const & position)
@@ -260,6 +254,8 @@ void Framework::OnUserPositionChanged(m2::PointD const & position)
 
   if (IsRoutingActive())
     m_routingSession.SetUserCurrentPosition(position);
+
+  m_trafficManager.UpdateMyPosition(TrafficManager::MyPosition(position));
 }
 
 void Framework::OnViewportChanged(ScreenBase const & screen)
@@ -269,6 +265,8 @@ void Framework::OnViewportChanged(ScreenBase const & screen)
     UpdateUserViewportChanged();
 
   m_currentModelView = screen;
+
+  m_trafficManager.UpdateViewport(m_currentModelView);
 
   if (m_viewportChanged != nullptr)
     m_viewportChanged(screen);
@@ -343,7 +341,10 @@ Framework::Framework()
   , m_storage(platform::migrate::NeedMigrate() ? COUNTRIES_OBSOLETE_FILE : COUNTRIES_FILE)
   , m_bmManager(*this)
   , m_isRenderingEnabled(true)
-  , m_trackingReporter(make_unique<StubSocket>(), tracking::Reporter::kPushDelayMs)
+  , m_trackingReporter(platform::CreateSocket(), TRACKING_REALTIME_HOST, TRACKING_REALTIME_PORT,
+                       tracking::Reporter::kPushDelayMs)
+  , m_trafficManager(m_model.GetIndex(), bind(&Framework::GetMwmsByRect, this, _1),
+                     kMaxTrafficCacheSizeBytes)
   , m_displacementModeManager([this](bool show) {
     int const mode = show ? dp::displacement::kHotelMode : dp::displacement::kDefaultMode;
     CallDrapeFunction(bind(&df::DrapeEngine::SetDisplacementMode, _1, mode));
@@ -405,7 +406,7 @@ Framework::Framework()
   auto const routingStatisticsFn = [](map<string, string> const & statistics)
   {
     alohalytics::LogEvent("Routing_CalculatingRoute", statistics);
-    GetPlatform().SendMarketingEvent("Routing_CalculatingRoute", {});
+    GetPlatform().GetMarketingService().SendMarketingEvent(marketing::kRoutingCalculatingRoute, {});
   };
 #ifdef DEBUG
   auto const routingVisualizerFn = [this](m2::PointD const & pt)
@@ -442,6 +443,8 @@ Framework::Framework()
 
 Framework::~Framework()
 {
+  m_trafficManager.SetDrapeEngine(nullptr);
+  m_drapeApi.SetEngine(nullptr);
   m_drapeEngine.reset();
 
   m_model.SetOnMapDeregisteredCallback(nullptr);
@@ -667,7 +670,8 @@ void Framework::LoadBookmarks()
 
 size_t Framework::AddBookmark(size_t categoryIndex, const m2::PointD & ptOrg, BookmarkData & bm)
 {
-  GetPlatform().SendMarketingEvent("Bookmarks_Bookmark_action", {{"action", "create"}});
+  GetPlatform().GetMarketingService().SendMarketingEvent(marketing::kBookmarksBookmarkAction,
+                                                         {{"action", "create"}});
   return m_bmManager.AddBookmark(categoryIndex, ptOrg, bm);
 }
 
@@ -783,6 +787,7 @@ void Framework::FillPointInfo(m2::PointD const & mercator, string const & custom
 
 void Framework::FillInfoFromFeatureType(FeatureType const & ft, place_page::Info & info) const
 {
+  using place_page::SponsoredType;
   auto const featureStatus = osm::Editor::Instance().GetFeatureStatus(ft.GetID());
   ASSERT_NOT_EQUAL(featureStatus, osm::Editor::FeatureStatus::Deleted,
                    ("Deleted features cannot be selected from UI."));
@@ -1663,6 +1668,9 @@ void Framework::CreateDrapeEngine(ref_ptr<dp::OGLContextFactory> contextFactory,
   {
     GetPlatform().RunOnGuiThread([this, sizes](){ m_searchMarksSizes = sizes; });
   });
+
+  m_drapeApi.SetEngine(make_ref(m_drapeEngine));
+  m_trafficManager.SetDrapeEngine(make_ref(m_drapeEngine));
 }
 
 void Framework::UpdateDrapeEngine(int width, int height)
@@ -1675,7 +1683,9 @@ void Framework::UpdateDrapeEngine(int width, int height)
 
     UpdatePlacePageInfoForCurrentSelection();
 
-    //TODO: update traffic data
+    m_drapeApi.Invalidate();
+
+    m_trafficManager.OnRecover();
   }
 }
 
@@ -2036,6 +2046,7 @@ void Framework::InvalidateUserMarks()
 
 void Framework::OnTapEvent(TapEvent const & tapEvent)
 {
+  using place_page::SponsoredType;
   auto const & tapInfo = tapEvent.m_info;
 
   bool const somethingWasAlreadySelected = (m_lastTapEvent != nullptr);
@@ -2066,7 +2077,7 @@ void Framework::OnTapEvent(TapEvent const & tapEvent)
       alohalytics::Stats::Instance().LogEvent("$SelectMapObject", kv, alohalytics::Location::FromLatLon(ll.lat, ll.lon));
 
       if (info.m_sponsoredType == SponsoredType::Booking)
-        GetPlatform().SendMarketingEvent("Placepage_Hotel_book", {{"provider", "booking.com"}});
+        GetPlatform().GetMarketingService().SendMarketingEvent(marketing::kPlacepageHotelBook, {{"provider", "booking.com"}});
     }
 
     ActivateMapSelection(true, selection, info);
@@ -2271,6 +2282,7 @@ void Framework::UpdateSavedDataVersion()
 }
 
 int64_t Framework::GetCurrentDataVersion() const { return m_storage.GetCurrentDataVersion(); }
+
 void Framework::BuildRoute(m2::PointD const & finish, uint32_t timeoutSec)
 {
   ASSERT_THREAD_CHECKER(m_threadChecker, ("BuildRoute"));
@@ -2282,13 +2294,34 @@ void Framework::BuildRoute(m2::PointD const & finish, uint32_t timeoutSec)
     CallRouteBuilded(IRouter::NoCurrentPosition, storage::TCountriesVec());
     return;
   }
-  BuildRoute(start, finish, timeoutSec);
+  BuildRoute(start, finish, false /* isP2P */, timeoutSec);
 }
 
-void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec)
+void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, bool isP2P, uint32_t timeoutSec)
 {
   ASSERT_THREAD_CHECKER(m_threadChecker, ("BuildRoute"));
   ASSERT(m_drapeEngine != nullptr, ());
+
+  // Send tag to Push Woosh.
+  {
+    string tag;
+    switch (m_currentRouterType)
+    {
+    case RouterType::Vehicle:
+      tag = isP2P ? marketing::kRoutingP2PVehicleDiscovered : marketing::kRoutingVehicleDiscovered;
+      break;
+    case RouterType::Pedestrian:
+      tag = isP2P ? marketing::kRoutingP2PPedestrianDiscovered : marketing::kRoutingPedestrianDiscovered;
+      break;
+    case RouterType::Bicycle:
+      tag = isP2P ? marketing::kRoutingP2PBicycleDiscovered : marketing::kRoutingBicycleDiscovered;
+      break;
+    case RouterType::Taxi:
+      tag = isP2P ? marketing::kRoutingP2PTaxiDiscovered : marketing::kRoutingTaxiDiscovered;
+      break;
+    }
+    GetPlatform().GetMarketingService().SendPushWooshTag(tag);
+  }
 
   if (IsRoutingActive())
     CloseRouting();
@@ -2401,7 +2434,9 @@ void Framework::SetRouterImpl(RouterType type)
       return m_model.GetIndex().GetMwmIdByCountryFile(CountryFile(countryFile)).IsAlive();
     };
 
-    router.reset(new OsrmRouter(&m_model.GetIndex(), countryFileGetter));
+    router.reset(
+        new CarRouter(m_model.GetIndex(), countryFileGetter,
+                      CreateCarAStarBidirectionalRouter(m_model.GetIndex(), countryFileGetter)));
     fetcher.reset(new OnlineAbsentCountriesFetcher(countryFileGetter, localFileChecker));
     m_routingSession.SetRoutingSettings(routing::GetCarRoutingSettings());
   }
@@ -2553,8 +2588,8 @@ RouterType Framework::GetBestRouter(m2::PointD const & startPoint, m2::PointD co
     {
       return m_infoGetter->GetRegionCountryId(pt);
     };
-    if (!OsrmRouter::CheckRoutingAbility(startPoint, finalPoint, countryFileGetter,
-                                         &m_model.GetIndex()))
+    if (!CarRouter::CheckRoutingAbility(startPoint, finalPoint, countryFileGetter,
+                                        m_model.GetIndex()))
     {
       return RouterType::Pedestrian;
     }
@@ -2878,7 +2913,7 @@ bool Framework::CreateMapObject(m2::PointD const & mercator, uint32_t const feat
   if (!mwmId.IsAlive())
     return false;
 
-  GetPlatform().SendMarketingEvent("EditorAdd_start", {});
+  GetPlatform().GetMarketingService().SendMarketingEvent(marketing::kEditorAddStart, {});
 
   search::ReverseGeocoder const coder(m_model.GetIndex());
   vector<search::ReverseGeocoder::Street> streets;
@@ -2901,7 +2936,7 @@ bool Framework::GetEditableMapObject(FeatureID const & fid, osm::EditableMapObje
   if (!GetFeatureByID(fid, ft))
     return false;
 
-  GetPlatform().SendMarketingEvent("EditorEdit_start", {});
+  GetPlatform().GetMarketingService().SendMarketingEvent(marketing::kEditorEditStart, {});
 
   emo = {};
   emo.SetFromFeatureType(ft);
@@ -3140,4 +3175,55 @@ bool Framework::GenerateRouteAltitudeChart(uint32_t width, uint32_t height,
     break;
   }
   return true;
+}
+
+namespace
+{
+  vector<dp::Color> colorList = { dp::Color(255, 0, 0, 255), dp::Color(0, 255, 0, 255), dp::Color(0, 0, 255, 255),
+                                  dp::Color(255, 255, 0, 255), dp::Color(0, 255, 255, 255), dp::Color(255, 0, 255, 255),
+                                  dp::Color(100, 0, 0, 255), dp::Color(0, 100, 0, 255), dp::Color(0, 0, 100, 255),
+                                  dp::Color(100, 100, 0, 255), dp::Color(0, 100, 100, 255), dp::Color(100, 0, 100, 255)
+                                };
+} // namespace
+
+void Framework::VizualizeRoadsInRect(m2::RectD const & rect)
+{
+  int constexpr kScale = scales::GetUpperScale();
+  size_t counter = 0;
+  m_model.ForEachFeature(rect, [this, &counter, &rect](FeatureType & ft)
+  {
+    if (routing::IsRoad(feature::TypesHolder(ft)))
+    {
+      bool allPointsOutside = true;
+      vector<m2::PointD> points;
+      ft.ForEachPoint([&points, &rect, &allPointsOutside](m2::PointD const & pt)
+      {
+        if (rect.IsPointInside(pt))
+          allPointsOutside = false;
+        points.push_back(pt);
+      }, kScale);
+
+      if (!allPointsOutside)
+      {
+        size_t const colorIndex = counter % colorList.size();
+        m_drapeApi.AddLine(strings::to_string(ft.GetID().m_index),
+                           df::DrapeApiLineData(points, colorList[colorIndex])
+                                                .Width(3.0f).ShowPoints(true).ShowId());
+        counter++;
+      }
+    }
+  }, kScale);
+}
+
+vector<MwmSet::MwmId> Framework::GetMwmsByRect(m2::RectD const & rect)
+{
+  vector<MwmSet::MwmId> result;
+  if (!m_infoGetter)
+    return result;
+
+  auto countryIds = m_infoGetter->GetRegionsCountryIdByRect(rect);
+  for (auto const & countryId : countryIds)
+    result.push_back(m_model.GetIndex().GetMwmIdByCountryFile(platform::CountryFile(countryId)));
+
+  return result;
 }

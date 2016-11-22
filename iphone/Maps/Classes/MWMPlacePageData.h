@@ -12,9 +12,22 @@ enum class Sections
   Buttons
 };
 
+enum class PreviewRows
+{
+  Title,
+  ExternalTitle,
+  Subtitle,
+  Schedule,
+  Booking,
+  Address,
+  Space,
+  Banner
+};
+
 enum class MetainfoRows
 {
   OpeningHours,
+  ExtendedOpeningHours,
   Phone,
   Address,
   Website,
@@ -67,6 +80,10 @@ enum class OpeningHours
 - (NSURL *)sponsoredURL;
 - (NSURL *)sponsoredDescriptionURL;
 - (NSString *)sponsoredId;
+- (NSString *)bannerTitle;
+- (NSString *)bannerContent;
+- (NSURL *)bannerIconURL;
+- (NSURL *)bannerURL;
 - (void)assignOnlinePriceToLabel:(UILabel *)label;
 
 // API
@@ -81,6 +98,7 @@ enum class OpeningHours
 
 // Table view's data
 - (vector<place_page::Sections> const &)sections;
+- (vector<place_page::PreviewRows> const &)previewRows;
 - (vector<place_page::MetainfoRows> const &)metainfoRows;
 - (vector<place_page::ButtonsRows> const &)buttonsRows;
 

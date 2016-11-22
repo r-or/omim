@@ -1,5 +1,4 @@
 #import "MWMShareActivityItem.h"
-#import "MWMPlacePageEntity.h"
 #import "Macros.h"
 #import "Statistics.h"
 
@@ -42,8 +41,7 @@ NSString * httpGe0Url(NSString * shortUrl)
     NSAssert(object, @"Entity can't be nil!");
     BOOL const isMyPosition = object.isMyPosition;
     _isMyPosition = isMyPosition;
-    if (!isMyPosition)
-      _object = object;
+    _object = object;
   }
   return self;
 }
@@ -114,18 +112,24 @@ NSString * httpGe0Url(NSString * shortUrl)
 
 - (NSString *)itemDefaultWithActivityType:(NSString *)activityType
 {
-  NSString * url = httpGe0Url([self url:NO]);
+  NSString * ge0Url = [self url:NO];
+  NSString * url = httpGe0Url(ge0Url);
   if (self.isMyPosition)
   {
     BOOL const hasSubject = [activityType isEqualToString:UIActivityTypeMail];
     if (hasSubject)
-      return url;
-    return [NSString stringWithFormat:@"%@ %@", L(@"my_position_share_email_subject"), url];
+      return [NSString stringWithFormat:@"%@ %@", url, ge0Url];
+    return [NSString
+        stringWithFormat:@"%@ %@\n%@", L(@"my_position_share_email_subject"), url, ge0Url];
   }
 
   NSMutableString * result = [L(@"sharing_call_action_look") mutableCopy];
-  vector<NSString *> strings{self.object.title, self.object.subtitle, self.object.address,
-                             self.object.phoneNumber, url};
+  vector<NSString *> strings{self.object.title,
+                             self.object.subtitle,
+                             self.object.address,
+                             self.object.phoneNumber,
+                             url,
+                             ge0Url};
 
   if (self.object.isBooking)
   {

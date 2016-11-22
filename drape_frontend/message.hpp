@@ -65,10 +65,14 @@ public:
     RequestSymbolsSize,
     RecoverGLResources,
     SetVisibleViewport,
-    AddTrafficSegments,
+    CacheTrafficSegments,
     SetTrafficTexCoords,
     UpdateTraffic,
-    FlushTrafficData
+    FlushTrafficData,
+    ClearTrafficData,
+    DrapeApiAddLines,
+    DrapeApiRemove,
+    DrapeApiFlush,
   };
 
   virtual ~Message() {}

@@ -514,9 +514,10 @@ void Framework::EnableDownloadOn3g()
 }
 
 uint64_t Framework::RequestUberProducts(ms::LatLon const & from, ms::LatLon const & to,
-                                    uber::ProductsCallback const & callback)
+                                        uber::ProductsCallback const & callback,
+                                        uber::ErrorCallback const & errorCallback)
 {
-  return m_work.GetUberApi().GetAvailableProducts(from, to, callback);
+  return m_work.GetUberApi().GetAvailableProducts(from, to, callback, errorCallback);
 }
 
 uber::RideRequestLinks Framework::GetUberLinks(string const & productId, ms::LatLon const & from, ms::LatLon const & to)
@@ -669,8 +670,9 @@ Java_com_mapswithme_maps_Framework_nativeGetDistanceAndAzimuthFromLatLon(
 JNIEXPORT jobject JNICALL
 Java_com_mapswithme_maps_Framework_nativeFormatLatLon(JNIEnv * env, jclass, jdouble lat, jdouble lon, jboolean useDMSFormat)
 {
-  return jni::ToJavaString(env, (useDMSFormat ? measurement_utils::FormatLatLonAsDMS(lat, lon, 2)
-                                              : measurement_utils::FormatLatLon(lat, lon, 6)));
+  return jni::ToJavaString(
+      env, (useDMSFormat ? measurement_utils::FormatLatLonAsDMS(lat, lon, 2)
+                         : measurement_utils::FormatLatLon(lat, lon, true /* withSemicolon */, 6)));
 }
 
 JNIEXPORT jobjectArray JNICALL
@@ -831,10 +833,12 @@ Java_com_mapswithme_maps_Framework_nativeCloseRouting(JNIEnv * env, jclass)
 JNIEXPORT void JNICALL
 Java_com_mapswithme_maps_Framework_nativeBuildRoute(JNIEnv * env, jclass,
                                                     jdouble startLat,  jdouble startLon,
-                                                    jdouble finishLat, jdouble finishLon)
+                                                    jdouble finishLat, jdouble finishLon,
+                                                    jboolean isP2P)
 {
   frm()->BuildRoute(MercatorBounds::FromLatLon(startLat, startLon),
-                    MercatorBounds::FromLatLon(finishLat, finishLon), 0 /* timeoutSec */);
+                    MercatorBounds::FromLatLon(finishLat, finishLon),
+                    isP2P, 0 /* timeoutSec */);
 
 }
 

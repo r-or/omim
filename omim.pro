@@ -39,7 +39,7 @@ SUBDIRS = 3party base coding geometry editor indexer routing search
   # Integration tests dependencies for gtool.
   # TODO(AlexZ): Avoid duplication for routing_integration_tests.
   CONFIG(gtool):!CONFIG(no-tests) {
-    SUBDIRS *= map
+    SUBDIRS *= traffic map
 
     # Booking quality check
     booking_quality_check.subdir = generator/booking_quality_check
@@ -64,7 +64,7 @@ SUBDIRS = 3party base coding geometry editor indexer routing search
 }
 
 !CONFIG(gtool):!CONFIG(osrm) {
-  SUBDIRS *= drape drape_frontend partners_api tracking map
+  SUBDIRS *= drape drape_frontend partners_api tracking traffic map
 
   CONFIG(map_designer):CONFIG(desktop) {
     SUBDIRS *= skin_generator
@@ -150,9 +150,10 @@ SUBDIRS = 3party base coding geometry editor indexer routing search
     platform_tests.depends = 3party base coding platform platform_tests_support
     SUBDIRS *= platform_tests
 
-    downloader_tests.subdir = platform/downloader_tests
-    downloader_tests.depends = 3party base coding platform platform_tests_support
-    SUBDIRS *= downloader_tests
+#   Uncomment after replace hash function
+#    downloader_tests.subdir = platform/downloader_tests
+#    downloader_tests.depends = 3party base coding platform platform_tests_support
+#    SUBDIRS *= downloader_tests
 
     search_tests.subdir = search/search_tests
     search_tests.depends = 3party base coding geometry platform indexer search
@@ -250,8 +251,11 @@ SUBDIRS = 3party base coding geometry editor indexer routing search
     SUBDIRS *= partners_api_tests
 
     tracking_tests.subdir = tracking/tracking_tests
-    tracking_tests.depends = base platform tracking
+    tracking_tests.depends = 3party base routing tracking platform_tests_support platform coding geometry 
     SUBDIRS *= tracking_tests
 
+    traffic_tests.subdir = traffic/traffic_tests
+    traffic_tests.depends = 3party base routing traffic platform_tests_support platform coding geometry
+    SUBDIRS *= traffic_tests
   } # !no-tests
 } # !gtool

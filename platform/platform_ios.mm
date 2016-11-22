@@ -23,6 +23,8 @@
 
 #import "../iphone/Maps/Classes/Common.h"
 
+#import "3party/Alohalytics/src/alohalytics_objc.h"
+
 #import <Foundation/NSAutoreleasePool.h>
 #import <Foundation/NSBundle.h>
 #import <Foundation/NSPathUtilities.h>
@@ -131,7 +133,7 @@ static string GetMacAddress()
   return result;
 }
 
-string Platform::UniqueClientId() const { return HashUniqueID(GetMacAddress() + GetDeviceUid()); }
+string Platform::UniqueClientId() const { return [Alohalytics installationId].UTF8String; }
 static void PerformImpl(void * obj)
 {
   Platform::TFunctor * f = reinterpret_cast<Platform::TFunctor *>(obj);
@@ -211,24 +213,6 @@ void Platform::SetupMeasurementSystem() const
       [[[NSLocale autoupdatingCurrentLocale] objectForKey:NSLocaleUsesMetricSystem] boolValue];
   units = isMetric ? measurement_utils::Units::Metric : measurement_utils::Units::Imperial;
   settings::Set(settings::kMeasurementUnits, units);
-}
-
-void Platform::SendPushWooshTag(string const & tag) { SendPushWooshTag(tag, vector<string>{"1"}); }
-void Platform::SendPushWooshTag(string const & tag, string const & value)
-{
-  SendPushWooshTag(tag, vector<string>{value});
-}
-
-void Platform::SendPushWooshTag(string const & tag, vector<string> const & values)
-{
-  if (m_pushwooshSender)
-    m_pushwooshSender(tag, values);
-}
-
-void Platform::SendMarketingEvent(string const & tag, map<string, string> const & params)
-{
-  if (m_marketingSender)
-    m_marketingSender(tag, params);
 }
 
 ////////////////////////////////////////////////////////////////////////

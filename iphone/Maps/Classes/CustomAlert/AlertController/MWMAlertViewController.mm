@@ -3,6 +3,9 @@
 #import "MWMController.h"
 #import "MWMDownloadTransitMapAlert.h"
 #import "MWMLocationAlert.h"
+#import "MWMLocationNotFoundAlert.h"
+#import "MWMSearchNoResultsAlert.h"
+#import "MapViewController.h"
 #import "MapsAppDelegate.h"
 
 static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController";
@@ -47,7 +50,11 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
 #pragma mark - Actions
 
 - (void)presentRateAlert { [self displayAlert:MWMAlert.rateAlert]; }
-- (void)presentLocationAlert { [self displayAlert:[MWMAlert locationAlert]]; }
+- (void)presentLocationAlert
+{
+  if (![MapViewController controller].pageViewController)
+    [self displayAlert:[MWMAlert locationAlert]];
+}
 - (void)presentPoint2PointAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock
                              needToRebuild:(BOOL)needToRebuild
 {
@@ -62,7 +69,7 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
 
 - (void)presentLocationNotFoundAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock
 {
-  [self displayAlert:[MWMAlert locationNotFoundAlertWithOkBlock:okBlock]];
+  [self displayAlert:[MWMLocationNotFoundAlert alertWithOkBlock:okBlock]];
 }
 
 - (void)presentNoConnectionAlert { [self displayAlert:[MWMAlert noConnectionAlert]]; }
@@ -176,6 +183,28 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
   [self displayAlert:[MWMAlert trackWarningAlertWithCancelBlock:block]];
 }
 
+- (void)presentSearchNoResultsAlert
+{
+  Class alertClass = [MWMSearchNoResultsAlert class];
+  NSArray<__kindof MWMAlert *> * subviews = self.view.subviews;
+  MWMSearchNoResultsAlert * alert = nil;
+  for (MWMAlert * view in subviews)
+  {
+    if (![view isKindOfClass:alertClass])
+      continue;
+    alert = static_cast<MWMSearchNoResultsAlert *>(view);
+    alert.alpha = 1;
+    [self.view bringSubviewToFront:alert];
+    break;
+  }
+  if (!alert)
+  {
+    alert = [MWMSearchNoResultsAlert alert];
+    [self displayAlert:alert];
+  }
+  [alert update];
+}
+
 - (void)presentEditorViralAlert { [self displayAlert:[MWMAlert editorViralAlert]]; }
 - (void)presentOsmAuthAlert { [self displayAlert:[MWMAlert osmAuthAlert]]; }
 - (void)displayAlert:(MWMAlert *)alert
@@ -191,22 +220,20 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
     }
   }
   [UIView animateWithDuration:kDefaultAnimationDuration
-      animations:^{
-        for (MWMAlert * view in self.view.subviews)
-          view.alpha = 0.0;
-      }
-      completion:^(BOOL finished) {
-        for (MWMAlert * view in self.view.subviews)
-        {
-          if (view != alert)
-            view.hidden = YES;
-        }
-      }];
+                        delay:0
+                      options:UIViewAnimationOptionBeginFromCurrentState
+                   animations:^{
+                     for (MWMAlert * view in self.view.subviews)
+                     {
+                       if (view != alert)
+                         view.alpha = 0.0;
+                     }
+                   }
+                   completion:nil];
 
   [self removeFromParentViewController];
   alert.alertController = self;
   [self.ownerViewController addChildViewController:self];
-  self.view.alpha = 0.;
   alert.alpha = 0.;
   CGFloat const scale = 1.1;
   alert.transform = CGAffineTransformMakeScale(scale, scale);
@@ -219,14 +246,14 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
   [MapsAppDelegate.theApp.window endEditing:YES];
 }
 
-- (void)closeAlert
+- (void)closeAlert:(nullable TMWMVoidBlock)completion
 {
   NSArray * subviews = self.view.subviews;
   MWMAlert * closeAlert = subviews.lastObject;
   MWMAlert * showAlert = (subviews.count >= 2 ? subviews[subviews.count - 2] : nil);
-  if (showAlert)
-    showAlert.hidden = NO;
   [UIView animateWithDuration:kDefaultAnimationDuration
+      delay:0
+      options:UIViewAnimationOptionBeginFromCurrentState
       animations:^{
         closeAlert.alpha = 0.;
         if (showAlert)
@@ -241,6 +268,8 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
           [self.view removeFromSuperview];
           [self removeFromParentViewController];
         }
+        if (completion)
+          completion();
       }];
 }
 

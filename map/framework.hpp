@@ -8,8 +8,10 @@
 #include "map/mwm_url.hpp"
 #include "map/place_page_info.hpp"
 #include "map/track.hpp"
+#include "map/traffic_manager.hpp"
 
 #include "drape_frontend/gui/skin.hpp"
+#include "drape_frontend/drape_api.hpp"
 #include "drape_frontend/drape_engine.hpp"
 #include "drape_frontend/user_event_stream.hpp"
 #include "drape_frontend/watch/frame_image.hpp"
@@ -162,8 +164,12 @@ protected:
 
   uber::Api m_uberApi;
 
+  df::DrapeApi m_drapeApi;
+
   bool m_isRenderingEnabled;
   tracking::Reporter m_trackingReporter;
+
+  TrafficManager m_trafficManager;
 
   /// This function will be called by m_storage when latest local files
   /// is downloaded.
@@ -191,6 +197,8 @@ public:
   /// Get access to booking api helpers
   BookingApi & GetBookingApi() { return m_bookingApi; }
   BookingApi const & GetBookingApi() const { return m_bookingApi; }
+
+  df::DrapeApi & GetDrapeApi() { return m_drapeApi; }
 
   uber::Api & GetUberApi() { return m_uberApi;}
 
@@ -298,6 +306,9 @@ public:
 
   m2::PointD GetSearchMarkSize(SearchMarkType searchMarkType);
 
+  // Utilities
+  void VizualizeRoadsInRect(m2::RectD const & rect);
+
 protected:
   // search::ViewportSearchCallback::Delegate overrides:
   void RunUITask(function<void()> fn) override { GetPlatform().RunOnGuiThread(move(fn)); }
@@ -348,6 +359,8 @@ public:
   storage::TCountryId const & GetLastReportedCountry() { return m_lastReportedCountry; }
   /// Guarantees that listener is called in the main thread context.
   void SetCurrentCountryChangedListener(TCurrentCountryChanged const & listener);
+
+  vector<MwmSet::MwmId> GetMwmsByRect(m2::RectD const & rect);
 
 private:
   struct TapEvent
@@ -700,7 +713,7 @@ public:
   bool IsRouteNavigable() const { return m_routingSession.IsNavigable(); }
 
   void BuildRoute(m2::PointD const & finish, uint32_t timeoutSec);
-  void BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec);
+  void BuildRoute(m2::PointD const & start, m2::PointD const & finish, bool isP2P, uint32_t timeoutSec);
   // FollowRoute has a bug where the router follows the route even if the method hads't been called.
   // This method was added because we do not want to break the behaviour that is familiar to our users.
   bool DisableFollowMode();

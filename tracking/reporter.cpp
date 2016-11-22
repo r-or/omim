@@ -8,8 +8,6 @@
 
 #include "std/target_os.hpp"
 
-#include "private.h"
-
 namespace
 {
 double constexpr kRequiredHorizontalAccuracy = 10.0;
@@ -20,26 +18,17 @@ size_t constexpr kRealTimeBufferSize = 60;
 
 namespace tracking
 {
-// static
-// Apple and Android applications use different keys for settings.ini.
-// Keys saved for existing users, so can' fix it easy, need migration.
-// Use this hack until change to special traffic key.
-#if defined(OMIM_OS_IPHONE)
-const char Reporter::kEnabledSettingsKey[] = "StatisticsEnabled";
-#elif defined(OMIM_OS_ANDROID)
-const char Reporter::kEnabledSettingsKey[] = "AllowStat";
-#else
-const char Reporter::kEnabledSettingsKey[] = "AllowStat";
-#endif
+const char Reporter::kEnableTrackingKey[] = "StatisticsEnabled";
 
 // static
 milliseconds const Reporter::kPushDelayMs = milliseconds(10000);
 
-Reporter::Reporter(unique_ptr<platform::Socket> socket, milliseconds pushDelay)
-  : m_realtimeSender(move(socket), TRACKING_REALTIME_HOST, TRACKING_REALTIME_PORT, false)
+Reporter::Reporter(unique_ptr<platform::Socket> socket, string const & host, uint16_t port,
+                   milliseconds pushDelay)
+  : m_realtimeSender(move(socket), host, port, false)
   , m_pushDelay(pushDelay)
   , m_points(kRealTimeBufferSize)
-  , m_thread([this]{Run();})
+  , m_thread([this] { Run(); })
 {
 }
 
@@ -82,8 +71,15 @@ void Reporter::Run()
     m_input.clear();
 
     lock.unlock();
-    if (SendPoints())
-      m_points.clear();
+    if (m_points.empty() && m_idleFn)
+    {
+      m_idleFn();
+    }
+    else
+    {
+      if (SendPoints())
+        m_points.clear();
+    }
     lock.lock();
 
     auto const passedMs = duration_cast<milliseconds>(steady_clock::now() - startTime);

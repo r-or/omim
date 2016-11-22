@@ -4,6 +4,8 @@
 
 #include "std/target_os.hpp"
 
+#import "3party/Alohalytics/src/alohalytics_objc.h"
+
 #include <IOKit/IOKitLib.h>
 #include <Foundation/NSBundle.h>
 #include <Foundation/NSPathUtilities.h>
@@ -78,16 +80,7 @@ Platform::Platform()
   LOG(LDEBUG, ("Settings Directory:", m_settingsDir));
 }
 
-string Platform::UniqueClientId() const
-{
-  io_registry_entry_t ioRegistryRoot = IORegistryEntryFromPath(kIOMasterPortDefault, "IOService:/");
-  CFStringRef uuidCf = (CFStringRef) IORegistryEntryCreateCFProperty(ioRegistryRoot, CFSTR(kIOPlatformUUIDKey), kCFAllocatorDefault, 0);
-  IOObjectRelease(ioRegistryRoot);
-  char uidBuf[513];
-  CFStringGetCString(uuidCf, uidBuf, ARRAY_SIZE(uidBuf) - 1, kCFStringEncodingUTF8);
-  CFRelease(uuidCf);
-  return HashUniqueID(uidBuf);
-}
+string Platform::UniqueClientId() const { return [Alohalytics installationId].UTF8String; }
 
 static void PerformImpl(void * obj)
 {
@@ -135,16 +128,3 @@ Platform::EConnectionType Platform::ConnectionStatus()
     return EConnectionType::CONNECTION_NONE;
   return EConnectionType::CONNECTION_WIFI;
 }
-
-void Platform::SendPushWooshTag(string const & tag)
-{
-}
-
-void Platform::SendPushWooshTag(string const & tag, string const & value)
-{
-}
-
-void Platform::SendPushWooshTag(string const & tag, vector<string> const & values)
-{
-}
-void Platform::SendMarketingEvent(string const & tag, map<string, string> const & params) {}

@@ -38,6 +38,7 @@ public class NavigationController
 
   private final View mFrame;
   private final View mBottomFrame;
+  private final View mSearchButtonFrame;
   private final NavMenu mNavMenu;
 
   private final ImageView mNextTurnImage;
@@ -100,6 +101,9 @@ public class NavigationController
     View shadow = topFrame.findViewById(R.id.shadow_top);
     UiUtils.showIf(Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP, shadow);
 
+    UiUtils.extendViewWithStatusBar(mStreetFrame);
+    UiUtils.extendViewMarginWithStatusBar(turnFrame);
+
     // Bottom frame
     mSpeedValue = (TextView) mBottomFrame.findViewById(R.id.speed_value);
     mSpeedUnits = (TextView) mBottomFrame.findViewById(R.id.speed_dimen);
@@ -113,7 +117,8 @@ public class NavigationController
     mDistanceUnits = (TextView) mBottomFrame.findViewById(R.id.distance_dimen);
     mRouteProgress = (FlatProgressView) mBottomFrame.findViewById(R.id.navigation_progress);
 
-    mSearchWheel = new SearchWheel(mFrame);
+    mSearchButtonFrame = activity.findViewById(R.id.search_button_frame);
+    mSearchWheel = new SearchWheel(mSearchButtonFrame);
 
     if (Config.useExternalDisplay())
       mExtDisplay = new ExternalDisplay();
@@ -139,10 +144,7 @@ public class NavigationController
         {
         case STOP:
           RoutingController.get().cancel();
-          Statistics.INSTANCE.trackEvent(Statistics.EventName.ROUTING_CLOSE);
-          AlohaHelper.logClick(AlohaHelper.ROUTING_CLOSE);
-          parent.refreshFade();
-          mSearchWheel.reset();
+          stop(parent);
           break;
         case SETTINGS:
           parent.closeMenu(Statistics.EventName.ROUTING_SETTINGS, AlohaHelper.MENU_SETTINGS, new Runnable()
@@ -166,6 +168,14 @@ public class NavigationController
         }
       }
     });
+  }
+
+  private void stop(MwmActivity parent)
+  {
+    Statistics.INSTANCE.trackEvent(Statistics.EventName.ROUTING_CLOSE);
+    AlohaHelper.logClick(AlohaHelper.ROUTING_CLOSE);
+    parent.refreshFade();
+    mSearchWheel.reset();
   }
 
   private void updateVehicle(RoutingInfo info)
@@ -300,6 +310,7 @@ public class NavigationController
   public void show(boolean show)
   {
     UiUtils.showIf(show, mFrame);
+    UiUtils.showIf(show, mSearchButtonFrame);
     mNavMenu.show(show);
   }
 
@@ -318,4 +329,14 @@ public class NavigationController
     mShowTimeLeft = savedInstanceState.getBoolean(STATE_SHOW_TIME_LEFT);
   }
 
+  public boolean cancel()
+  {
+    if (RoutingController.get().cancel())
+    {
+      final MwmActivity parent = ((MwmActivity) mFrame.getContext());
+      stop(parent);
+      return true;
+    }
+    return false;
+  }
 }

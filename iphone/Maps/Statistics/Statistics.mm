@@ -1,6 +1,7 @@
+#import "Statistics.h"
 #import "AppInfo.h"
 #import "MWMCustomFacebookEvents.h"
-#import "Statistics.h"
+#import "MWMSettings.h"
 
 #import "3party/Alohalytics/src/alohalytics_objc.h"
 #import "Flurry.h"
@@ -10,78 +11,32 @@
 
 #include "platform/settings.hpp"
 
+#include "base/macros.hpp"
+
 // If you have a "missing header error" here, then please run configure.sh script in the root repo folder.
 #import "../../../private.h"
 
-char const * kStatisticsEnabledSettingsKey = "StatisticsEnabled";
+namespace
+{
+void checkFlurryLogStatus(FlurryEventRecordStatus status)
+{
+  NSCAssert(status == FlurryEventRecorded || status == FlurryEventLoggingDelayed,
+            @"Flurry log event failed.");
+}
+}  // namespace
 
 @interface Statistics ()
-{
-  bool _enabled;
-}
-@property (nonatomic) NSDate * lastLocationLogTimestamp;
+
+@property(nonatomic) NSDate * lastLocationLogTimestamp;
+
 @end
 
 @implementation Statistics
 
-+ (bool)isStatisticsEnabledByDefault
-{
-#ifdef OMIM_PRODUCTION
-  return true;
-#else
-  // Make developer's life a little bit easier.
-  [Alohalytics setDebugMode:YES];
-  return false;
-#endif
-}
-
-- (instancetype)init
-{
-  if ((self = [super init]))
-  {
-    _enabled = [Statistics isStatisticsEnabledByDefault];
-    // Note by AlexZ:
-    // _enabled should be persistent across app's process lifecycle. That's why we change
-    // _enabled property only once - when the app is launched. In this case we don't need additional
-    // checks and specific initializations for different 3party engines, code is much cleaner and safer
-    // (actually, we don't have a choice - 3party SDKs do not guarantee correctness if not initialized
-    // in application:didFinishLaunchingWithOptions:).
-    // The (only) drawback of this approach is that to actually disable or enable 3party engines,
-    // the app should be restarted.
-    (void)settings::Get(kStatisticsEnabledSettingsKey, _enabled);
-
-    if (_enabled)
-      [Alohalytics enable];
-    else
-      [Alohalytics disable];
-  }
-  return self;
-}
-
-- (bool)isStatisticsEnabled
-{
-  return _enabled;
-}
-
-- (void)enableOnNextAppLaunch
-{
-  // This setting will be checked and applied on the next launch.
-  settings::Set(kStatisticsEnabledSettingsKey, true);
-  // It does not make sense to log statisticsEnabled with Alohalytics here,
-  // as it will not be stored and logged anyway.
-}
-
-- (void)disableOnNextAppLaunch
-{
-  // This setting will be checked and applied on the next launch.
-  settings::Set(kStatisticsEnabledSettingsKey, false);
-  [Alohalytics logEvent:@"statisticsDisabled"];
-}
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   // _enabled should be already correctly set up in init method.
-  if (_enabled)
+  if ([MWMSettings statisticsEnabled])
   {
     [Flurry startSession:@(FLURRY_KEY)];
     [Flurry logAllPageViewsForTarget:application.windows.firstObject.rootViewController];
@@ -101,7 +56,7 @@ char const * kStatisticsEnabledSettingsKey = "StatisticsEnabled";
 
 - (void)logLocation:(CLLocation *)location
 {
-  if (!_enabled)
+  if (![MWMSettings statisticsEnabled])
     return;
   if (!_lastLocationLogTimestamp || [[NSDate date] timeIntervalSinceDate:_lastLocationLogTimestamp] > (60 * 60 * 3))
   {
@@ -113,29 +68,27 @@ char const * kStatisticsEnabledSettingsKey = "StatisticsEnabled";
 
 - (void)logEvent:(NSString *)eventName withParameters:(NSDictionary *)parameters
 {
-  if (!_enabled)
+  if (![MWMSettings statisticsEnabled])
     return;
   NSMutableDictionary * params = [self addDefaultAttributesToParameters:parameters];
-  [Flurry logEvent:eventName withParameters:params];
   [Alohalytics logEvent:eventName withDictionary:params];
+  checkFlurryLogStatus([Flurry logEvent:eventName withParameters:params]);
 }
 
 - (void)logEvent:(NSString *)eventName withParameters:(NSDictionary *)parameters atLocation:(CLLocation *)location
 {
-  if (!_enabled)
+  if (![MWMSettings statisticsEnabled])
     return;
   NSMutableDictionary * params = [self addDefaultAttributesToParameters:parameters];
   [Alohalytics logEvent:eventName withDictionary:params atLocation:location];
   auto const & coordinate = location ? location.coordinate : kCLLocationCoordinate2DInvalid;
-  params[kStatLat] = @(coordinate.latitude);
-  params[kStatLon] = @(coordinate.longitude);
-  [Flurry logEvent:eventName withParameters:params];
+  params[kStatLocation] = makeLocationEventValue(coordinate.latitude, coordinate.longitude);
+  checkFlurryLogStatus([Flurry logEvent:eventName withParameters:params]);
 }
 
 - (NSMutableDictionary *)addDefaultAttributesToParameters:(NSDictionary *)parameters
 {
   NSMutableDictionary * params = [parameters mutableCopy];
-  params[kStatDeviceType] = IPAD ? kStatiPad : kStatiPhone;
   BOOL isLandscape = UIDeviceOrientationIsLandscape([UIDevice currentDevice].orientation);
   params[kStatOrientation] = isLandscape ? kStatLandscape : kStatPortrait;
   AppInfo * info = [AppInfo sharedInfo];
@@ -152,7 +105,7 @@ char const * kStatisticsEnabledSettingsKey = "StatisticsEnabled";
 
 - (void)logApiUsage:(NSString *)programName
 {
-  if (!_enabled)
+  if (![MWMSettings statisticsEnabled])
     return;
   if (programName)
     [self logEvent:@"Api Usage" withParameters: @{@"Application Name" : programName}];
@@ -162,7 +115,7 @@ char const * kStatisticsEnabledSettingsKey = "StatisticsEnabled";
 
 - (void)applicationDidBecomeActive
 {
-  if (!_enabled)
+  if (![MWMSettings statisticsEnabled])
     return;
   [FBSDKAppEvents activateApp];
   // Special FB events to improve marketing campaigns quality.

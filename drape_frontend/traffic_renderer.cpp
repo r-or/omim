@@ -22,7 +22,7 @@ namespace
 int const kMinVisibleZoomLevel = 10;
 int const kMinVisibleArrowZoomLevel = 16;
 
-float const kTrafficArrowAspect = 64.0f / 16.0f;
+float const kTrafficArrowAspect = 24.0f / 8.0f;
 
 float const kLeftWidthInPixel[] =
 {
@@ -60,32 +60,26 @@ float CalculateHalfWidth(ScreenBase const & screen, bool left)
 } // namespace
 
 void TrafficRenderer::AddRenderData(ref_ptr<dp::GpuProgramManager> mng,
-                                    vector<TrafficRenderData> && renderData)
+                                    TrafficRenderData && renderData)
 {
-  if (renderData.empty())
-    return;
+  m_renderData.emplace_back(move(renderData));
 
-  size_t const startIndex = m_renderData.size();
-  m_renderData.reserve(m_renderData.size() + renderData.size());
-  move(renderData.begin(), renderData.end(), std::back_inserter(m_renderData));
-  for (size_t i = startIndex; i < m_renderData.size(); i++)
+  ref_ptr<dp::GpuProgram> program = mng->GetProgram(m_renderData.back().m_state.GetProgramIndex());
+  program->Bind();
+  m_renderData.back().m_bucket->GetBuffer()->Build(program);
+
+  for (size_t j = 0; j < m_renderData.back().m_bucket->GetOverlayHandlesCount(); j++)
   {
-    ref_ptr<dp::GpuProgram> program = mng->GetProgram(m_renderData[i].m_state.GetProgramIndex());
-    program->Bind();
-    m_renderData[i].m_bucket->GetBuffer()->Build(program);
-    for (size_t j = 0; j < m_renderData[i].m_bucket->GetOverlayHandlesCount(); j++)
-    {
-      TrafficHandle * handle = static_cast<TrafficHandle *>(m_renderData[i].m_bucket->GetOverlayHandle(j).get());
-      m_handles.insert(make_pair(handle->GetSegmentId(), handle));
-    }
+    TrafficHandle * handle = static_cast<TrafficHandle *>(m_renderData.back().m_bucket->GetOverlayHandle(j).get());
+    m_handles.insert(make_pair(handle->GetSegmentId(), handle));
   }
 }
 
-void TrafficRenderer::UpdateTraffic(vector<TrafficSegmentData> const & trafficData)
+void TrafficRenderer::UpdateTraffic(TrafficSegmentsColoring const & trafficColoring)
 {
-  for (TrafficSegmentData const & segment : trafficData)
+  for (auto const & segment : trafficColoring)
   {
-    auto it = m_texCoords.find(segment.m_speedBucket);
+    auto it = m_texCoords.find(static_cast<size_t>(segment.m_speedGroup));
     if (it == m_texCoords.end())
       continue;
 
@@ -124,15 +118,26 @@ void TrafficRenderer::RenderTraffic(ScreenBase const & screen, int zoomLevel,
   }
 }
 
-void TrafficRenderer::SetTexCoords(unordered_map<int, glsl::vec2> && texCoords)
+void TrafficRenderer::SetTexCoords(TrafficTexCoords && texCoords)
 {
   m_texCoords = move(texCoords);
 }
 
-void TrafficRenderer::Clear()
+void TrafficRenderer::ClearGLDependentResources()
 {
   m_renderData.clear();
   m_handles.clear();
+  m_texCoords.clear();
+}
+
+void TrafficRenderer::Clear(MwmSet::MwmId const & mwmId)
+{
+  auto removePredicate = [&mwmId](TrafficRenderData const & data)
+  {
+    return data.m_mwmId == mwmId;
+  };
+
+  m_renderData.erase(remove_if(m_renderData.begin(), m_renderData.end(), removePredicate), m_renderData.end());
 }
 
 } // namespace df

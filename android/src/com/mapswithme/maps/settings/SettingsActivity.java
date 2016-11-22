@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.annotation.StyleRes;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -49,7 +50,8 @@ public class SettingsActivity extends PreferenceActivity
   }
 
   @Override
-  public int getThemeResourceId(String theme)
+  @StyleRes
+  public int getThemeResourceId(@NonNull String theme)
   {
     if (ThemeUtils.isDefaultTheme(theme))
       return R.style.MwmTheme_Settings;
@@ -128,12 +130,14 @@ public class SettingsActivity extends PreferenceActivity
     getAppDelegate().onCreate(savedInstanceState);
 
     super.onCreate(savedInstanceState);
+    UiUtils.setupStatusBar(this);
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
     // Hack to attach Toolbar and make it work on native PreferenceActivity
     ViewGroup root = (ViewGroup)findViewById(android.R.id.list).getParent().getParent().getParent();
     View toolbarHolder = LayoutInflater.from(this).inflate(R.layout.toolbar_default, root, false);
     Toolbar toolbar = (Toolbar) toolbarHolder.findViewById(R.id.toolbar);
+    UiUtils.extendViewWithStatusBar(toolbar);
     UiUtils.showHomeUpButton(toolbar);
 
     // First, add toolbar view to UI.

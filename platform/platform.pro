@@ -13,11 +13,12 @@ INCLUDEPATH += $$ROOT_DIR/3party/jansson/src
 !iphone*:!android*:!tizen {
   QT *= core
 
-  SOURCES += platform_qt.cpp \
-             wifi_location_service.cpp \
-             location_service.cpp
-  HEADERS += wifi_info.hpp \
-             location_service.hpp
+  SOURCES += location_service.cpp \
+             marketing_service_dummy.cpp \
+             platform_qt.cpp \
+             wifi_location_service.cpp
+  HEADERS += location_service.hpp \
+             wifi_info.hpp
   !macx-* {
     QT *= network
     SOURCES += http_thread_qt.cpp
@@ -28,21 +29,24 @@ INCLUDEPATH += $$ROOT_DIR/3party/jansson/src
     SOURCES += platform_win.cpp \
                wifi_info_windows.cpp
   } else:macx-* {
-    OBJECTIVE_SOURCES += platform_mac.mm \
+    OBJECTIVE_SOURCES += marketing_service_dummy.cpp \
+                         platform_mac.mm \
                          apple_location_service.mm
   } else:linux* {
     SOURCES += platform_linux.cpp
   }
 } else:iphone* {
-  OBJECTIVE_SOURCES += platform_ios.mm
+  OBJECTIVE_SOURCES += marketing_service_ios.mm \
+                       platform_ios.mm
 } else:android* {
-  SOURCES += platform_android.cpp \
+  SOURCES += platform_android.cpp
 } else:tizen* {
-  HEADERS += tizen_utils.hpp \
-    http_thread_tizen.hpp
-  SOURCES += platform_tizen.cpp \
-    tizen_utils.cpp \
-    http_thread_tizen.cpp \
+  HEADERS += http_thread_tizen.hpp \
+             tizen_utils.hpp
+  SOURCES += http_thread_tizen.cpp \
+             marketing_service_dummy.cpp \
+             platform_tizen.cpp \
+             tizen_utils.cpp
 }
 
 macx-*|iphone* {
@@ -79,6 +83,7 @@ HEADERS += \
     local_country_file.hpp \
     local_country_file_utils.hpp \
     location.hpp \
+    marketing_service.hpp \
     measurement_utils.hpp \
     mwm_traits.hpp \
     mwm_version.hpp \
@@ -98,6 +103,7 @@ SOURCES += \
     http_request.cpp \
     local_country_file.cpp \
     local_country_file_utils.cpp \
+    marketing_service.cpp \
     measurement_utils.cpp \
     mwm_traits.cpp \
     mwm_version.cpp \

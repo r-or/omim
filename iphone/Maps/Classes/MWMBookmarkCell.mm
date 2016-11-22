@@ -66,13 +66,13 @@ NSString * const kTextViewContentSizeKeyPath = @"contentSize";
     auto const height = s.CGSizeValue.height;
     auto const boundedHeight = self.textViewHeight.constant;
 
-    if (height <= boundedHeight || self.isOpen)
+    if (height < boundedHeight || self.isOpen)
       [self stateOpen:YES];
     else
       [self stateOpen:NO];
 
     [self setNeedsLayout];
-    [self.updateCellDelegate updateCellWithForceReposition:NO];
+    [self.updateCellDelegate cellUpdated];
     return;
   }
 
@@ -202,4 +202,5 @@ NSString * const kTextViewContentSizeKeyPath = @"contentSize";
 }
 
 - (IBAction)editTap { [self.editBookmarkDelegate editBookmark]; }
+
 @end

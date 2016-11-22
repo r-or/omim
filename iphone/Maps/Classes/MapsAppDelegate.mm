@@ -110,7 +110,7 @@ void InitLocalizedStrings()
 void InitCrashTrackers()
 {
 #ifdef OMIM_PRODUCTION
-  if (![[Statistics instance] isStatisticsEnabled])
+  if (![MWMSettings statisticsEnabled])
     return;
 
   NSString * hockeyKey = @(HOCKEY_APP_KEY);
@@ -466,6 +466,10 @@ using namespace osm_auth_ios;
   }
   else
   {
+    if ([MWMSettings statisticsEnabled])
+      [Alohalytics enable];
+    else
+      [Alohalytics disable];
     [self incrementSessionsCountAndCheckForAlert];
     [MapsAppDelegate initPushNotificationsWithLaunchOptions:launchOptions];
   }
@@ -936,6 +940,7 @@ using namespace osm_auth_ios;
 
 - (void)firstLaunchSetup
 {
+  [MWMSettings setStatisticsEnabled:YES];
   NSString * currentVersion =
       [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleVersionKey];
   NSUserDefaults * standartDefaults = [NSUserDefaults standardUserDefaults];
@@ -943,6 +948,8 @@ using namespace osm_auth_ios;
   [standartDefaults setInteger:1 forKey:kUDSessionsCountKey];
   [standartDefaults setObject:NSDate.date forKey:kUDLastLaunchDateKey];
   [standartDefaults synchronize];
+  
+  GetPlatform().GetMarketingService().ProcessFirstLaunch();
 }
 
 - (void)incrementSessionCount

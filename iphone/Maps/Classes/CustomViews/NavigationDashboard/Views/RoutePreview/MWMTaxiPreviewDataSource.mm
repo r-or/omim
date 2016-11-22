@@ -86,10 +86,18 @@ using namespace uber;
   return self;
 }
 
+- (void)dealloc
+{
+  MWMTaxiCollectionView * cv = self.collectionView;
+  cv.dataSource = nil;
+  cv.delegate = nil;
+  self.collectionView = nil;
+}
+
 - (void)requestTaxiFrom:(MWMRoutePoint const &)from
                                   to:(MWMRoutePoint const &)to
                           completion:(TMWMVoidBlock)completion
-                             failure:(TMWMVoidBlock)failure
+                             failure:(MWMStringBlock)failure
 {
   NSAssert(completion && failure, @"Completion and failure blocks must be not nil!");
   m_products.clear();
@@ -98,20 +106,14 @@ using namespace uber;
   auto cv = self.collectionView;
   cv.hidden = YES;
   cv.pageControl.hidden = YES;
-  
-  m_requestId = m_api.GetAvailableProducts(m_from, m_to, [self, completion, failure](vector<Product> const & products,
+
+  m_requestId = m_api.GetAvailableProducts(m_from, m_to, [self, completion](vector<Product> const & products,
                                                                   uint64_t const requestId)
   {
-    dispatch_async(dispatch_get_main_queue(), [products, requestId, self, completion, failure]
+    dispatch_async(dispatch_get_main_queue(), [products, requestId, self, completion]
     {
       if (self->m_requestId != requestId)
         return;
-
-      if (products.empty())
-      {
-        failure();
-        return;
-      }
 
       self->m_products = products;
       auto cv = self.collectionView;
@@ -122,6 +124,24 @@ using namespace uber;
       cv.contentOffset = {};
       cv.currentPage = 0;
       completion();
+    });
+  },
+  [self, failure](uber::ErrorCode const code, uint64_t const requestId)
+  {
+    dispatch_async(dispatch_get_main_queue(), ^
+    {
+      if (self->m_requestId != requestId)
+        return;
+
+      switch (code)
+      {
+      case uber::ErrorCode::NoProducts:
+        failure(L(@"taxi_not_found"));
+        break;
+      case uber::ErrorCode::RemoteError:
+        failure(L(@"dialog_taxi_error"));
+        break;
+      }
     });
   });
 }

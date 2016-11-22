@@ -25,8 +25,8 @@ define add_prebuild_static_lib
   include $(PREBUILT_STATIC_LIBRARY)
 endef
 
-prebuild_static_libs := map tracking drape_frontend routing search storage indexer drape platform editor partners_api geometry coding base opening_hours
-prebuild_static_libs += pugixml oauthcpp expat freetype fribidi minizip jansson tomcrypt protobuf osrm stats_client succinct
+prebuild_static_libs := map tracking traffic drape_frontend routing search storage indexer drape platform editor partners_api geometry coding base opening_hours
+prebuild_static_libs += pugixml oauthcpp expat freetype fribidi minizip jansson protobuf osrm stats_client succinct
 
 $(foreach item,$(prebuild_static_libs),$(eval $(call add_prebuild_static_lib,$(item))))
 
@@ -102,11 +102,13 @@ LOCAL_SRC_FILES := \
 	com/mapswithme/platform/HttpThread.cpp \
 	com/mapswithme/platform/SocketImpl.cpp \
 	com/mapswithme/platform/Language.cpp \
+	com/mapswithme/platform/MarketingService.cpp \
 	com/mapswithme/platform/Platform.cpp \
 	com/mapswithme/platform/PThreadImpl.cpp \
 	com/mapswithme/util/Config.cpp \
 	com/mapswithme/util/HttpClient.cpp \
 	com/mapswithme/util/StringUtils.cpp \
+	com/mapswithme/util/statistics/PushwooshHelper.cpp \
 
 
 LOCAL_LDLIBS := -llog -landroid -lEGL -lGLESv2 -latomic -lz

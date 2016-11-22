@@ -1,8 +1,9 @@
+project(coding_tests)
+
 add_definitions(-DOMIM_UNIT_TEST_DISABLE_PLATFORM_INIT)
 
 set(
   SRC
-  base64_for_user_id_test.cpp
   base64_test.cpp
   bit_streams_test.cpp
   coder_test.hpp
@@ -27,7 +28,6 @@ set(
   reader_test.cpp
   reader_test.hpp
   reader_writer_ops_test.cpp
-  sha2_test.cpp
   simple_dense_coding_test.cpp
   succinct_mapper_test.cpp
   traffic_test.cpp
@@ -43,6 +43,6 @@ set(
   zip_reader_test.cpp
 )
 
-omim_add_test(coding_tests ${SRC})
+omim_add_test(${PROJECT_NAME} ${SRC})
 
-omim_link_libraries(coding_tests coding base geometry minizip tomcrypt succinct ${LIBZ})
+omim_link_libraries(${PROJECT_NAME} coding base geometry minizip succinct ${LIBZ})

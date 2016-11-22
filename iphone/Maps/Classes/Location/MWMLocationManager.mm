@@ -287,14 +287,13 @@ void setPermissionRequested()
 
 - (void)processLocationUpdate:(CLLocation *)locationInfo
 {
-  if (!locationInfo)
+  if (!locationInfo || self.lastLocationStatus != location::TLocationError::ENoError)
     return;
   location::GpsInfo const gpsInfo = gpsInfoFromLocation(locationInfo);
   [self onLocationUpdate:gpsInfo];
   if (self.lastLocationInfo == locationInfo)
     return;
   self.lastLocationInfo = locationInfo;
-  self.lastLocationStatus = location::TLocationError::ENoError;
   [self.predictor reset:gpsInfo];
 }
 
@@ -453,6 +452,8 @@ void setPermissionRequested()
   // So we filter out such events completely.
   if (location.horizontalAccuracy < 0.)
     return;
+
+  self.lastLocationStatus = location::TLocationError::ENoError;
   [self processLocationUpdate:location];
   [[Statistics instance] logLocation:location];
 }

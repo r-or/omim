@@ -14,8 +14,9 @@ class MWMRoutePoint;
 - (void)requestTaxiFrom:(MWMRoutePoint const &)from
                          to:(MWMRoutePoint const &)to
                           completion:(TMWMVoidBlock)completion
-                             failure:(TMWMVoidBlock)failure;
+                             failure:(MWMStringBlock)failure;
 
 - (NSURL *)taxiURL;
+- (BOOL)isTaxiInstalled;
 
 @end

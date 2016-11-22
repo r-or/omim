@@ -18,6 +18,7 @@ SOURCES += \
     bicycle_directions.cpp \
     bicycle_model.cpp \
     car_model.cpp \
+    car_router.cpp \
     cross_mwm_road_graph.cpp \
     cross_mwm_router.cpp \
     cross_routing_context.cpp \
@@ -30,9 +31,9 @@ SOURCES += \
     osrm_engine.cpp \
     osrm_helpers.cpp \
     osrm_path_segment_factory.cpp \
-    osrm_router.cpp \
     pedestrian_directions.cpp \
     pedestrian_model.cpp \
+    restriction_loader.cpp \
     road_graph.cpp \
     road_graph_router.cpp \
     route.cpp \
@@ -40,6 +41,7 @@ SOURCES += \
     router_delegate.cpp \
     routing_algorithm.cpp \
     routing_mapping.cpp \
+    routing_serialization.cpp \
     routing_session.cpp \
     speed_camera.cpp \
     turns.cpp \
@@ -57,6 +59,7 @@ HEADERS += \
     bicycle_directions.hpp \
     bicycle_model.hpp \
     car_model.hpp \
+    car_router.hpp \
     cross_mwm_road_graph.hpp \
     cross_mwm_router.hpp \
     cross_routing_context.hpp \
@@ -71,9 +74,9 @@ HEADERS += \
     osrm_engine.hpp \
     osrm_helpers.hpp \
     osrm_path_segment_factory.hpp \
-    osrm_router.hpp \
     pedestrian_directions.hpp \
     pedestrian_model.hpp \
+    restriction_loader.hpp \
     road_graph.hpp \
     road_graph_router.hpp \
     route.hpp \
@@ -83,6 +86,7 @@ HEADERS += \
     routing_helpers.hpp \
     routing_mapping.hpp \
     routing_result_graph.hpp \
+    routing_serialization.hpp \
     routing_session.hpp \
     routing_settings.hpp \
     speed_camera.hpp \

@@ -162,8 +162,9 @@ public:
   void RequestSymbolsSize(vector<string> const & symbols,
                           TRequestSymbolsSizeCallback const & callback);
 
-  void AddTrafficSegments(vector<pair<uint64_t, m2::PolylineD>> const & segments);
-  void UpdateTraffic(vector<TrafficSegmentData> const & segmentsData);
+  void CacheTrafficSegmentsGeometry(TrafficSegmentsGeometry const & segments);
+  void UpdateTraffic(TrafficSegmentsColoring const & segmentsColoring);
+  void ClearTrafficCache(MwmSet::MwmId const & mwmId);
 
   void SetFontScaleFactor(double scaleFactor);
 
@@ -198,6 +199,8 @@ private:
 
   bool m_choosePositionMode = false;
   bool m_kineticScrollEnabled = true;
+
+  friend class DrapeApi;
 };
 
 } // namespace df

@@ -10,8 +10,8 @@ public:
   SocketImpl()
   {
     JNIEnv * env = jni::GetEnv();
-    static jmethodID const socketConstructor = jni::GetConstructorID(env, g_socketWrapperClazz, "()V");
-    jni::TScopedLocalRef localSelf(env, env->NewObject(g_socketWrapperClazz, socketConstructor));
+    static jmethodID const socketConstructor = jni::GetConstructorID(env, g_platformSocketClazz, "()V");
+    jni::TScopedLocalRef localSelf(env, env->NewObject(g_platformSocketClazz, socketConstructor));
     m_self = env->NewGlobalRef(localSelf.get());
     ASSERT(m_self, ());
   }
@@ -71,5 +71,5 @@ private:
   jobject m_self;
 };
 
-unique_ptr<Socket> createSocket() { return make_unique<SocketImpl>(); }
+unique_ptr<Socket> CreateSocket() { return make_unique<SocketImpl>(); }
 }

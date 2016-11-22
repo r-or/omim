@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3462FDAD1DC1E5BF00906FD7 /* libopening_hours.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3462FDAC1DC1E5BF00906FD7 /* libopening_hours.a */; };
 		56099E291CC7C97D00A7772A /* loaded_path_segment.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 56099E251CC7C97D00A7772A /* loaded_path_segment.hpp */; };
 		56099E2A1CC7C97D00A7772A /* routing_result_graph.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 56099E261CC7C97D00A7772A /* routing_result_graph.hpp */; };
 		56099E2B1CC7C97D00A7772A /* turn_candidate.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 56099E271CC7C97D00A7772A /* turn_candidate.hpp */; };
@@ -18,9 +19,10 @@
 		563B91C51CC4F1DC00222BC1 /* bicycle_model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 563B91C31CC4F1DC00222BC1 /* bicycle_model.cpp */; };
 		563B91C61CC4F1DC00222BC1 /* bicycle_model.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 563B91C41CC4F1DC00222BC1 /* bicycle_model.hpp */; };
 		56555E561D897C90009D786D /* libalohalitics.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACE61C68A23B009CB89E /* libalohalitics.a */; };
-		56555E571D897C96009D786D /* libopening_hours.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 56F0D7621D896DAF00045886 /* libopening_hours.a */; };
 		56555E581D897C9D009D786D /* liboauthcpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFA1C68A2D7009CB89E /* liboauthcpp.a */; };
 		56555E591D897D28009D786D /* testingmain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6742ACDE1C68A13F009CB89E /* testingmain.cpp */; };
+		56826BD01DB51C4E00807C62 /* car_router.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 56826BCE1DB51C4E00807C62 /* car_router.cpp */; };
+		56826BD11DB51C4E00807C62 /* car_router.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 56826BCF1DB51C4E00807C62 /* car_router.hpp */; };
 		56EA2FD51D8FD8590083F01A /* routing_helpers.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 56EA2FD41D8FD8590083F01A /* routing_helpers.hpp */; };
 		56F0D7341D896A5300045886 /* libmap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 67BD35DE1C69F198003AA26F /* libmap.a */; };
 		56F0D7391D896A5300045886 /* libstorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 67BD35D41C69F155003AA26F /* libstorage.a */; };
@@ -29,7 +31,6 @@
 		56F0D73C1D896A5300045886 /* libjansson.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFE1C68A2F4009CB89E /* libjansson.a */; };
 		56F0D73D1D896A5300045886 /* libgeometry.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACE71C68A23B009CB89E /* libgeometry.a */; };
 		56F0D73E1D896A5300045886 /* libpugixml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACEE1C68A27C009CB89E /* libpugixml.a */; };
-		56F0D73F1D896A5300045886 /* libtomcrypt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFF1C68A2F4009CB89E /* libtomcrypt.a */; };
 		56F0D7401D896A5300045886 /* libcoding.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACE31C68A203009CB89E /* libcoding.a */; };
 		56F0D7411D896A5300045886 /* libbase.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACE21C68A203009CB89E /* libbase.a */; };
 		56F0D7421D896A5300045886 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742AD021C68A303009CB89E /* libz.tbd */; };
@@ -54,7 +55,6 @@
 		56F0D7591D896A5300045886 /* packed_polygons_obsolete.bin in Resources */ = {isa = PBXBuildFile; fileRef = 671182E81C7F0E1F00CB8177 /* packed_polygons_obsolete.bin */; };
 		56F0D75A1D896A5300045886 /* classificator.txt in Resources */ = {isa = PBXBuildFile; fileRef = 6742AD531C68BB14009CB89E /* classificator.txt */; };
 		56F0D75B1D896A5300045886 /* sound-strings in Resources */ = {isa = PBXBuildFile; fileRef = 6742AD611C68F747009CB89E /* sound-strings */; };
-		56F0D7631D896DAF00045886 /* libopening_hours.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 56F0D7621D896DAF00045886 /* libopening_hours.a */; };
 		670B84C01A9381D900CE4492 /* cross_routing_context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 670B84BE1A9381D900CE4492 /* cross_routing_context.cpp */; };
 		670B84C11A9381D900CE4492 /* cross_routing_context.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 670B84BF1A9381D900CE4492 /* cross_routing_context.hpp */; };
 		670C62131AC5A15700C38A8C /* routing_mapping.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 670C62111AC5A15700C38A8C /* routing_mapping.cpp */; };
@@ -96,7 +96,6 @@
 		6742AD391C68AA04009CB89E /* libplatform_tests_support.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742AD041C68A317009CB89E /* libplatform_tests_support.a */; };
 		6742AD3A1C68AA04009CB89E /* libsuccinct.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742AD051C68A317009CB89E /* libsuccinct.a */; };
 		6742AD3B1C68AA04009CB89E /* libjansson.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFE1C68A2F4009CB89E /* libjansson.a */; };
-		6742AD3C1C68AA04009CB89E /* libtomcrypt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFF1C68A2F4009CB89E /* libtomcrypt.a */; };
 		6742AD3D1C68AA04009CB89E /* liboauthcpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFA1C68A2D7009CB89E /* liboauthcpp.a */; };
 		6742AD3E1C68AA04009CB89E /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFB1C68A2D7009CB89E /* libprotobuf.a */; };
 		6742AD3F1C68AA04009CB89E /* libeditor.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACF81C68A2C8009CB89E /* libeditor.a */; };
@@ -134,8 +133,6 @@
 		674F9BD61B0A580E00704FFA /* turns_generator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 674F9BC61B0A580E00704FFA /* turns_generator.cpp */; };
 		674F9BD71B0A580E00704FFA /* turns_generator.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 674F9BC71B0A580E00704FFA /* turns_generator.hpp */; };
 		675344141A3F644F00A0A8C3 /* osrm_data_facade.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 675344061A3F644F00A0A8C3 /* osrm_data_facade.hpp */; };
-		675344171A3F644F00A0A8C3 /* osrm_router.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 675344091A3F644F00A0A8C3 /* osrm_router.cpp */; };
-		675344181A3F644F00A0A8C3 /* osrm_router.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6753440A1A3F644F00A0A8C3 /* osrm_router.hpp */; };
 		675344191A3F644F00A0A8C3 /* osrm2feature_map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6753440B1A3F644F00A0A8C3 /* osrm2feature_map.cpp */; };
 		6753441A1A3F644F00A0A8C3 /* osrm2feature_map.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 6753440C1A3F644F00A0A8C3 /* osrm2feature_map.hpp */; };
 		6753441B1A3F644F00A0A8C3 /* route.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6753440D1A3F644F00A0A8C3 /* route.cpp */; };
@@ -158,7 +155,6 @@
 		67BD35C21C69F121003AA26F /* libplatform_tests_support.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742AD041C68A317009CB89E /* libplatform_tests_support.a */; };
 		67BD35C31C69F121003AA26F /* libsuccinct.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742AD051C68A317009CB89E /* libsuccinct.a */; };
 		67BD35C41C69F121003AA26F /* libjansson.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFE1C68A2F4009CB89E /* libjansson.a */; };
-		67BD35C51C69F121003AA26F /* libtomcrypt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFF1C68A2F4009CB89E /* libtomcrypt.a */; };
 		67BD35C61C69F121003AA26F /* liboauthcpp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFA1C68A2D7009CB89E /* liboauthcpp.a */; };
 		67BD35C71C69F121003AA26F /* libprotobuf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACFB1C68A2D7009CB89E /* libprotobuf.a */; };
 		67BD35C81C69F121003AA26F /* libeditor.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6742ACF81C68A2C8009CB89E /* libeditor.a */; };
@@ -223,25 +219,28 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3462FDAC1DC1E5BF00906FD7 /* libopening_hours.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopening_hours.a; path = "../../../omim-build/xcode/Debug/libopening_hours.a"; sourceTree = "<group>"; };
+		34F558351DBF2A2600A4FC11 /* common-debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "common-debug.xcconfig"; path = "../common-debug.xcconfig"; sourceTree = "<group>"; };
+		34F558361DBF2A2600A4FC11 /* common-release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "common-release.xcconfig"; path = "../common-release.xcconfig"; sourceTree = "<group>"; };
 		56099E251CC7C97D00A7772A /* loaded_path_segment.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = loaded_path_segment.hpp; sourceTree = "<group>"; };
 		56099E261CC7C97D00A7772A /* routing_result_graph.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = routing_result_graph.hpp; sourceTree = "<group>"; };
 		56099E271CC7C97D00A7772A /* turn_candidate.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = turn_candidate.hpp; sourceTree = "<group>"; };
-		56099E2C1CC8FBDA00A7772A /* osrm_path_segment_factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = osrm_path_segment_factory.cpp; path = ../../routing/osrm_path_segment_factory.cpp; sourceTree = "<group>"; };
-		56099E2D1CC8FBDA00A7772A /* osrm_path_segment_factory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = osrm_path_segment_factory.hpp; path = ../../routing/osrm_path_segment_factory.hpp; sourceTree = "<group>"; };
+		56099E2C1CC8FBDA00A7772A /* osrm_path_segment_factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = osrm_path_segment_factory.cpp; sourceTree = "<group>"; };
+		56099E2D1CC8FBDA00A7772A /* osrm_path_segment_factory.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = osrm_path_segment_factory.hpp; sourceTree = "<group>"; };
 		56099E301CC9247E00A7772A /* bicycle_directions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bicycle_directions.cpp; sourceTree = "<group>"; };
 		56099E311CC9247E00A7772A /* bicycle_directions.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = bicycle_directions.hpp; sourceTree = "<group>"; };
 		56099E321CC9247E00A7772A /* directions_engine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = directions_engine.cpp; sourceTree = "<group>"; };
 		563B91C31CC4F1DC00222BC1 /* bicycle_model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bicycle_model.cpp; sourceTree = "<group>"; };
 		563B91C41CC4F1DC00222BC1 /* bicycle_model.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = bicycle_model.hpp; sourceTree = "<group>"; };
-		56EA2FD41D8FD8590083F01A /* routing_helpers.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = routing_helpers.hpp; path = ../../routing/routing_helpers.hpp; sourceTree = "<group>"; };
+		56826BCE1DB51C4E00807C62 /* car_router.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = car_router.cpp; sourceTree = "<group>"; };
+		56826BCF1DB51C4E00807C62 /* car_router.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = car_router.hpp; sourceTree = "<group>"; };
+		56EA2FD41D8FD8590083F01A /* routing_helpers.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = routing_helpers.hpp; sourceTree = "<group>"; };
 		56F0D75F1D896A5300045886 /* routing_benchmarks.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = routing_benchmarks.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		56F0D7621D896DAF00045886 /* libopening_hours.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopening_hours.a; path = "/Users/vladimirbykoyanko/src_github/omim/xcode/opening_hours/../../../omim-xcode-build/Debug/libopening_hours.a"; sourceTree = "<absolute>"; };
 		670B84BE1A9381D900CE4492 /* cross_routing_context.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cross_routing_context.cpp; sourceTree = "<group>"; };
 		670B84BF1A9381D900CE4492 /* cross_routing_context.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = cross_routing_context.hpp; sourceTree = "<group>"; };
 		670C62111AC5A15700C38A8C /* routing_mapping.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = routing_mapping.cpp; sourceTree = "<group>"; };
 		670D049C1B0B4A970013A7AC /* nearest_edge_finder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nearest_edge_finder.cpp; sourceTree = "<group>"; };
 		670D049D1B0B4A970013A7AC /* nearest_edge_finder.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = nearest_edge_finder.hpp; sourceTree = "<group>"; };
-		670D05A61B0E02560013A7AC /* defaults.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = defaults.xcconfig; path = ../defaults.xcconfig; sourceTree = "<group>"; };
 		670EE55A1B6001E7001E8064 /* routing_session.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = routing_session.cpp; sourceTree = "<group>"; };
 		670EE55B1B6001E7001E8064 /* routing_session.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = routing_session.hpp; sourceTree = "<group>"; };
 		670EE55C1B6001E7001E8064 /* routing_settings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = routing_settings.hpp; sourceTree = "<group>"; };
@@ -289,7 +288,6 @@
 		6742ACFA1C68A2D7009CB89E /* liboauthcpp.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = liboauthcpp.a; path = "../../../omim-xcode-build/Debug/liboauthcpp.a"; sourceTree = "<group>"; };
 		6742ACFB1C68A2D7009CB89E /* libprotobuf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libprotobuf.a; path = "../../../omim-xcode-build/Debug/libprotobuf.a"; sourceTree = "<group>"; };
 		6742ACFE1C68A2F4009CB89E /* libjansson.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjansson.a; path = "../../../omim-xcode-build/Debug/libjansson.a"; sourceTree = "<group>"; };
-		6742ACFF1C68A2F4009CB89E /* libtomcrypt.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtomcrypt.a; path = "../../../omim-xcode-build/Debug/libtomcrypt.a"; sourceTree = "<group>"; };
 		6742AD021C68A303009CB89E /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		6742AD041C68A317009CB89E /* libplatform_tests_support.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libplatform_tests_support.a; path = "../../../omim-xcode-build/Debug/libplatform_tests_support.a"; sourceTree = "<group>"; };
 		6742AD051C68A317009CB89E /* libsuccinct.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libsuccinct.a; path = "../../../omim-xcode-build/Debug/libsuccinct.a"; sourceTree = "<group>"; };
@@ -319,8 +317,6 @@
 		674F9BC71B0A580E00704FFA /* turns_generator.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = turns_generator.hpp; sourceTree = "<group>"; };
 		675343F81A3F640D00A0A8C3 /* librouting.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = librouting.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		675344061A3F644F00A0A8C3 /* osrm_data_facade.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = osrm_data_facade.hpp; sourceTree = "<group>"; };
-		675344091A3F644F00A0A8C3 /* osrm_router.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = osrm_router.cpp; sourceTree = "<group>"; };
-		6753440A1A3F644F00A0A8C3 /* osrm_router.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = osrm_router.hpp; sourceTree = "<group>"; };
 		6753440B1A3F644F00A0A8C3 /* osrm2feature_map.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = osrm2feature_map.cpp; sourceTree = "<group>"; };
 		6753440C1A3F644F00A0A8C3 /* osrm2feature_map.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = osrm2feature_map.hpp; sourceTree = "<group>"; };
 		6753440D1A3F644F00A0A8C3 /* route.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = route.cpp; sourceTree = "<group>"; };
@@ -389,7 +385,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				56555E581D897C9D009D786D /* liboauthcpp.a in Frameworks */,
-				56555E571D897C96009D786D /* libopening_hours.a in Frameworks */,
 				56555E561D897C90009D786D /* libalohalitics.a in Frameworks */,
 				56F0D7341D896A5300045886 /* libmap.a in Frameworks */,
 				56F0D7391D896A5300045886 /* libstorage.a in Frameworks */,
@@ -398,7 +393,6 @@
 				56F0D73C1D896A5300045886 /* libjansson.a in Frameworks */,
 				56F0D73D1D896A5300045886 /* libgeometry.a in Frameworks */,
 				56F0D73E1D896A5300045886 /* libpugixml.a in Frameworks */,
-				56F0D73F1D896A5300045886 /* libtomcrypt.a in Frameworks */,
 				56F0D7401D896A5300045886 /* libcoding.a in Frameworks */,
 				56F0D7411D896A5300045886 /* libbase.a in Frameworks */,
 				56F0D7421D896A5300045886 /* libz.tbd in Frameworks */,
@@ -415,13 +409,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				56F0D7631D896DAF00045886 /* libopening_hours.a in Frameworks */,
+				3462FDAD1DC1E5BF00906FD7 /* libopening_hours.a in Frameworks */,
 				6742AD4D1C68AA59009CB89E /* librouting.a in Frameworks */,
 				6742AD401C68AA04009CB89E /* libosrm.a in Frameworks */,
 				6742AD3B1C68AA04009CB89E /* libjansson.a in Frameworks */,
 				6742AD451C68AA04009CB89E /* libgeometry.a in Frameworks */,
 				6742AD421C68AA04009CB89E /* libpugixml.a in Frameworks */,
-				6742AD3C1C68AA04009CB89E /* libtomcrypt.a in Frameworks */,
 				6742AD481C68AA04009CB89E /* libcoding.a in Frameworks */,
 				6742AD471C68AA04009CB89E /* libbase.a in Frameworks */,
 				6742AD491C68AA2F009CB89E /* libz.tbd in Frameworks */,
@@ -466,7 +459,6 @@
 				67BD35C41C69F121003AA26F /* libjansson.a in Frameworks */,
 				67BD35CE1C69F121003AA26F /* libgeometry.a in Frameworks */,
 				67BD35CB1C69F121003AA26F /* libpugixml.a in Frameworks */,
-				67BD35C51C69F121003AA26F /* libtomcrypt.a in Frameworks */,
 				67BD35D11C69F121003AA26F /* libcoding.a in Frameworks */,
 				67BD35D01C69F121003AA26F /* libbase.a in Frameworks */,
 				67BD35D21C69F126003AA26F /* libz.tbd in Frameworks */,
@@ -488,7 +480,7 @@
 		56F0D7611D896DAF00045886 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				56F0D7621D896DAF00045886 /* libopening_hours.a */,
+				3462FDAC1DC1E5BF00906FD7 /* libopening_hours.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -552,7 +544,6 @@
 				6742AD041C68A317009CB89E /* libplatform_tests_support.a */,
 				6742AD051C68A317009CB89E /* libsuccinct.a */,
 				6742ACFE1C68A2F4009CB89E /* libjansson.a */,
-				6742ACFF1C68A2F4009CB89E /* libtomcrypt.a */,
 				6742ACFA1C68A2D7009CB89E /* liboauthcpp.a */,
 				6742ACFB1C68A2D7009CB89E /* libprotobuf.a */,
 				6742ACF81C68A2C8009CB89E /* libeditor.a */,
@@ -604,10 +595,8 @@
 		675343EF1A3F640D00A0A8C3 = {
 			isa = PBXGroup;
 			children = (
-				56EA2FD41D8FD8590083F01A /* routing_helpers.hpp */,
-				56099E2C1CC8FBDA00A7772A /* osrm_path_segment_factory.cpp */,
-				56099E2D1CC8FBDA00A7772A /* osrm_path_segment_factory.hpp */,
-				670D05A61B0E02560013A7AC /* defaults.xcconfig */,
+				34F558351DBF2A2600A4FC11 /* common-debug.xcconfig */,
+				34F558361DBF2A2600A4FC11 /* common-release.xcconfig */,
 				6742AD251C68A923009CB89E /* libs */,
 				675343FA1A3F640D00A0A8C3 /* routing */,
 				6742ACA01C68A07C009CB89E /* routing_tests */,
@@ -633,6 +622,11 @@
 		675343FA1A3F640D00A0A8C3 /* routing */ = {
 			isa = PBXGroup;
 			children = (
+				56EA2FD41D8FD8590083F01A /* routing_helpers.hpp */,
+				56099E2C1CC8FBDA00A7772A /* osrm_path_segment_factory.cpp */,
+				56099E2D1CC8FBDA00A7772A /* osrm_path_segment_factory.hpp */,
+				56826BCE1DB51C4E00807C62 /* car_router.cpp */,
+				56826BCF1DB51C4E00807C62 /* car_router.hpp */,
 				56099E301CC9247E00A7772A /* bicycle_directions.cpp */,
 				56099E311CC9247E00A7772A /* bicycle_directions.hpp */,
 				56099E321CC9247E00A7772A /* directions_engine.cpp */,
@@ -694,8 +688,6 @@
 				67C7D4261B4EB48F00FE41AA /* turns_sound_settings.hpp */,
 				670C62111AC5A15700C38A8C /* routing_mapping.cpp */,
 				675344061A3F644F00A0A8C3 /* osrm_data_facade.hpp */,
-				675344091A3F644F00A0A8C3 /* osrm_router.cpp */,
-				6753440A1A3F644F00A0A8C3 /* osrm_router.hpp */,
 				6753440B1A3F644F00A0A8C3 /* osrm2feature_map.cpp */,
 				6753440C1A3F644F00A0A8C3 /* osrm2feature_map.hpp */,
 				6753440D1A3F644F00A0A8C3 /* route.cpp */,
@@ -741,7 +733,6 @@
 				56099E2A1CC7C97D00A7772A /* routing_result_graph.hpp in Headers */,
 				A120B3481B4A7BE5002F3808 /* cross_mwm_router.hpp in Headers */,
 				674F9BD31B0A580E00704FFA /* road_graph_router.hpp in Headers */,
-				675344181A3F644F00A0A8C3 /* osrm_router.hpp in Headers */,
 				675344141A3F644F00A0A8C3 /* osrm_data_facade.hpp in Headers */,
 				6753441F1A3F644F00A0A8C3 /* turns.hpp in Headers */,
 				6753441A1A3F644F00A0A8C3 /* osrm2feature_map.hpp in Headers */,
@@ -770,6 +761,7 @@
 				670D049F1B0B4A970013A7AC /* nearest_edge_finder.hpp in Headers */,
 				A120B34F1B4A7C0A002F3808 /* online_absent_fetcher.hpp in Headers */,
 				674F9BD51B0A580E00704FFA /* road_graph.hpp in Headers */,
+				56826BD11DB51C4E00807C62 /* car_router.hpp in Headers */,
 				A120B3511B4A7C0A002F3808 /* routing_algorithm.hpp in Headers */,
 				675344211A3F644F00A0A8C3 /* vehicle_model.hpp in Headers */,
 				56099E2B1CC7C97D00A7772A /* turn_candidate.hpp in Headers */,
@@ -991,6 +983,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56826BD01DB51C4E00807C62 /* car_router.cpp in Sources */,
 				56099E2E1CC8FBDA00A7772A /* osrm_path_segment_factory.cpp in Sources */,
 				675344201A3F644F00A0A8C3 /* vehicle_model.cpp in Sources */,
 				56099E351CC9247E00A7772A /* directions_engine.cpp in Sources */,
@@ -1004,7 +997,6 @@
 				675344191A3F644F00A0A8C3 /* osrm2feature_map.cpp in Sources */,
 				670D049E1B0B4A970013A7AC /* nearest_edge_finder.cpp in Sources */,
 				674F9BD61B0A580E00704FFA /* turns_generator.cpp in Sources */,
-				675344171A3F644F00A0A8C3 /* osrm_router.cpp in Sources */,
 				A17B42981BCFBD0E00A1EAE4 /* osrm_helpers.cpp in Sources */,
 				563B91C51CC4F1DC00222BC1 /* bicycle_model.cpp in Sources */,
 				674F9BD21B0A580E00704FFA /* road_graph_router.cpp in Sources */,
@@ -1050,17 +1042,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_TESTABILITY = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "mail.ru.routing-benchmarks";
+				INFOPLIST_FILE = "$(OMIM_ROOT)/iphone/Maps/MAPSME.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = mail.ru.routing_benchmarks;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.12;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1068,17 +1052,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
-				INFOPLIST_FILE = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "mail.ru.routing-benchmarks";
+				INFOPLIST_FILE = "$(OMIM_ROOT)/iphone/Maps/MAPSME.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = mail.ru.routing_benchmarks;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx10.12;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -1086,17 +1062,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_TESTABILITY = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "$(OMIM_ROOT)/iphone/Maps/MAPSME.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "mail.ru.routing-tests";
+				PRODUCT_BUNDLE_IDENTIFIER = mail.ru.routing_tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1104,120 +1072,42 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "$(OMIM_ROOT)/iphone/Maps/MAPSME.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "mail.ru.routing-tests";
+				PRODUCT_BUNDLE_IDENTIFIER = mail.ru.routing_tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
 		675344011A3F640D00A0A8C3 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 670D05A61B0E02560013A7AC /* defaults.xcconfig */;
+			baseConfigurationReference = 34F558351DBF2A2600A4FC11 /* common-debug.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(OMIM_ROOT)/3party/jansson/src",
 					"$(OMIM_ROOT)/3party/osrm/osrm-backend/include",
 					"$(OMIM_ROOT)/3party/osrm/osrm-backend/third_party",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				MTL_ENABLE_DEBUG_INFO = YES;
-				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
 			};
 			name = Debug;
 		};
 		675344021A3F640D00A0A8C3 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 670D05A61B0E02560013A7AC /* defaults.xcconfig */;
+			baseConfigurationReference = 34F558361DBF2A2600A4FC11 /* common-release.xcconfig */;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(OMIM_ROOT)/3party/jansson/src",
 					"$(OMIM_ROOT)/3party/osrm/osrm-backend/include",
 					"$(OMIM_ROOT)/3party/osrm/osrm-backend/third_party",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				SDKROOT = macosx;
-				SUPPORTED_PLATFORMS = "macosx iphonesimulator iphoneos";
 			};
 			name = Release;
 		};
 		675344041A3F640D00A0A8C3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				GCC_ENABLE_CPP_EXCEPTIONS = YES;
-				GCC_ENABLE_CPP_RTTI = YES;
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -1225,13 +1115,7 @@
 		675344051A3F640D00A0A8C3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = lib;
-				GCC_ENABLE_CPP_EXCEPTIONS = YES;
-				GCC_ENABLE_CPP_RTTI = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = "RELEASE=1";
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -1240,17 +1124,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_TESTABILITY = YES;
-				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "$(OMIM_ROOT)/iphone/Maps/MAPSME.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "mail.ru.routing-integration-tests";
+				PRODUCT_BUNDLE_IDENTIFIER = mail.ru.routing_integration_tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1258,17 +1134,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
 				INFOPLIST_FILE = "$(OMIM_ROOT)/iphone/Maps/MAPSME.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "mail.ru.routing-integration-tests";
+				PRODUCT_BUNDLE_IDENTIFIER = mail.ru.routing_integration_tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};

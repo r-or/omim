@@ -18,16 +18,14 @@
 #import "MWMMapDownloadDialog.h"
 #import "MWMMapDownloaderViewController.h"
 #import "MWMMapViewControlsManager.h"
-#import "MWMPageController.h"
 #import "MWMPlacePageData.h"
-#import "MWMPlacePageEntity.h"
 #import "MWMPlacePageProtocol.h"
 #import "MWMRouter.h"
 #import "MWMRouterSavedState.h"
 #import "MWMSettings.h"
 #import "MWMStorage.h"
 #import "MWMTableViewController.h"
-#import "MWMWhatsNewProfileBookingController.h"
+#import "MWMWhatsNewUberController.h"
 #import "MapsAppDelegate.h"
 #import "Statistics.h"
 #import "UIColor+MapsMeColor.h"
@@ -110,7 +108,7 @@ BOOL gIsFirstMyPositionMode = YES;
 @property(nonatomic) BOOL disableStandbyOnLocationStateMode;
 
 @property(nonatomic) UserTouchesAction userTouchesAction;
-@property(nonatomic) MWMPageController * pageViewController;
+
 @property(nonatomic) MWMMapDownloadDialog * downloadDialog;
 
 @property(nonatomic) BOOL skipForceTouch;
@@ -301,7 +299,7 @@ BOOL gIsFirstMyPositionMode = YES;
 
 - (void)showWelcomeScreenIfNeeded
 {
-  Class<MWMWelcomeControllerProtocol> whatsNewClass = [MWMWhatsNewProfileBookingController class];
+  Class<MWMWelcomeControllerProtocol> whatsNewClass = [MWMWhatsNewUberController class];
   BOOL const isFirstSession = [Alohalytics isFirstSession];
   Class<MWMWelcomeControllerProtocol> welcomeClass =
       isFirstSession ? [MWMFirstLaunchController class] : whatsNewClass;
@@ -309,7 +307,7 @@ BOOL gIsFirstMyPositionMode = YES;
   NSUserDefaults * ud = [NSUserDefaults standardUserDefaults];
   if ([ud boolForKey:[welcomeClass udWelcomeWasShownKey]])
     return;
-
+  
   self.pageViewController =
       [MWMPageController pageControllerWithParent:self welcomeClass:welcomeClass];
   [self.pageViewController show];
@@ -445,7 +443,9 @@ BOOL gIsFirstMyPositionMode = YES;
   switch (mode)
   {
   case location::NotFollowNoPosition:
-    if (gIsFirstMyPositionMode && ![Alohalytics isFirstSession])
+  {
+    BOOL const hasLocation = [MWMLocationManager lastLocation] != nil;
+    if (hasLocation || (gIsFirstMyPositionMode && ![Alohalytics isFirstSession]))
     {
       GetFramework().SwitchMyPositionNextMode();
     }
@@ -460,6 +460,7 @@ BOOL gIsFirstMyPositionMode = YES;
       }
     }
     break;
+  }
   case location::PendingPosition:
   case location::NotFollow: break;
   case location::Follow:
@@ -584,17 +585,6 @@ BOOL gIsFirstMyPositionMode = YES;
   {
     MWMAuthorizationWebViewLoginViewController * dvc = segue.destinationViewController;
     dvc.authType = MWMWebViewAuthorizationTypeGoogle;
-  }
-  else if ([segue.identifier isEqualToString:@"PP2BookmarkEditingIPAD"])
-  {
-    UINavigationController * nav = segue.destinationViewController;
-    MWMEditBookmarkController * dvc = nav.viewControllers.firstObject;
-    dvc.manager = sender;
-  }
-  else if ([segue.identifier isEqualToString:@"PP2BookmarkEditing"])
-  {
-    MWMEditBookmarkController * dvc = segue.destinationViewController;
-    dvc.manager = sender;
   }
 }
 

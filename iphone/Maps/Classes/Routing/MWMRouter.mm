@@ -63,10 +63,27 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
 + (BOOL)isTaxi { return GetFramework().GetRouter() == routing::RouterType::Taxi; }
 + (void)startRouting
 {
-  if ([self isTaxi])
-    [[UIApplication sharedApplication] openURL:[MWMNavigationDashboardManager manager].taxiDataSource.taxiURL];
-  else
-    [[self router] start];
+  auto router = [MWMRouter router];
+  if (![self isTaxi])
+  {
+    [router start];
+    return;
+  }
+
+  auto taxiDataSource = [MWMNavigationDashboardManager manager].taxiDataSource;
+  auto eventName = taxiDataSource.isTaxiInstalled ? kStatRoutingTaxiOrder : kStatRoutingTaxiInstall;
+  auto const & sLatLon = MercatorBounds::ToLatLon(router.startPoint.Point());
+  auto const & fLatLon = MercatorBounds::ToLatLon(router.finishPoint.Point());
+
+  [Statistics logEvent:eventName
+        withParameters:@{
+          kStatProvider : kStatUber,
+          kStatFromLocation : makeLocationEventValue(sLatLon.lat, sLatLon.lon),
+          kStatToLocation : makeLocationEventValue(fLatLon.lat, fLatLon.lon)
+        }
+            atLocation:[MWMLocationManager lastLocation]];
+
+  [[UIApplication sharedApplication] openURL:taxiDataSource.taxiURL];
 }
 
 - (instancetype)initRouter
@@ -117,8 +134,6 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
 {
   self.startPoint = startPoint;
   [self rebuildWithBestRouter:bestRouter];
-  if (!self.finishPoint.IsValid())
-    [[MWMMapViewControlsManager manager] onRoutePrepare];
 }
 
 - (void)buildToPoint:(MWMRoutePoint const &)finishPoint bestRouter:(BOOL)bestRouter
@@ -141,28 +156,11 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
 - (void)rebuildWithBestRouter:(BOOL)bestRouter
 {
   [self clearAltitudeImagesData];
+  // Taxi can't be used as best router.
+  if ([MWMRouter isTaxi])
+    bestRouter = NO;
 
-  auto const setTags = ^(RouterType t, BOOL isP2P)
-  {
-    NSMutableString * tag = (isP2P ? @"routing_p2p_" : @"routing_").mutableCopy;
-    switch (t)
-    {
-    case RouterType::Vehicle:
-      [tag appendString:@"vehicle_discovered"];
-      break;
-    case RouterType::Pedestrian:
-      [tag appendString:@"pedestrian_discovered"];
-      break;
-    case RouterType::Bicycle:
-      [tag appendString:@"bicycle_discovered"];
-      break;
-    case RouterType::Taxi:
-      [tag appendString:@"uber_discovered"];
-      break;
-    }
-    [[PushNotificationManager pushManager] setTags:@{ tag : @YES }];
-  };
-
+  bool isP2P = false;
   if (self.startPoint.IsMyPosition())
   {
     [Statistics logEvent:kStatPointToPoint
@@ -179,9 +177,11 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
   {
     [Statistics logEvent:kStatPointToPoint
           withParameters:@{kStatAction : kStatBuildRoute, kStatValue : kStatPointToPoint}];
-    setTags(self.type, YES);
+    isP2P = true;
   }
 
+  MWMMapViewControlsManager * mapViewControlsManager = [MWMMapViewControlsManager manager];
+  [mapViewControlsManager onRoutePrepare];
   if (![self arePointsValidForRouting])
     return;
   auto & f = GetFramework();
@@ -189,11 +189,10 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
   auto const & finishPoint = self.finishPoint.Point();
   if (bestRouter)
     self.type = GetFramework().GetBestRouter(startPoint, finishPoint);
-  f.BuildRoute(startPoint, finishPoint, 0 /* timeoutSec */);
+  f.BuildRoute(startPoint, finishPoint, isP2P, 0 /* timeoutSec */);
   f.SetRouteStartPoint(startPoint, isMarkerPoint(self.startPoint));
   f.SetRouteFinishPoint(finishPoint, isMarkerPoint(self.finishPoint));
-  [[MWMMapViewControlsManager manager] onRouteRebuild];
-  setTags(self.type, NO);
+  [mapViewControlsManager onRouteRebuild];
 }
 
 - (void)start
@@ -257,6 +256,10 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
 
 - (void)doStop
 {
+  // Don't save taxi routing type as default.
+  if ([MWMRouter isTaxi])
+    GetFramework().SetRouter(routing::RouterType::Vehicle);
+
   [self clearAltitudeImagesData];
   GetFramework().CloseRouting();
   MapsAppDelegate * app = [MapsAppDelegate theApp];
@@ -314,13 +317,11 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
       self.altitudeElevation = @(heightString.c_str());
     }
 
-    UIImage * altitudeImage = [UIImage imageWithRGBAData:imageData width:width height:height];
-    if (altitudeImage)
-    {
-      dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
+      UIImage * altitudeImage = [UIImage imageWithRGBAData:imageData width:width height:height];
+      if (altitudeImage)
         block(altitudeImage, self.altitudeElevation);
-      });
-    }
+    });
   });
 }
 
@@ -363,6 +364,7 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
                        countries:(storage::TCountriesVec const &)absentCountries
 {
   MWMRouterSavedState * state = [MWMRouterSavedState state];
+  MWMMapViewControlsManager * mapViewControlsManager = [MWMMapViewControlsManager manager];
   switch (code)
   {
   case routing::IRouter::ResultCode::NoError:
@@ -372,10 +374,12 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
     if (state.forceStateChange == MWMRouterForceStateChange::Start)
       [self start];
     else
-      [[MWMMapViewControlsManager manager] onRouteReady];
+      [mapViewControlsManager onRouteReady];
     [self updateFollowingInfo];
-    [[MWMNavigationDashboardManager manager] setRouteBuilderProgress:100];
-    [MWMMapViewControlsManager manager].searchHidden = YES;
+    if (![MWMRouter isTaxi])
+      [[MWMNavigationDashboardManager manager] setRouteBuilderProgress:100];
+
+    mapViewControlsManager.searchHidden = YES;
     break;
   }
   case routing::IRouter::RouteFileNotExist:
@@ -384,7 +388,7 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
   case routing::IRouter::FileTooOld:
   case routing::IRouter::RouteNotFound:
     [self presentDownloaderAlert:code countries:absentCountries];
-    [[MWMMapViewControlsManager manager] onRouteError];
+    [mapViewControlsManager onRouteError];
     break;
   case routing::IRouter::Cancelled: break;
   case routing::IRouter::StartPointNotFound:
@@ -393,7 +397,7 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
   case routing::IRouter::PointsInDifferentMWM:
   case routing::IRouter::InternalError:
     [[MWMAlertViewController activeAlertController] presentAlert:code];
-    [[MWMMapViewControlsManager manager] onRouteError];
+    [mapViewControlsManager onRouteError];
     break;
   }
   state.forceStateChange = MWMRouterForceStateChange::None;
@@ -401,7 +405,8 @@ bool isMarkerPoint(MWMRoutePoint const & point) { return point.IsValid() && !poi
 
 - (void)processRouteBuilderProgress:(CGFloat)progress
 {
-  [[MWMNavigationDashboardManager manager] setRouteBuilderProgress:progress];
+  if (![MWMRouter isTaxi])
+    [[MWMNavigationDashboardManager manager] setRouteBuilderProgress:progress];
 }
 
 #pragma mark - Alerts

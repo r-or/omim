@@ -43,10 +43,12 @@ SOURCES += \
     arrow3d.cpp \
     backend_renderer.cpp \
     base_renderer.cpp \
-    batchers_pool.cpp \
     batch_merge_helper.cpp \
     circle_shape.cpp \
     color_constants.cpp \
+    drape_api.cpp \
+    drape_api_builder.cpp \
+    drape_api_renderer.cpp \
     drape_engine.cpp \
     engine_context.cpp \
     framebuffer.cpp \
@@ -143,6 +145,9 @@ HEADERS += \
     batch_merge_helper.hpp \
     circle_shape.hpp \
     color_constants.hpp \
+    drape_api.hpp \
+    drape_api_builder.hpp \
+    drape_api_renderer.hpp \
     drape_engine.hpp \
     engine_context.hpp \
     framebuffer.hpp \

@@ -3,6 +3,8 @@
 #include "drape_frontend/gui/layer_render.hpp"
 
 #include "drape_frontend/base_renderer.hpp"
+#include "drape_frontend/batchers_pool.hpp"
+#include "drape_frontend/drape_api_builder.hpp"
 #include "drape_frontend/map_data_provider.hpp"
 #include "drape_frontend/overlay_batcher.hpp"
 #include "drape_frontend/requested_tiles.hpp"
@@ -23,7 +25,6 @@ namespace df
 {
 
 class Message;
-class BatchersPool;
 class ReadManager;
 class RouteBuilder;
 
@@ -87,15 +88,18 @@ private:
   void ReleaseResources();
 
   void InitGLDependentResource();
-  void FlushGeometry(drape_ptr<Message> && message);
+  void FlushGeometry(TileKey const & key, dp::GLState const & state, drape_ptr<dp::RenderBucket> && buffer);
+
+  void FlushTrafficRenderData(TrafficRenderData && renderData);
 
   void CleanupOverlays(TileKey const & tileKey);
 
   MapDataProvider m_model;
-  drape_ptr<BatchersPool> m_batchersPool;
+  drape_ptr<BatchersPool<TileKey, TileKeyStrictComparator>> m_batchersPool;
   drape_ptr<ReadManager> m_readManager;
   drape_ptr<RouteBuilder> m_routeBuilder;
   drape_ptr<TrafficGenerator> m_trafficGenerator;
+  drape_ptr<DrapeApiBuilder> m_drapeApiBuilder;
   gui::LayerCacher m_guiCacher;
 
   ref_ptr<RequestedTiles> m_requestedTiles;

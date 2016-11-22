@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 
 import com.mapswithme.maps.base.BaseMwmFragment;
 import com.mapswithme.util.UiUtils;
+import com.mapswithme.util.statistics.PushwooshHelper;
 
 public class MapFragment extends BaseMwmFragment
                       implements View.OnTouchListener,
@@ -90,7 +91,7 @@ public class MapFragment extends BaseMwmFragment
                         ANCHOR_LEFT_TOP);
     }
 
-    setupCompass(0, 0, false);
+    setupCompass(0, UiUtils.getCompassYOffset(getContext()), false);
   }
 
   void setupCompass(int offsetX, int offsetY, boolean forceRedraw)
@@ -167,6 +168,9 @@ public class MapFragment extends BaseMwmFragment
     final float exactDensityDpi = metrics.densityDpi;
 
     mFirstStart = ((MwmActivity) getMwmActivity()).isFirstStart();
+    if (mFirstStart)
+      PushwooshHelper.nativeProcessFirstLaunch();
+
     if (!nativeCreateEngine(surface, (int) exactDensityDpi, mFirstStart))
     {
       reportUnsupported();

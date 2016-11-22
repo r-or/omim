@@ -14,6 +14,7 @@ SOURCES += \
     exception.cpp \
     gmtime.cpp \
     internal/message.cpp \
+    levenshtein_dfa.cpp \
     logging.cpp \
     lower_case.cpp \
     normalize_unicode.cpp \
@@ -31,6 +32,7 @@ SOURCES += \
     time_samples.cpp \
     timegm.cpp \
     timer.cpp \
+    uni_string_dfa.cpp \
 
 HEADERS += \
     SRC_FIRST.hpp \
@@ -45,9 +47,11 @@ HEADERS += \
     condition.hpp \
     const_helper.hpp \
     deferred_task.hpp \
+    dfa_helpers.hpp \
     exception.hpp \
     gmtime.hpp \
-    internal/messagex.hpp \
+    internal/message.hpp \
+    levenshtein_dfa.hpp \
     limited_priority_queue.hpp \
     logging.hpp \
     macros.hpp \
@@ -85,4 +89,5 @@ HEADERS += \
     time_samples.hpp \
     timegm.hpp \
     timer.hpp \
+    uni_string_dfa.hpp \
     worker_thread.hpp \
