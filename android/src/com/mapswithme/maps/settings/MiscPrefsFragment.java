@@ -62,6 +62,68 @@ public class MiscPrefsFragment extends BaseXmlSettingsFragment
       });
     }
 
+    pref = findPreference(getString(R.string.pref_ext_disp));
+    ((TwoStatePreference) pref).setChecked(Config.useExternalDisplay());
+    pref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+    {
+      @Override
+      public boolean onPreferenceChange(Preference preference, Object newValue) {
+        boolean oldVal = Config.useExternalDisplay();
+        boolean newVal = (Boolean) newValue;
+        if (oldVal != newVal)
+        {
+          Config.setUseExternalDisplay(newVal);
+          Preference ip = findPreference(getString(R.string.pref_ext_disp_server_ip));
+          Preference port = findPreference(getString(R.string.pref_ext_disp_server_port));
+          ip.setEnabled(newVal);
+          ip.setSelectable(newVal);
+          port.setEnabled(newVal);
+          port.setSelectable(newVal);
+        }
+        return true;
+      }
+    });
+
+    pref = findPreference(getString(R.string.pref_ext_disp_server_ip));
+    if (!Config.externalDisplayIp().equals(""))
+      pref.setSummary(Config.externalDisplayIp());
+    pref.setEnabled(Config.useExternalDisplay());
+    pref.setSelectable(Config.useExternalDisplay());
+    pref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+    {
+      @Override
+      public boolean onPreferenceChange(Preference preference, Object newValue) {
+        String oldVal = Config.externalDisplayIp();
+        String newVal = (String) newValue;
+        if (!oldVal.equals(newVal))
+        {
+          Config.setExternalDisplayIp(newVal);
+          preference.setSummary(newVal);
+        }
+        return true;
+      }
+    });
+
+    pref = findPreference(getString(R.string.pref_ext_disp_server_port));
+    if (!Config.externalDisplayPort().equals(""))
+      pref.setSummary(Config.externalDisplayPort());
+    pref.setEnabled(Config.useExternalDisplay());
+    pref.setSelectable(Config.useExternalDisplay());
+    pref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+    {
+      @Override
+      public boolean onPreferenceChange(Preference preference, Object newValue) {
+        String oldVal = Config.externalDisplayPort();
+        String newVal = (String) newValue;
+        if (!oldVal.equals(newVal))
+        {
+          Config.setExternalDisplayPort(newVal);
+          preference.setSummary(newVal);
+        }
+        return true;
+      }
+    });
+
     if (!MytargetHelper.isShowcaseSwitchedOnServer())
       getPreferenceScreen().removePreference(findPreference(getString(R.string.pref_showcase_switched_on)));
   }

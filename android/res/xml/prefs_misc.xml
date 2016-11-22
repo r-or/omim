@@ -16,4 +16,24 @@
     android:title="Google Play Services"
     android:summary="@string/pref_use_google_play"
     android:defaultValue="true"/>
+
+  <CheckBoxPreference
+      android:key="@string/pref_ext_disp"
+      android:title="@string/pref_use_ext_disp"
+      android:summary="@string/pref_use_ext_disp_hint"
+      android:defaultValue="true"/>
+
+  <EditTextPreference
+      android:key="@string/pref_ext_disp_server_ip"
+      android:title="@string/pref_ext_disp_ip"
+      android:summary="192.168.4.1"
+      android:inputType="textEmailAddress"
+      android:defaultValue="192.168.4.1"/>
+
+  <EditTextPreference
+      android:key="@string/pref_ext_disp_server_port"
+      android:title="@string/pref_ext_disp_port"
+      android:summary="80"
+      android:inputType="phone"
+      android:defaultValue="80"/>
 </PreferenceScreen>

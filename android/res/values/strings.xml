@@ -496,6 +496,14 @@
 	<string name="toolbar_application_menu">Application menu</string>
 	<!-- Preference text -->
 	<string name="pref_use_google_play">Use Google Play Services to determine your current location</string>
+  <!-- Misc Settings: External Display -->
+  <string name="pref_ext_disp">ExtDisplay</string>
+  <string name="pref_use_ext_disp">Use External Display</string>
+  <string name="pref_use_ext_disp_hint">Forward routing information to a server</string>
+  <string name="pref_ext_disp_server_ip">ExtDisplayServerIp</string>
+  <string name="pref_ext_disp_server_port">ExtDisplayServerPort</string>
+  <string name="pref_ext_disp_ip">IP Address</string>
+  <string name="pref_ext_disp_port">Port</string>
 	<!-- Text for rating dialog -->
 	<string name="rating_just_rated">I’ve just rated your app</string>
 	<!-- Text for rating dialog -->

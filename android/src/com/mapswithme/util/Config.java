@@ -23,6 +23,9 @@ public final class Config
   private static final String KEY_PREF_ZOOM_BUTTONS = "ZoomButtonsEnabled";
   private static final String KEY_PREF_STATISTICS = "StatisticsEnabled";
   private static final String KEY_PREF_USE_GS = "UseGoogleServices";
+  private static final String KEY_PREF_EXT_DISPLAY = "UseExternalDisplay";
+  private static final String KEY_PREF_EXT_DISPLAY_IP = "ExternalDisplayIp";
+  private static final String KEY_PREF_EXT_DISPLAY_PORT = "ExternalDisplayPort";
 
   private static final String KEY_LIKES_RATED_DIALOG = "RatedDialog";
   private static final String KEY_LIKES_LAST_RATED_SESSION = "LastRatedSession";
@@ -248,10 +251,23 @@ public final class Config
     setBool(KEY_PREF_USE_GS, use);
   }
 
+  public static void setUseExternalDisplay(boolean use) { setBool(KEY_PREF_EXT_DISPLAY, use); }
+
+  public static boolean useExternalDisplay() { return getBool(KEY_PREF_EXT_DISPLAY, true); }
+
+  public static void setExternalDisplayIp(String ip) { setString(KEY_PREF_EXT_DISPLAY_IP, ip); }
+
+  public static String externalDisplayIp() { return getString(KEY_PREF_EXT_DISPLAY_IP); }
+
+  public static void setExternalDisplayPort(String port) { setString(KEY_PREF_EXT_DISPLAY_PORT, port); }
+
+  public static String externalDisplayPort() { return getString(KEY_PREF_EXT_DISPLAY_PORT); }
+
   public static boolean isRatingApplied(Class<? extends DialogFragment> dialogFragmentClass)
   {
     return getBool(KEY_LIKES_RATED_DIALOG + dialogFragmentClass.getSimpleName());
   }
+
 
   public static void setRatingApplied(Class<? extends DialogFragment> dialogFragmentClass)
   {

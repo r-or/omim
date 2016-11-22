@@ -25,6 +25,7 @@ import com.mapswithme.maps.settings.SettingsActivity;
 import com.mapswithme.maps.sound.TtsPlayer;
 import com.mapswithme.maps.widget.FlatProgressView;
 import com.mapswithme.maps.widget.menu.NavMenu;
+import com.mapswithme.util.Config;
 import com.mapswithme.util.StringUtils;
 import com.mapswithme.util.UiUtils;
 import com.mapswithme.util.Utils;
@@ -63,7 +64,7 @@ public class NavigationController
 
   private final SearchWheel mSearchWheel;
 
-  private final ExternalDisplay mExtDisplay;
+  private ExternalDisplay mExtDisplay;
 
   private boolean mShowTimeLeft = true;
 
@@ -113,6 +114,11 @@ public class NavigationController
     mRouteProgress = (FlatProgressView) mBottomFrame.findViewById(R.id.navigation_progress);
 
     mSearchWheel = new SearchWheel(mFrame);
+
+    if (Config.useExternalDisplay())
+      mExtDisplay = new ExternalDisplay();
+    else
+      mExtDisplay = null;
   }
 
   public void onResume()
@@ -208,16 +214,20 @@ public class NavigationController
 
   public void update(RoutingInfo info)
   {
+    if (mExtDisplay != null && !Config.useExternalDisplay()) {
+      mExtDisplay.close();
+      mExtDisplay = null; // delete extDisplay and socket
+    }
+    else if (mExtDisplay == null && Config.useExternalDisplay())
+      mExtDisplay = new ExternalDisplay();
+
     if (info == null)
       return;
 
     if (Framework.nativeGetRouter() == Framework.ROUTER_TYPE_PEDESTRIAN)
       updatePedestrian(info);
-    else {
+    else
       updateVehicle(info);
-      mExtDisplay.updateVehicle(info);
-    }
-
 
     boolean hasStreet = !TextUtils.isEmpty(info.nextStreet);
     UiUtils.showIf(hasStreet, mStreetFrame);
@@ -225,9 +235,11 @@ public class NavigationController
       mNextStreet.setText(info.nextStreet);
 
     final Location last = LocationHelper.INSTANCE.getLastKnownLocation();
+
+    Pair<String, String> speedAndUnits = new Pair<>("", "");
     if (last != null)
     {
-      Pair<String, String> speedAndUnits = StringUtils.nativeFormatSpeedAndUnits(last.getSpeed());
+      speedAndUnits = StringUtils.nativeFormatSpeedAndUnits(last.getSpeed());
       mSpeedValue.setText(speedAndUnits.first);
       mSpeedUnits.setText(speedAndUnits.second);
     }
@@ -235,6 +247,11 @@ public class NavigationController
     mDistanceValue.setText(info.distToTarget);
     mDistanceUnits.setText(info.targetUnits);
     mRouteProgress.setProgress((int) info.completionPercent);
+
+    if (mExtDisplay != null) {
+      mExtDisplay.setSpeed(speedAndUnits);
+      mExtDisplay.updateVehicle(info);
+    }
   }
 
   private void updateTime(int seconds)

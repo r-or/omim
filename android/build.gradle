@@ -1,13 +1,14 @@
 buildscript {
   repositories {
     jcenter()
+    mavenCentral()
     maven {
       url 'https://maven.fabric.io/public'
     }
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.1'
+    classpath 'com.android.tools.build:gradle:2.2.2'
     classpath 'io.fabric.tools:gradle:1.+'
   }
 }
@@ -50,7 +51,7 @@ dependencies {
   compile 'com.google.code.gson:gson:2.6.1'
   compile 'com.pushwoosh:pushwoosh:4.9.0'
   compile 'com.my.tracker:mytracker-sdk:1.3.5'
-  compile 'com.loopj.android:android-async-http:1.4.9'
+  //compile 'com.squareup.retrofit2:retrofit:2.1.0'
   compile fileTree(dir: '3rd_party', include: '*.jar')
   // BottomSheet
   compile project(":3rd_party:BottomSheet")
@@ -219,10 +220,10 @@ android {
   // TODO check that feature when new gradle plugins will appear
   // connected bugreport https://code.google.com/p/android/issues/detail?id=178606
   splits.abi {
-    enable true
+    enable false
     reset()
     include 'x86', 'armeabi-v7a'
-    universalApk true
+    universalApk false
   }
 
   // TODO: Fix a lot of lint errors in our code
@@ -315,6 +316,10 @@ android {
     exclude 'lib/mips/libcrashlytics.so'
     exclude 'lib/x86_64/libcrashlytics-envelope.so'
     exclude 'lib/x86_64/libcrashlytics.so'
+  }
+
+  dexOptions {
+    jumboMode true
   }
 }
 
