@@ -42,7 +42,9 @@ m2::PointD const & IndexGraph::GetPoint(Joint::Id jointId)
 }
 
 double IndexGraph::GetSpeed(RoadPoint ftp) { return GetRoad(ftp.GetFeatureId()).GetSpeed(); }
+
 void IndexGraph::Build(uint32_t jointNumber) { m_jointIndex.Build(m_roadIndex, jointNumber); }
+
 void IndexGraph::Import(vector<Joint> const & joints)
 {
   m_roadIndex.Import(joints);
@@ -290,8 +292,8 @@ void IndexGraph::ApplyRestrictionNo(CrossingPoint restrictionPoint)
     return;
   }
 
-  ASSERT_EQUAL(m_blockedEdges.count(make_pair(fromFirstOneStepAside, centerId)), 0, ());
-  ASSERT_EQUAL(m_blockedEdges.count(make_pair(centerId, toFirstOneStepAside)), 0, ());
+  ASSERT_EQUAL(m_blockedEdges.count(DirectedEdge(fromFirstOneStepAside, centerId)), 0, ());
+  ASSERT_EQUAL(m_blockedEdges.count(DirectedEdge(centerId, toFirstOneStepAside)), 0, ());
 
   // One ingoing edge case.
   if (ingoingEdges.size() == 1)
@@ -459,7 +461,7 @@ void IndexGraph::ApplyRestrictionOnly(CrossingPoint restrictionPoint)
   // *       *       *                     *       *       *
   //  ↖     ^     ↗                        ↖     ^     ↗^
   //    ↖   |   ↗                            ↖   |   ↗  |
-  //      ↖ | ↗                                ↖| ↗     |
+  //      ↖ | ↗                                ↖ | ↗    |
   //         *  O             ==>                  *  O    * N
   //      ↗ ^ ↖                                 ↗^       ^
   //    ↗   |   ↖                             ↗  |       |
@@ -501,9 +503,9 @@ void IndexGraph::ApplyRestrictions(RestrictionVec const & restrictions)
       continue;
     }
 
-    CrossingPoint restrictionPoint;
+    CrossingPoint crossingPoint;
     if (!m_roadIndex.GetAdjacentFtPoints(restriction.m_featureIds[0], restriction.m_featureIds[1],
-                                         restrictionPoint))
+                                         crossingPoint))
     {
       continue;  // Restriction is not contain adjacent features.
     }
@@ -512,8 +514,8 @@ void IndexGraph::ApplyRestrictions(RestrictionVec const & restrictions)
     {
       switch (restriction.m_type)
       {
-      case Restriction::Type::No: ApplyRestrictionNo(restrictionPoint); continue;
-      case Restriction::Type::Only: ApplyRestrictionOnly(restrictionPoint); continue;
+      case Restriction::Type::No: ApplyRestrictionNo(crossingPoint); continue;
+      case Restriction::Type::Only: ApplyRestrictionOnly(crossingPoint); continue;
       }
     }
     catch (RootException const & e)
@@ -575,8 +577,8 @@ void IndexGraph::GetNeighboringEdge(RoadGeometry const & road, RoadPoint const &
     return;
 
   Joint::Id const rbJointId = m_roadIndex.GetJointId(rp);
-  auto const edge =
-      outgoing ? make_pair(rbJointId, neighbor.first) : make_pair(neighbor.first, rbJointId);
+  DirectedEdge const edge = outgoing ? DirectedEdge(rbJointId, neighbor.first)
+                                     : DirectedEdge(neighbor.first, rbJointId);
   if (m_blockedEdges.find(edge) != m_blockedEdges.end())
     return;
 
