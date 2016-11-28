@@ -17,21 +17,21 @@ import java.util.TimerTask;
 public class TcpSocketClient {
   private final String TAG = "TcpSocketClient";
 
-  private boolean DEBUG = true;
+  private boolean DEBUG = false;
   private String mDbgStr =
-      "{\"cDist\":\"170%20m\",\"cTurn\":11,\"cTurnExNum\":69,\"nTurn\":5,\"cStreet\":\"Harvard Street qjaj^$#@xyz\"," +
-      "\"nStreet\":\"College Avenue - and some more\",\"tDist\":\"420%20km\",\"tPerc\"" +
-      ":\"0\",\"tTimeLeft\":\"60\",\"cSpeed\":\"999.99km/h\"}";
+      "{\"cDist\":\"170%20m\",\"cTurn\":11,\"cTurnExNum\":69,\"nTurn\":5,\"cStreet\":\"Harvard Street qjaj^$#@xyz\","
+          + "\"nStreet\":\"College Avenue - and some more\",\"tDist\":\"420%20km\",\"tPerc\":\"0\""
+          + ",\"tTimeLeft\":\"60\",\"cSpeed\":\"999.99km/h\"}";
 
   private boolean mRun;
   private volatile Socket mSocket;
   private InetSocketAddress mAddress;
   private boolean mConnecting;
 
-  private final int mConnectionTimeoutMs = 5000;
-  private final int mPingUpdateSpeedMs = 5000;
+  private final int mConnectionTimeoutMs = DEBUG ? 10000 : 5000;
+  private final int mPingUpdateSpeedMs = DEBUG ? 10000 : 5000;
   private final int mTimeSyncRateMs = 60000;
-  private final int mOutUpdateSpeedMs = 500;
+  private final int mOutUpdateSpeedMs = DEBUG ? 3000 : 500;
 
   private boolean mConnTimeout;
 
@@ -82,9 +82,12 @@ public class TcpSocketClient {
         }
         if (mPingScheduled) {
           mPingScheduled = false;
-          if (!checkSocket() || !keepAlivePing()) {
+          if (!checkSocket()) {
             mSocket = null;
-            Log.e(TAG, "Ping: couldn't send ping; mSocket not established. Wrong IP / net?");
+            Log.e(TAG, "Ping: socket not available!");
+          }else if (!keepAlivePing()) {
+            mSocket = null;
+            Log.e(TAG, "Ping: failed!");
           }
         } else if (mSocket != null) {
           if (mTimeSyncScheduled) {
@@ -137,9 +140,12 @@ public class TcpSocketClient {
       if (mAddress.getAddress() != null) {
         mConnecting = true;
         try {
-          mSocket = new Socket(mAddress.getAddress(), mAddress.getPort());
-          Log.d(TAG, "ClientThread: connected!");
-          scheduleRoutingInfoUpdate("");
+          mSocket = new Socket();
+          mSocket.connect(mAddress, mConnectionTimeoutMs / 2);
+          if (mSocket.isConnected()) {
+            Log.d(TAG, "ClientThread: connected!");
+            scheduleRoutingInfoUpdate("");
+          }
         } catch (Exception e) {
           /**/
         }
@@ -183,6 +189,7 @@ public class TcpSocketClient {
             e1.printStackTrace();
           }
           mConnTimeout = false;
+          customConnTimer.cancel();
           return null;
         }
         bIn.write(cB);
@@ -206,6 +213,7 @@ public class TcpSocketClient {
     Log.i(TAG, "Ping: starting...");
     long startTime = System.nanoTime();
     if (!sendBarr(Command.PING, null)) {
+      Log.i(TAG, "Ping: sending failed, connection broken!");
       // broken connection!
       try {
         mSocket.close();
@@ -217,8 +225,10 @@ public class TcpSocketClient {
     }
 
     ByteArrayOutputStream bIn = readFromSocket();
-    if (bIn == null || bIn.toByteArray().length < 4)
+    if (bIn == null || bIn.toByteArray().length < 4) {
+      Log.i(TAG, "Ping: receiving failed, connection broken!");
       return false;
+    }
 
     long roundTrip = System.nanoTime() - startTime;
     byte[] bytesReceived = bIn.toByteArray();
@@ -247,6 +257,10 @@ public class TcpSocketClient {
       Log.d(TAG, "Closed mSocket: " + mSocket);
       mSocket = null;
     }
+    if (mSocket != null)
+      Log.d(TAG, mSocket.toString());
+    else
+      Log.d(TAG, "Connecting: " + mConnecting);
 
     if (mSocket == null && !mConnecting) {
       new Thread(new ClientThread()).start();
