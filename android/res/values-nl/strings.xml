@@ -952,7 +952,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">In de buurt</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">Bestellen</string>
+	<string name="taxi_order">Bestel een taxi</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">Verwacht binnen %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -967,12 +967,12 @@
 	<string name="booking_filters_rating_very_good">Heel Goed</string>
 	<string name="booking_filters_rating_excellent">Uitstekend</string>
 	<string name="booking_filters_price_category">Prijscategorie</string>
-	<string name="booking_filters_no_results">Geen Resultaten Gevonden</string>
-	<string name="booking_filters_nores_message">Probeer een meer algemene zoekterm, zoom uit of reset de filter.</string>
-	<string name="booking_filters_expand_area_button">Uitzoomen</string>
-	<string name="booking_filters_reset_button">Filter Resetten</string>
+	<string name="search_no_results_title">Geen Resultaten Gevonden</string>
+	<string name="search_no_results_message">Probeer een meer algemene zoekterm, zoom uit of reset de filter.</string>
+	<string name="search_no_results_expand_area_button">Uitzoomen</string>
+	<string name="search_no_results_reset_button">Filter Resetten</string>
 	<!-- noun -->
-	<string name="booking_list">Lijst</string>
+	<string name="search_in_table">Lijst</string>
 	<string name="booking_based_on_reviews">Gebaseerd op %d hotelbeoordelingen</string>
 	<string name="booking_show_more">Meer weergeven</string>
 	<string name="booking_reviews">Beoordelingen</string>
@@ -987,4 +987,57 @@
 	<string name="whatsnew_uber_message">Bestel een Uber-taxi rechtstreeks vanuit de app!</string>
 	<string name="dialog_taxi_offline">Het bestellen van een taxi is niet beschikbaar in de offline modus.</string>
 	<string name="dialog_taxi_error">Het bestellen van een taxi is tijdelijk niet beschikbaar.</string>
+	<string name="advertisement">Reclame</string>
+	<string name="mobile_data_dialog">Mobiel internet gebruiken om gedetailleerde informatie weer te geven?</string>
+	<string name="mobile_data_option_always">Altijd Gebruiken</string>
+	<string name="mobile_data_option_today">Enkel Vandaag</string>
+	<string name="mobile_data_option_not_today">Vandaag niet Gebruiken</string>
+	<string name="mobile_data">Mobiel Internet</string>
+	<string name="mobile_data_description">Mobiel internet is vereist voor het weergeven van gedetailleerde informatie over plaatsen, zoals foto\&#39;s, prijzen en beoordelingen.</string>
+	<string name="mobile_data_option_never">Nooit Gebruiken</string>
+	<string name="mobile_data_option_ask">Altijd Vragen</string>
+	<string name="traffic_update_maps_text">Om verkeersgegevens weer te geven, moeten de kaarten bijgewerkt worden.</string>
+	<string name="traffic_outdated">Verkeersgegevens zijn verouderd.</string>
+	<string name="big_font">Grotere labels</string>
+	<string name="traffic_update_app">Gelieve MAPS.ME bij te werken</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">Om de verkeersgegevens weer te geven, moet de applicatie bijgewerkt worden.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">Verkeersgegevens zijn niet beschikbaar</string>
+	<string name="banner_deliveryclub_title">Levering maaltijden</string>
+	<string name="banner_deliveryclub_message">Snelle levering van 4.000 restaurants. Bestel via Delivery Club.</string>
+	<string name="banner_lamoda_title">Online kleding- en schoenenwinkel</string>
+	<string name="banner_lamoda_message">Meer dan 1.000 merken. Tot 70% korting. Gratis levering over het hele land.</string>
+	<string name="banner_tutu_title">Treintickets online</string>
+	<string name="banner_tutu_message">Treintickets naar elke staf online - prijzen, zoeken en reserveren.</string>
+	<string name="banner_geerbest_title">Online elektronicawinkel</string>
+	<string name="banner_geerbest_message">Onmiddellijk zoeken tussen meer dan 50.000 artikelen aan lage prijzen.</string>
+	<string name="banner_rentalcars_title">Online auto\&#39;s huren</string>
+	<string name="banner_rentalcars_message">800 autoverhuurbedrijven in meer dan 49.000 locaties voor autoverhuur.</string>
+	<string name="banner_viator_title">Online tours zoeken</string>
+	<string name="banner_viator_message">Zoek in meer dan 50.000 tours over de hele wereld.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">Verkeersgegevens in 36 Landen</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">Actuele verkeersinformatie, en de snelste reisroutes hierop gebaseerd!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">Verkeersinfo in Roaming</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">Vereist minder dan 1 MB mobiele bandbreedte per trip.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">Bestel een Taxi</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">De meeste locatiepagina\&#39;s bevatten nu een knop om een taxi te bestellen.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">Verbeterde Zoekfunctie</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">Zelfs verkeerd gespelde zoekopdrachten geven nauwkeurige zoekresultaten.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">Zoekfilters</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">Hotels zoeken gebaseerd op prijs en rating.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">Lettergrootte</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">Labels op de map kunnen groter gemaakt worden.</string>
 </resources>

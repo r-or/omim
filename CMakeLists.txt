@@ -4,33 +4,6 @@ project(omim C CXX)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Find installed packages
-
-find_package(Threads)
-
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
-find_package(Qt5Network REQUIRED)
-find_package(Qt5OpenGL REQUIRED)
-find_package(Qt5Widgets REQUIRED)
-
-find_library(LIBZ NAMES z)
-if (LIBZ STREQUAL "LIBZ-NOTFOUND")
-  message(FATAL_ERROR "Failed to find libz library.")
-endif()
-
-
-get_filename_component(OMIM_ROOT . ABSOLUTE)
-
-include_directories(
-  ${CMAKE_HOME_DIRECTORY}
-  ${Qt5Core_LIBRARIES}
-  ${Qt5Core_INCLUDE_DIRS}
-  ${Qt5Network_LIBRARIES}
-  ${Qt5Network_INCLUDE_DIRS}
-  ${CMAKE_HOME_DIRECTORY}/3party/boost
-)
-
 # Set environment variables
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR})
@@ -88,7 +61,50 @@ endif()
 
 omim_set_platform_var(PLATFORM_LINUX "linux-.*" ${LINUX_DETECTED})
 
+if (PLATFORM_LINUX OR PLATFORM_MAC OR PLATFORM_WIN)
+  set(PLATFORM_DESKTOP TRUE)
+else()
+  set(PLATFORM_DESKTOP FALSE)
+endif()
+
 # End of setting the target platform
+
+# Find installed packages
+
+find_package(Threads)
+
+if (NOT PLATFORM_IPHONE AND NOT PLATFORM_ANDROID)
+  find_package(Qt5Core REQUIRED)
+  find_package(Qt5Network REQUIRED)
+  find_package(Qt5Gui REQUIRED)
+  find_package(Qt5OpenGL REQUIRED)
+  find_package(Qt5Widgets REQUIRED)
+endif()
+
+if (PLATFORM_LINUX)
+  find_package(OpenGL)
+endif()
+
+find_library(LIBZ NAMES z)
+if (LIBZ STREQUAL "LIBZ-NOTFOUND")
+  message(FATAL_ERROR "Failed to find libz library.")
+endif()
+
+if (NOT DEVELOPER_FRAMEWORKS_DIR)
+  message("Doing nothing, because we know nothing about developer frameworks dir")
+  #do nothing
+else()
+  include_directories(${DEVELOPER_FRAMEWORKS_DIR})
+endif()
+
+get_filename_component(OMIM_ROOT . ABSOLUTE)
+
+include_directories(
+  ${CMAKE_HOME_DIRECTORY}
+  ${Qt5Core_INCLUDE_DIRS}
+  ${Qt5Network_INCLUDE_DIRS}
+  ${CMAKE_HOME_DIRECTORY}/3party/boost
+)
 
 # Functions for using in subdirectories
 
@@ -101,12 +117,28 @@ endfunction()
 function(omim_add_test_subdirectory subdir)
   if (NOT NO_TESTS)
     add_subdirectory(${subdir})
+  else()
+    message("NO_TESTS: Skipping subdirectory ${subdir}")
+  endif()
+endfunction()
+
+function(omim_link_platform_deps target)
+  if ("${ARGN}" MATCHES "platform")
+    if (PLATFORM_MAC)
+      target_link_libraries(
+        ${target}
+        "-framework CFNetwork"
+        "-framework Foundation"
+        "-framework SystemConfiguration"
+      )
+    endif()
   endif()
 endfunction()
 
 function(omim_link_libraries target)
   if (TARGET ${target})
     target_link_libraries(${target} ${ARGN} ${CMAKE_THREAD_LIBS_INIT})
+    omim_link_platform_deps(${target} ${ARGN})
   else()
     message("~> Skipping linking the libraries to the target ${target} as it does not exist")
   endif()
@@ -134,6 +166,10 @@ add_subdirectory(3party/expat)
 add_subdirectory(map)
 add_subdirectory(drape)
 
+if (PLATFORM_DESKTOP)
+  add_subdirectory(3party/libtess2)
+endif()
+
 add_compile_options(
   "-Wall"
   "-std=c++11"
@@ -144,8 +180,6 @@ add_subdirectory(3party/liboauthcpp)
 add_subdirectory(3party/pugixml)
 add_subdirectory(3party/succinct)
 add_subdirectory(3party/osrm)
-add_subdirectory(3party/gmock)
-add_subdirectory(qt_tstfrm)
 add_subdirectory(base)
 add_subdirectory(coding)
 add_subdirectory(geometry)
@@ -161,3 +195,14 @@ add_subdirectory(search)
 add_subdirectory(tracking)
 add_subdirectory(traffic)
 add_subdirectory(partners_api)
+
+if (PLATFORM_DESKTOP)
+  add_subdirectory(generator)
+endif()
+
+omim_add_test_subdirectory(qt_tstfrm)
+omim_add_test_subdirectory(3party/gmock)
+
+if (NOT PLATFORM_IPHONE AND NOT PLATFORM_ANDROID)
+    add_subdirectory(qt)
+endif()

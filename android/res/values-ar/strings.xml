@@ -958,7 +958,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">قريبة</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">ترتيب</string>
+	<string name="taxi_order">طلب تاكسي</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">متوقع في %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -973,12 +973,12 @@
 	<string name="booking_filters_rating_very_good">جيد جداً</string>
 	<string name="booking_filters_rating_excellent">ممتاز</string>
 	<string name="booking_filters_price_category">فئة الأسعار</string>
-	<string name="booking_filters_no_results">لم يتم العثور على نتائج</string>
-	<string name="booking_filters_nores_message">جرب مصطلح بحث أكثر عمومية أو التصغير أو إعادة تعيين عامل التصفية.</string>
-	<string name="booking_filters_expand_area_button">تصغير</string>
-	<string name="booking_filters_reset_button">إعادة تعيين عامل التصفية</string>
+	<string name="search_no_results_title">لم يتم العثور على نتائج</string>
+	<string name="search_no_results_message">جرب مصطلح بحث أكثر عمومية أو التصغير أو إعادة تعيين عامل التصفية.</string>
+	<string name="search_no_results_expand_area_button">تصغير</string>
+	<string name="search_no_results_reset_button">إعادة تعيين عامل التصفية</string>
 	<!-- noun -->
-	<string name="booking_list">قائمة</string>
+	<string name="search_in_table">قائمة</string>
 	<string name="booking_based_on_reviews">استناداً إلى %d من مراجعات الفنادق</string>
 	<string name="booking_show_more">إظهار المزيد</string>
 	<string name="booking_reviews">المراجعات</string>
@@ -993,4 +993,57 @@
 	<string name="whatsnew_uber_message">اطلب تاكسي Uber مباشرة من التطبيق!</string>
 	<string name="dialog_taxi_offline">طلب تاكسي غير متاح في وضع الطيران.</string>
 	<string name="dialog_taxi_error">طلب تاكسي غير متاح مؤقتا.</string>
+	<string name="advertisement">إعلان</string>
+	<string name="mobile_data_dialog">استخدام إنترنت المحمول لإظهار المعلومات التفصيلية؟</string>
+	<string name="mobile_data_option_always">استخدام دائمًا</string>
+	<string name="mobile_data_option_today">اليوم فقط</string>
+	<string name="mobile_data_option_not_today">عدم الاستخدام اليوم</string>
+	<string name="mobile_data">انترنت المحمول</string>
+	<string name="mobile_data_description">الإنترنت المحمول مطلوب لعرض معلومات تفصيلية عن الأماكن مثل الصور الفوتوغرافية والأسعار والمراجعات.</string>
+	<string name="mobile_data_option_never">عدم الاستخدام مطلقًا</string>
+	<string name="mobile_data_option_ask">السؤال دوماً</string>
+	<string name="traffic_update_maps_text">لعرض البيانات المرورية، يجب تحديث الخرائط.</string>
+	<string name="traffic_outdated">البيانات المرورية قديمة.</string>
+	<string name="big_font">تسميات أكبر</string>
+	<string name="traffic_update_app">الرجاء تحديث MAPS.ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">لعرض البيانات المرورية، يجب تحديث التطبيق.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">البيانات المرورية غير متاحة</string>
+	<string name="banner_deliveryclub_title">توصيل الطعام</string>
+	<string name="banner_deliveryclub_message">توصيل سريع من 4000 مطعم. اطلب من Delivery Club.</string>
+	<string name="banner_lamoda_title">متجر الملابس والأحذية على الإنترنت</string>
+	<string name="banner_lamoda_message">أكثر من 1000 علامة تجارية. خصم يصل إلى 70%. توصيل مجاني في كافة أنحاء البلاد.</string>
+	<string name="banner_tutu_title">تذاكر القطار على الإنترنت</string>
+	<string name="banner_tutu_message">تذاكر القطار إلى أي مدينة على الإنترنت - الأسعار والبحث والحجز.</string>
+	<string name="banner_geerbest_title">متجر إلكترونيات على الإنترنت</string>
+	<string name="banner_geerbest_message">بحث سريع في أكثر من 50000 صنف بأسعار منخفضة.</string>
+	<string name="banner_rentalcars_title">إيجار السيارات على الإنترنت</string>
+	<string name="banner_rentalcars_message">800 شركة تأجير سيارات في أكثر من 49000 مكان لتأجير السيارات.</string>
+	<string name="banner_viator_title">بحث عن الرحلات على الإنترنت</string>
+	<string name="banner_viator_message">بحث في أكثر من 50000 رحلة في كافة أنحاء العالم.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">البيانات المرورية في 36 دولة</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">معلومات مرورية حديثة وأسرع مسارات القيادة التي تعتمد عليها!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">المعلومات المرورية أثناء التجوال</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">يتطلب أقل من 1 ميجابايت من عرض نطاق المحمول لكل رحلة.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">طلب تاكسي</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">تحتوي معظم صفحات المواقع الآن على زر لطلب تاكسي.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">بحث محسّن</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">حتى الاستعلامات التي بها أخطاء إملائية يمكن أن تحقق نتائج بحث دقيقة.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">عوامل تصفية البحث</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">البحث عن الفنادق وفقًا للسعر والتصنيف.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">حجم الخط</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">يمكن جعل التسميات على الخريطة أكبر.</string>
 </resources>

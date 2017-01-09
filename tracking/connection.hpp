@@ -24,12 +24,12 @@ public:
   Connection(unique_ptr<platform::Socket> socket, string const & host, uint16_t port,
              bool isHistorical);
   bool Reconnect();
+  void Shutdown();
   bool Send(boost::circular_buffer<DataPoint> const & points);
 
 private:
   unique_ptr<platform::Socket> m_socket;
   string const m_host;
   uint16_t const m_port;
-  bool const m_isHistorical;
 };
 }  // namespace tracking

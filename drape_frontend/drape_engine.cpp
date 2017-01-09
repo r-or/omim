@@ -11,6 +11,7 @@
 #include "platform/settings.hpp"
 
 #include "std/bind.hpp"
+#include "std/utility.hpp"
 
 namespace
 {
@@ -62,16 +63,17 @@ DrapeEngine::DrapeEngine(Params && params)
                                     bind(&DrapeEngine::UserPositionChanged, this, _1),
                                     bind(&DrapeEngine::MyPositionModeChanged, this, _1, _2),
                                     mode, make_ref(m_requestedTiles), timeInBackground,
-                                    params.m_allow3dBuildings, params.m_blockTapEvents,
-                                    params.m_isFirstLaunch, params.m_isRoutingActive,
-                                    params.m_isAutozoomEnabled);
+                                    params.m_allow3dBuildings, params.m_trafficEnabled,
+                                    params.m_blockTapEvents, params.m_isFirstLaunch,
+                                    params.m_isRoutingActive, params.m_isAutozoomEnabled);
 
   m_frontend = make_unique_dp<FrontendRenderer>(frParams);
 
   BackendRenderer::Params brParams(frParams.m_commutator, frParams.m_oglContextFactory,
                                    frParams.m_texMng, params.m_model,
                                    params.m_model.UpdateCurrentCountryFn(),
-                                   make_ref(m_requestedTiles), params.m_allow3dBuildings);
+                                   make_ref(m_requestedTiles), params.m_allow3dBuildings,
+                                   params.m_trafficEnabled);
   m_backend = make_unique_dp<BackendRenderer>(brParams);
 
   m_widgetsInfo = move(params.m_info);
@@ -389,10 +391,11 @@ bool DrapeEngine::GetMyPosition(m2::PointD & myPosition)
 }
 
 void DrapeEngine::AddRoute(m2::PolylineD const & routePolyline, vector<double> const & turns,
-                           df::ColorConstant color, df::RoutePattern pattern)
+                           df::ColorConstant color, vector<traffic::SpeedGroup> const & traffic,
+                           df::RoutePattern pattern)
 {
   m_threadCommutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
-                                  make_unique_dp<AddRouteMessage>(routePolyline, turns, color, pattern),
+                                  make_unique_dp<AddRouteMessage>(routePolyline, turns, color, traffic, pattern),
                                   MessagePriority::Normal);
 }
 
@@ -533,23 +536,28 @@ void DrapeEngine::RequestSymbolsSize(vector<string> const & symbols,
                                   MessagePriority::Normal);
 }
 
-void DrapeEngine::CacheTrafficSegmentsGeometry(TrafficSegmentsGeometry const & segments)
+void DrapeEngine::EnableTraffic(bool trafficEnabled)
 {
-  if (segments.empty())
-    return;
-
   m_threadCommutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
-                                  make_unique_dp<CacheTrafficSegmentsMessage>(segments),
+                                  make_unique_dp<EnableTrafficMessage>(trafficEnabled),
                                   MessagePriority::Normal);
 }
 
-void DrapeEngine::UpdateTraffic(TrafficSegmentsColoring const & segmentsColoring)
+void DrapeEngine::UpdateTraffic(traffic::TrafficInfo const & info)
 {
-  if (segmentsColoring.empty())
+  if (info.GetColoring().empty())
     return;
 
+#ifdef DEBUG
+  for (auto const & segmentPair : info.GetColoring())
+    ASSERT_NOT_EQUAL(segmentPair.second, traffic::SpeedGroup::Unknown, ());
+#endif
+
+  df::TrafficSegmentsColoring segmentsColoring;
+  segmentsColoring.emplace(info.GetMwmId(), info.GetColoring());
+
   m_threadCommutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
-                                  make_unique_dp<UpdateTrafficMessage>(segmentsColoring),
+                                  make_unique_dp<UpdateTrafficMessage>(move(segmentsColoring)),
                                   MessagePriority::Normal);
 }
 

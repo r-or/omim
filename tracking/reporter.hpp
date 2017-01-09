@@ -4,8 +4,10 @@
 
 #include "base/thread.hpp"
 
+#include "std/atomic.hpp"
 #include "std/chrono.hpp"
 #include "std/condition_variable.hpp"
+#include "std/function.hpp"
 #include "std/mutex.hpp"
 #include "std/string.hpp"
 #include "std/unique_ptr.hpp"
@@ -37,12 +39,15 @@ public:
 
   void AddLocation(location::GpsInfo const & info);
 
+  void SetAllowSendingPoints(bool allow) { m_allowSendingPoints = allow; }
+
   inline void SetIdleFunc(function<void()> fn) { m_idleFn = fn; }
 
 private:
   void Run();
   bool SendPoints();
 
+  atomic<bool> m_allowSendingPoints;
   Connection m_realtimeSender;
   milliseconds m_pushDelay;
   bool m_wasConnected = false;

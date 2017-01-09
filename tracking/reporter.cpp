@@ -21,11 +21,12 @@ namespace tracking
 const char Reporter::kEnableTrackingKey[] = "StatisticsEnabled";
 
 // static
-milliseconds const Reporter::kPushDelayMs = milliseconds(10000);
+milliseconds const Reporter::kPushDelayMs = milliseconds(20000);
 
 Reporter::Reporter(unique_ptr<platform::Socket> socket, string const & host, uint16_t port,
                    milliseconds pushDelay)
-  : m_realtimeSender(move(socket), host, port, false)
+  : m_allowSendingPoints(true)
+  , m_realtimeSender(move(socket), host, port, false)
   , m_pushDelay(pushDelay)
   , m_points(kRealTimeBufferSize)
   , m_thread([this] { Run(); })
@@ -92,6 +93,16 @@ void Reporter::Run()
 
 bool Reporter::SendPoints()
 {
+  if (!m_allowSendingPoints)
+  {
+    if (m_wasConnected)
+    {
+      m_realtimeSender.Shutdown();
+      m_wasConnected = false;
+    }
+    return true;
+  }
+
   if (m_points.empty())
     return true;
 

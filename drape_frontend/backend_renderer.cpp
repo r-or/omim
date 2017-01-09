@@ -27,7 +27,8 @@ namespace df
 BackendRenderer::BackendRenderer(Params const & params)
   : BaseRenderer(ThreadsCommutator::ResourceUploadThread, params)
   , m_model(params.m_model)
-  , m_readManager(make_unique_dp<ReadManager>(params.m_commutator, m_model, params.m_allow3dBuildings))
+  , m_readManager(make_unique_dp<ReadManager>(params.m_commutator, m_model,
+                                              params.m_allow3dBuildings, params.m_trafficEnabled))
   , m_trafficGenerator(make_unique_dp<TrafficGenerator>(bind(&BackendRenderer::FlushTrafficRenderData, this, _1)))
   , m_requestedTiles(params.m_requestedTiles)
   , m_updateCurrentCountryFn(params.m_updateCurrentCountryFn)
@@ -108,9 +109,11 @@ void BackendRenderer::AcceptMessage(ref_ptr<Message> message)
       TTilesCollection tiles = m_requestedTiles->GetTiles();
       if (!tiles.empty())
       {
-        ScreenBase const screen = m_requestedTiles->GetScreen();
-        bool const have3dBuildings = m_requestedTiles->Have3dBuildings();
-        m_readManager->UpdateCoverage(screen, have3dBuildings, tiles, m_texMng);
+        ScreenBase screen;
+        bool have3dBuildings;
+        bool needRegenerateTraffic;
+        m_requestedTiles->GetParams(screen, have3dBuildings, needRegenerateTraffic);
+        m_readManager->UpdateCoverage(screen, have3dBuildings, needRegenerateTraffic, tiles, m_texMng);
         m_updateCurrentCountryFn(screen.ClipRect().Center(), (*tiles.begin()).m_zoomLevel);
       }
       break;
@@ -257,8 +260,8 @@ void BackendRenderer::AcceptMessage(ref_ptr<Message> message)
   case Message::AddRoute:
     {
       ref_ptr<AddRouteMessage> msg = message;
-      m_routeBuilder->Build(msg->GetRoutePolyline(), msg->GetTurns(),
-                            msg->GetColor(), msg->GetPattern(), m_texMng, msg->GetRecacheId());
+      m_routeBuilder->Build(msg->GetRoutePolyline(), msg->GetTurns(), msg->GetColor(),
+                            msg->GetTraffic(), msg->GetPattern(), m_texMng, msg->GetRecacheId());
       break;
     }
 
@@ -292,6 +295,7 @@ void BackendRenderer::AcceptMessage(ref_ptr<Message> message)
     {
       m_texMng->Invalidate(VisualParams::Instance().GetResourcePostfix());
       RecacheMapShapes();
+      m_trafficGenerator->InvalidateTexturesCache();
       break;
     }
 
@@ -331,37 +335,34 @@ void BackendRenderer::AcceptMessage(ref_ptr<Message> message)
       break;
     }
 
-  case Message::CacheTrafficSegments:
+  case Message::EnableTraffic:
     {
-      ref_ptr<CacheTrafficSegmentsMessage> msg = message;
-      for (auto const & segment : msg->GetSegments())
-        m_trafficGenerator->AddSegment(segment.first, segment.second);
+      ref_ptr<EnableTrafficMessage> msg = message;
+      if (!msg->IsTrafficEnabled())
+        m_trafficGenerator->ClearCache();
+      m_readManager->SetTrafficEnabled(msg->IsTrafficEnabled());
+      m_commutator->PostMessage(ThreadsCommutator::RenderThread,
+                                make_unique_dp<EnableTrafficMessage>(msg->IsTrafficEnabled()),
+                                MessagePriority::Normal);
+      break;
+    }
+
+  case Message::FlushTrafficGeometry:
+    {
+      ref_ptr<FlushTrafficGeometryMessage> msg = message;
+      auto const & tileKey = msg->GetKey();
+      if (m_requestedTiles->CheckTileKey(tileKey) && m_readManager->CheckTileKey(tileKey))
+        m_trafficGenerator->FlushSegmentsGeometry(tileKey, msg->GetSegments(), m_texMng);
       break;
     }
 
   case Message::UpdateTraffic:
     {
       ref_ptr<UpdateTrafficMessage> msg = message;
-      auto segments = m_trafficGenerator->GetSegmentsToUpdate(msg->GetSegmentsColoring());
-      if (!segments.empty())
-      {
-        m_commutator->PostMessage(ThreadsCommutator::RenderThread,
-                                  make_unique_dp<UpdateTrafficMessage>(segments),
-                                  MessagePriority::Normal);
-      }
-
-      if (segments.size() < msg->GetSegmentsColoring().size())
-      {
-        m_trafficGenerator->GetTrafficGeom(m_texMng, msg->GetSegmentsColoring());
-
-        if (m_trafficGenerator->IsColorsCacheRefreshed())
-        {
-          auto texCoords = m_trafficGenerator->ProcessCacheRefreshing();
-          m_commutator->PostMessage(ThreadsCommutator::RenderThread,
-                                    make_unique_dp<SetTrafficTexCoordsMessage>(move(texCoords)),
-                                    MessagePriority::Normal);
-        }
-      }
+      m_trafficGenerator->UpdateColoring(msg->GetSegmentsColoring());
+      m_commutator->PostMessage(ThreadsCommutator::RenderThread,
+                                make_unique_dp<RegenerateTrafficMessage>(),
+                                MessagePriority::Normal);
       break;
     }
   case Message::ClearTrafficData:
@@ -456,8 +457,10 @@ void BackendRenderer::Routine::Do()
 
 void BackendRenderer::InitGLDependentResource()
 {
+  int constexpr kBatchSize = 5000;
   m_batchersPool = make_unique_dp<BatchersPool<TileKey, TileKeyStrictComparator>>(ReadManager::ReadCount(),
-                                                bind(&BackendRenderer::FlushGeometry, this, _1, _2, _3));
+                                               bind(&BackendRenderer::FlushGeometry, this, _1, _2, _3),
+                                               kBatchSize, kBatchSize);
   m_trafficGenerator->Init();
 
   dp::TextureManager::Params params;

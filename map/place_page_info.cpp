@@ -1,10 +1,12 @@
-#include "place_page_info.hpp"
+#include "map/place_page_info.hpp"
+#include "map/reachable_by_taxi_checker.hpp"
 
 #include "indexer/feature_utils.hpp"
 #include "indexer/osm_editor.hpp"
 
 #include "platform/measurement_utils.hpp"
 #include "platform/preferred_languages.hpp"
+#include "platform/settings.hpp"
 
 namespace place_page
 {
@@ -38,12 +40,9 @@ bool Info::HasWifi() const { return GetInternet() == osm::Internet::Wlan; }
 
 bool Info::HasBanner() const
 {
-  // Dummy implementation.
-  // auto const now = time(nullptr);
-  // auto const bannerStartTime = strings::to_uint(m_metadata.Get(feature::Metadata::FMD_BANNER_FROM));
-  // auto const bannerEndTime = strings::to_uint(m_metadata.Get(feature::Metadata::FMD_BANNER_TO));
-  // return !(now < bannerStartTime || now > bannerEndTime);
-  return true;
+  bool adForbidden = false;
+  UNUSED_VALUE(settings::Get("AdForbidden", adForbidden));
+  return !adForbidden && !m_banner.IsEmpty() && m_banner.IsActive();
 }
 
 string Info::FormatNewBookmarkName() const
@@ -174,31 +173,44 @@ string Info::GetApproximatePricing() const
 
 string Info::GetBannerTitleId() const
 {
-  // Dummy implementation.
-  //return m_metadata.Get(feature::Metadata::FMD_BANNER_ID) + "title";
-  return "title";
+  if (m_banner.IsEmpty())
+    return {};
+  return m_banner.GetMessageBase() + "_title";
 }
 
 string Info::GetBannerMessageId() const
 {
-  // Dummy implementation.
-  //return m_metadata.Get(feature::Metadata::FMD_BANNER_ID) + "message";
-  return "message";
+  if (m_banner.IsEmpty())
+    return {};
+  return m_banner.GetMessageBase() + "_message";
 }
 
 string Info::GetBannerIconId() const
 {
-  // Dummy implementation.
-  //return m_metadata.Get(feature::Metadata::FMD_BANNER_ID) + "icon";
-  return "icon";
+  if (m_banner.IsEmpty())
+    return {};
+  return m_banner.GetIconName();
 }
 
 string Info::GetBannerUrl() const
 {
-  // Dummy implementation.
-  //return m_metadata.Get(feature::Metadata::FMD_BANNER_URL);
-  return "url";
+  if (m_banner.IsEmpty())
+    return {};
+  return m_banner.GetFormattedUrl(m_metadata.Get(feature::Metadata::FMD_BANNER_URL));
+}
+
+string Info::GetBannerId() const
+{
+  if (m_banner.IsEmpty())
+    return {};
+  return m_banner.GetId();
+}
+
+bool Info::IsReachableByTaxi() const
+{
+  return IsReachableByTaxiChecker::Instance()(m_types);
 }
 
 void Info::SetMercator(m2::PointD const & mercator) { m_mercator = mercator; }
+vector<string> Info::GetRawTypes() const { return m_types.ToObjectNames(); }
 }  // namespace place_page

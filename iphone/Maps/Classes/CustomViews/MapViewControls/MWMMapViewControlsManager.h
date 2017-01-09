@@ -17,6 +17,7 @@
 @property(nonatomic) BOOL hidden;
 @property(nonatomic) BOOL zoomHidden;
 @property(nonatomic) BOOL sideButtonsHidden;
+@property(nonatomic) BOOL trafficButtonHidden;
 @property(nonatomic) MWMBottomMenuState menuState;
 @property(nonatomic) MWMBottomMenuState menuRestoreState;
 @property(nonatomic, readonly) MWMNavigationDashboardState navigationState;
@@ -30,11 +31,8 @@
 
 #pragma mark - Layout
 
-- (void)refreshLayout;
 - (void)mwm_refreshUI;
 
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
-                                duration:(NSTimeInterval)duration;
 - (void)viewWillTransitionToSize:(CGSize)size
        withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator;
 
@@ -43,7 +41,6 @@
 - (void)dismissPlacePage;
 - (void)showPlacePage:(place_page::Info const &)info;
 - (void)addPlace:(BOOL)isBusiness hasPoint:(BOOL)hasPoint point:(m2::PointD const &)point;
-- (void)dragPlacePage:(CGRect)frame;
 
 #pragma mark - MWMNavigationDashboardManager
 

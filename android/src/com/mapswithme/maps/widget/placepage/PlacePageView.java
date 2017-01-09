@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -42,6 +43,7 @@ import com.mapswithme.maps.MwmActivity;
 import com.mapswithme.maps.MwmApplication;
 import com.mapswithme.maps.R;
 import com.mapswithme.maps.api.ParsedMwmRequest;
+import com.mapswithme.maps.bookmarks.data.Banner;
 import com.mapswithme.maps.bookmarks.data.Bookmark;
 import com.mapswithme.maps.bookmarks.data.BookmarkManager;
 import com.mapswithme.maps.bookmarks.data.DistanceAndAzimut;
@@ -66,6 +68,7 @@ import com.mapswithme.maps.widget.ObservableScrollView;
 import com.mapswithme.maps.widget.ScrollViewShadowController;
 import com.mapswithme.maps.widget.recycler.DividerItemDecoration;
 import com.mapswithme.maps.widget.recycler.RecyclerClickListener;
+import com.mapswithme.util.ConnectionState;
 import com.mapswithme.util.Graphics;
 import com.mapswithme.util.StringUtils;
 import com.mapswithme.util.ThemeUtils;
@@ -93,7 +96,9 @@ public class PlacePageView extends RelativeLayout
                Sponsored.OnHotelInfoReceivedListener,
                LineCountTextView.OnLineCountCalculatedListener,
                RecyclerClickListener,
-               NearbyAdapter.OnItemClickListener
+               NearbyAdapter.OnItemClickListener,
+               BannerController.OnBannerClickListener,
+               BottomPlacePageAnimationController.OnBannerOpenListener
 {
   private static final String PREF_USE_DMS = "use_dms";
 
@@ -134,6 +139,7 @@ public class PlacePageView extends RelativeLayout
   private View mWiki;
   private View mEntrance;
   private TextView mTvEntrance;
+  private View mTaxi;
   private View mEditPlace;
   private View mAddOrganisation;
   private View mAddPlace;
@@ -159,6 +165,11 @@ public class PlacePageView extends RelativeLayout
   private TextView mHotelRatingBase;
 //TODO: remove this after booking_api.cpp will be done
   private View mHotelMore;
+  @Nullable
+  BannerController mBannerController;
+
+  @Nullable
+  View mHeightCompensationView;
 
   // Animations
   private BaseShadowController mShadowController;
@@ -298,6 +309,9 @@ public class PlacePageView extends RelativeLayout
     mWiki.setOnClickListener(this);
     mEntrance = mDetails.findViewById(R.id.ll__place_entrance);
     mTvEntrance = (TextView) mEntrance.findViewById(R.id.tv__place_entrance);
+    mTaxi = mDetails.findViewById(R.id.ll__place_page_taxi);
+    TextView orderTaxi = (TextView) mTaxi.findViewById(R.id.tv__place_page_order_taxi);
+    orderTaxi.setOnClickListener(this);
     mEditPlace = mDetails.findViewById(R.id.ll__place_editor);
     mEditPlace.setOnClickListener(this);
     mAddOrganisation = mDetails.findViewById(R.id.ll__add_organisation);
@@ -321,6 +335,8 @@ public class PlacePageView extends RelativeLayout
 
     ViewGroup ppButtons = (ViewGroup) findViewById(R.id.pp__buttons);
 
+    mHeightCompensationView = findViewById(R.id.pp__height_compensation);
+
 //  TODO: remove this after booking_api.cpp will be done
     mHotelMore = findViewById(R.id.ll__more);
     mHotelMore.setOnClickListener(this);
@@ -330,6 +346,10 @@ public class PlacePageView extends RelativeLayout
     initHotelGalleryView();
     initHotelNearbyView();
     initHotelRatingView();
+
+    View bannerView = findViewById(R.id.banner);
+    if (bannerView != null)
+      mBannerController = new BannerController(bannerView, this);
 
     mButtons = new PlacePageButtons(this, ppButtons, new PlacePageButtons.ItemListener()
     {
@@ -396,26 +416,38 @@ public class PlacePageView extends RelativeLayout
           break;
 
         case ROUTE_FROM:
-          if (RoutingController.get().setStartPoint(mMapObject))
+          RoutingController controller = RoutingController.get();
+          if (!controller.isPlanning())
+          {
+            controller.prepare(mMapObject, null);
             hide();
+          }
+          else if (controller.setStartPoint(mMapObject))
+          {
+            hide();
+          }
           break;
 
-          case ROUTE_TO:
-            if (RoutingController.get().isPlanning())
-            {
-              if (RoutingController.get().setEndPoint(mMapObject))
-                hide();
-            }
-            else
-            {
-              getActivity().startLocationToPoint(Statistics.EventName.PP_ROUTE, AlohaHelper.PP_ROUTE, getMapObject());
-            }
-            break;
+        case ROUTE_TO:
+          if (RoutingController.get().isPlanning())
+          {
+            if (RoutingController.get().setEndPoint(mMapObject))
+              hide();
+          }
+          else
+          {
+            getActivity().startLocationToPoint(Statistics.EventName.PP_ROUTE, AlohaHelper.PP_ROUTE, getMapObject());
+          }
+          break;
 
-          case BOOKING:
-          case OPENTABLE:
-            onSponsoredClick(true /* book */);
-            break;
+        case BOOKING:
+        case OPENTABLE:
+          onSponsoredClick(true /* book */);
+          break;
+
+        case CALL:
+          Utils.callPhone(getContext(), mTvPhone.getText().toString());
+          break;
         }
       }
     });
@@ -705,6 +737,20 @@ public class PlacePageView extends RelativeLayout
         });
   }
 
+  @Override
+  public void onBannerClick(@NonNull Banner banner)
+  {
+    if (!TextUtils.isEmpty(banner.getUrl()))
+      followUrl(banner.getUrl());
+  }
+
+  @Override
+  public void onNeedOpenBanner()
+  {
+    if (mBannerController != null)
+      mBannerController.open();
+  }
+
   private void init(AttributeSet attrs, int defStyleAttr)
   {
     initViews();
@@ -718,8 +764,11 @@ public class PlacePageView extends RelativeLayout
     mIsFloating = attrArray.getBoolean(R.styleable.PlacePageView_floating, false);
     attrArray.recycle();
 
-    mAnimationController = animationType == 0 ? new BottomPlacePageAnimationController(this)
-                                              : new LeftPlacePageAnimationController(this);
+    boolean isBottom = animationType == 0;
+    mAnimationController = isBottom ? new BottomPlacePageAnimationController(this)
+                                    : new LeftPlacePageAnimationController(this);
+    if (isBottom)
+      ((BottomPlacePageAnimationController) mAnimationController).setBannerOpenListener(this);
   }
 
   public void restore()
@@ -765,13 +814,35 @@ public class PlacePageView extends RelativeLayout
     if (state == State.HIDDEN)
       clearBookmarkWebView();
 
+    int heightCompensation = 0;
+    if (mBannerController != null)
+    {
+      if ((state == State.HIDDEN || state == State.PREVIEW) && !UiUtils.isLandscape(getContext()))
+      {
+        if (mBannerController.close())
+          heightCompensation = mBannerController.getLastBannerHeight();
+      }
+      else
+      {
+        mBannerController.open();
+      }
+    }
+
+    if (mHeightCompensationView != null)
+    {
+      ViewGroup.LayoutParams lp = mHeightCompensationView.getLayoutParams();
+      lp.height = heightCompensation;
+      mHeightCompensationView.setLayoutParams(lp);
+    }
+
     if (mMapObject != null)
       mAnimationController.setState(state, mMapObject.getMapObjectType());
 
     if (!mIsDocked && !mIsFloating)
     {
       // After ninepatch background is set from code, all paddings are lost, so we need to restore it later.
-      int bottom = mPreview.getPaddingBottom();
+      int bottom = mBannerController != null && mBannerController.isShowing()
+                   ? 0 : (int) getResources().getDimension(R.dimen.margin_base);
       int left = mPreview.getPaddingLeft();
       int right = mPreview.getPaddingRight();
       int top = mPreview.getPaddingTop();
@@ -912,6 +983,9 @@ public class PlacePageView extends RelativeLayout
       mTvSponsoredPrice.setText(mSponsoredPrice);
       UiUtils.showIf(!isPriceEmpty, mTvSponsoredPrice);
     }
+
+    if (mBannerController != null)
+      mBannerController.updateData(mMapObject.getBanner());
   }
 
   private void refreshDetails()
@@ -949,9 +1023,16 @@ public class PlacePageView extends RelativeLayout
     refreshMetadataOrHide(mMapObject.getMetadata(Metadata.MetadataType.FMD_FLATS), mEntrance, mTvEntrance);
     refreshOpeningHours();
 
-    if (RoutingController.get().isNavigating() ||
-        RoutingController.get().isPlanning() ||
-        MapManager.nativeIsLegacyMode())
+    boolean showTaxiOffer = mMapObject.isReachableByTaxi() &&
+                            LocationHelper.INSTANCE.getMyPosition() != null &&
+                            ConnectionState.isConnected();
+
+    UiUtils.showIf(showTaxiOffer, mTaxi);
+
+    boolean inRouting = RoutingController.get().isNavigating() ||
+                        RoutingController.get().isPlanning();
+
+    if (inRouting || MapManager.nativeIsLegacyMode())
     {
       UiUtils.hide(mEditPlace, mAddOrganisation, mAddPlace);
     }
@@ -1078,17 +1159,15 @@ public class PlacePageView extends RelativeLayout
       }
     }
 
+    if (mMapObject.hasPhoneNumber())
+      buttons.add(PlacePageButtons.Item.CALL);
+
     buttons.add(PlacePageButtons.Item.BOOKMARK);
 
-    if (RoutingController.get().isPlanning())
+    if (RoutingController.get().isPlanning() || showRoutingButton)
     {
       buttons.add(PlacePageButtons.Item.ROUTE_FROM);
       buttons.add(PlacePageButtons.Item.ROUTE_TO);
-    }
-    else
-    {
-      if (showRoutingButton)
-        buttons.add(PlacePageButtons.Item.ROUTE_TO);
     }
 
     buttons.add(PlacePageButtons.Item.SHARE);
@@ -1196,6 +1275,11 @@ public class PlacePageView extends RelativeLayout
     mAnimationController.setOnVisibilityChangedListener(listener);
   }
 
+  public void setOnAnimationListener(@Nullable BasePlacePageAnimationController.OnAnimationListener listener)
+  {
+    mAnimationController.setOnProgressListener(listener);
+  }
+
   private void addOrganisation()
   {
     Statistics.INSTANCE.trackEvent(Statistics.EventName.EDITOR_ADD_CLICK,
@@ -1233,15 +1317,7 @@ public class PlacePageView extends RelativeLayout
         refreshLatLon();
         break;
       case R.id.ll__place_phone:
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:" + mTvPhone.getText()));
-        try
-        {
-          getContext().startActivity(intent);
-        } catch (ActivityNotFoundException e)
-        {
-          AlohaHelper.logException(e);
-        }
+        Utils.callPhone(getContext(), mTvPhone.getText().toString());
         break;
       case R.id.ll__place_website:
         followUrl(mTvWebsite.getText().toString());
@@ -1256,9 +1332,7 @@ public class PlacePageView extends RelativeLayout
         showBigDirection();
         break;
       case R.id.ll__place_email:
-        intent = new Intent(Intent.ACTION_SENDTO);
-        intent.setData(Utils.buildMailUri(mTvEmail.getText().toString(), "", ""));
-        getContext().startActivity(intent);
+        Utils.sendTo(getContext(), mTvEmail.getText().toString());
         break;
       case R.id.tv__bookmark_edit:
         Bookmark bookmark = (Bookmark) mMapObject;
@@ -1277,6 +1351,12 @@ public class PlacePageView extends RelativeLayout
         ReviewActivity.start(getContext(), mReviewAdapter.getItems(), mMapObject.getTitle(),
                              mSponsored.mRating, mReviewAdapter.getItems()
                                                                .size(), mSponsored.mUrl);
+        break;
+      case R.id.tv__place_page_order_taxi:
+        RoutingController.get().prepare(LocationHelper.INSTANCE.getMyPosition(), mMapObject,
+                                        Framework.ROUTER_TYPE_TAXI);
+        hide();
+        Framework.nativeDeactivatePopup();
         break;
     }
   }

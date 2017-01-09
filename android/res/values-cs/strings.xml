@@ -959,7 +959,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">Nedaleké</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">Objednat</string>
+	<string name="taxi_order">Objednat taxi</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">Očekávaný příjezd za %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -974,12 +974,12 @@
 	<string name="booking_filters_rating_very_good">Velmi dobré</string>
 	<string name="booking_filters_rating_excellent">Vynikající</string>
 	<string name="booking_filters_price_category">Cenová kategorie</string>
-	<string name="booking_filters_no_results">Nebyly nalezeny žádné výsledky</string>
-	<string name="booking_filters_nores_message">Zkuste obecnější hledaný výraz, oddálit nebo obnovit filtr.</string>
-	<string name="booking_filters_expand_area_button">Oddálit</string>
-	<string name="booking_filters_reset_button">Resetovat filtr</string>
+	<string name="search_no_results_title">Nebyly nalezeny žádné výsledky</string>
+	<string name="search_no_results_message">Zkuste obecnější hledaný výraz, oddálit nebo obnovit filtr.</string>
+	<string name="search_no_results_expand_area_button">Oddálit</string>
+	<string name="search_no_results_reset_button">Resetovat filtr</string>
 	<!-- noun -->
-	<string name="booking_list">Seznam</string>
+	<string name="search_in_table">Seznam</string>
 	<string name="booking_based_on_reviews">Podle %d hodnocení hotelů</string>
 	<string name="booking_show_more">Zobrazit více</string>
 	<string name="booking_reviews">Hodnocení</string>
@@ -994,4 +994,57 @@
 	<string name="whatsnew_uber_message">Objednejte si taxi Uber přímo z aplikace!</string>
 	<string name="dialog_taxi_offline">Objednání taxi není v režimu offline k dispozici.</string>
 	<string name="dialog_taxi_error">Objednání taxi není dočasně k dispozici.</string>
+	<string name="advertisement">Inzerce</string>
+	<string name="mobile_data_dialog">Použít mobilní internet ke zobrazení podrobnějších informací?</string>
+	<string name="mobile_data_option_always">Vždy použít</string>
+	<string name="mobile_data_option_today">Jen dnes</string>
+	<string name="mobile_data_option_not_today">Nepoužívat dnes</string>
+	<string name="mobile_data">Mobilní Internet</string>
+	<string name="mobile_data_description">Ke zobrazení podrobných informací o místech, jako jsou fotografie, ceny a recenze, je třeba mobilní internet.</string>
+	<string name="mobile_data_option_never">Nikdy nepoužívat</string>
+	<string name="mobile_data_option_ask">Vždy se zeptat</string>
+	<string name="traffic_update_maps_text">Ke zobrazení údajů o provozu musí být aktualizovány mapy.</string>
+	<string name="traffic_outdated">Data o provozu jsou zastaralá.</string>
+	<string name="big_font">Větší štítky</string>
+	<string name="traffic_update_app">Aktualizujte MAPS. ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">Ke zobrazení dat o provozu je nutné aplikaci aktualizovat.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">Data o provozu nejsou k dispozici</string>
+	<string name="banner_deliveryclub_title">Rozvoz jídel</string>
+	<string name="banner_deliveryclub_message">Rychlé rozvoz z 4000 restaurací. Objednejte si u Delivery Club.</string>
+	<string name="banner_lamoda_title">Online obchod s oděvy a obuví</string>
+	<string name="banner_lamoda_message">Více než 1000 značek. Sleva až 70 %. Doručení zdarma po celé zemi.</string>
+	<string name="banner_tutu_title">Vlakové jízdenky online</string>
+	<string name="banner_tutu_message">Vlakové jízdenky do kteréhokoli města onlive - ceny, vyhledávání a rezervace.</string>
+	<string name="banner_geerbest_title">Online obchod s elektronikou</string>
+	<string name="banner_geerbest_message">Rychlé hledání ve více než 50 000 položkách za nízké ceny.</string>
+	<string name="banner_rentalcars_title">Pronájem auta online</string>
+	<string name="banner_rentalcars_message">800 autopůjčoven na více než 49 000 místech.</string>
+	<string name="banner_viator_title">Online vyhledávání zájezdů</string>
+	<string name="banner_viator_message">Hledejte ve více než 50 000 zájezdů po celém světě.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">Údaje o provozu ve 36 zemích</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">Na nich jsou založeny aktuální dopravní informace a nejrychlejší jízdní trasy!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">Dopravní informace při roamingu</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">Vyžaduje necelý 1 MB mobilních dat na jednu cestu.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">Objednat taxi</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">Většina stránek umístění nyní obsahuje tlačítko k objednání taxi.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">Vylepšené vyhledávání</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">I nesprávně napsané dotazy přinesou přesné výsledky vyhledávání.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">Vyhledávací filtry</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">Hledat hotely na základě ceny a hodnocení.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">Velikost písma</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">Popisky na mapě lze zvětšit.</string>
 </resources>

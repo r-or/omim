@@ -173,6 +173,10 @@ UNIT_CLASS_TEST(ProcessorTest, Smoke)
 
   SetViewport(m2::RectD(m2::PointD(-1.0, -1.0), m2::PointD(1.0, 1.0)));
   {
+    TRules rules = {};
+    TEST(ResultsMatch("", rules), ());
+  }
+  {
     TRules rules = {ExactMatch(wonderlandId, busStop)};
     TEST(ResultsMatch("Bus stop", rules), ());
   }
@@ -784,6 +788,33 @@ UNIT_CLASS_TEST(ProcessorTest, FuzzyMatch)
 
     // Too many errors, can't do anything.
     TEST(ResultsMatch("масква ленинргадский чирчиль", "ru", TRules{}), ());
+
+    TEST(ResultsMatch("моксва ленинргадский черчиль", "ru", rules), ());
+  }
+}
+
+UNIT_CLASS_TEST(ProcessorTest, SpacesInCategories)
+{
+  string const countryName = "Wonderland";
+  TestCountry country(m2::PointD(10, 10), countryName, "en");
+
+  TestCity city(m2::PointD(5.0, 5.0), "Москва", "ru", 100 /* rank */);
+  TestPOI nightclub(m2::PointD(5.0, 5.0), "Crasy daizy", "ru");
+  nightclub.SetTypes({{"amenity", "nightclub"}});
+
+  BuildWorld([&](TestMwmBuilder & builder) {
+    builder.Add(country);
+    builder.Add(city);
+  });
+
+  auto id = BuildCountry(countryName, [&](TestMwmBuilder & builder) { builder.Add(nightclub); });
+
+  {
+    TRules rules = {ExactMatch(id, nightclub)};
+    TEST(ResultsMatch("nightclub", "en", rules), ());
+    TEST(ResultsMatch("night club", "en", rules), ());
+    TEST(ResultsMatch("n i g h t c l u b", "en", TRules{}), ());
+    TEST(ResultsMatch("Москва ночной клуб", "ru", rules), ());
   }
 }
 }  // namespace

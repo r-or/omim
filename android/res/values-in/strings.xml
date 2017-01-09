@@ -951,7 +951,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">Dekat</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">Pesan</string>
+	<string name="taxi_order">Pesan taksi</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">Diharapkan dalam %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -966,12 +966,12 @@
 	<string name="booking_filters_rating_very_good">Sangat Bagus</string>
 	<string name="booking_filters_rating_excellent">Luar Biasa</string>
 	<string name="booking_filters_price_category">Kategori Harga</string>
-	<string name="booking_filters_no_results">Tidak Ada Hasil</string>
-	<string name="booking_filters_nores_message">Cobalah dengan istilah pencarian yang lebih umum, perkecil atau atur ulang filter.</string>
-	<string name="booking_filters_expand_area_button">Perkecil</string>
-	<string name="booking_filters_reset_button">Atur Ulang Filter</string>
+	<string name="search_no_results_title">Tidak Ada Hasil</string>
+	<string name="search_no_results_message">Cobalah dengan istilah pencarian yang lebih umum, perkecil atau atur ulang filter.</string>
+	<string name="search_no_results_expand_area_button">Perkecil</string>
+	<string name="search_no_results_reset_button">Atur Ulang Filter</string>
 	<!-- noun -->
-	<string name="booking_list">Daftar</string>
+	<string name="search_in_table">Daftar</string>
 	<string name="booking_based_on_reviews">Berdasarkan %d ulasan hotel</string>
 	<string name="booking_show_more">Selengkapnya</string>
 	<string name="booking_reviews">Ulasan</string>
@@ -986,4 +986,57 @@
 	<string name="whatsnew_uber_message">Pesan taksi Uber langsung dari aplikasi!</string>
 	<string name="dialog_taxi_offline">Memesan taksi tidak tersedia dalam modus offline.</string>
 	<string name="dialog_taxi_error">Memesan taksi untuk sementara tidak tersedia.</string>
+	<string name="advertisement">Iklan</string>
+	<string name="mobile_data_dialog">Gunakan internet seluler untuk memperlihatkan informasi terperinci?</string>
+	<string name="mobile_data_option_always">Selalu Gunakan</string>
+	<string name="mobile_data_option_today">Hanya Hari Ini</string>
+	<string name="mobile_data_option_not_today">Jangan Gunakan Hari Ini</string>
+	<string name="mobile_data">Internet Seluler</string>
+	<string name="mobile_data_description">Internet seluler diperlukan untuk menampilkan informasi terperinci tentang tempat, seperti foto, harga, dan ulasan.</string>
+	<string name="mobile_data_option_never">Jangan Gunakan</string>
+	<string name="mobile_data_option_ask">Selalu Tanya</string>
+	<string name="traffic_update_maps_text">Untuk memperlihatkan data lalu lintas, peta harus diperbarui.</string>
+	<string name="traffic_outdated">Data lalu lintas belum diperbarui.</string>
+	<string name="big_font">Label yang lebih besar</string>
+	<string name="traffic_update_app">Perbarui MAPS.ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">Untuk menampilkan data lalu lintas, aplikasi ini harus diperbarui.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">Data lalu lintas tidak tersedia</string>
+	<string name="banner_deliveryclub_title">Pengiriman makanan</string>
+	<string name="banner_deliveryclub_message">Pengiriman cepat dari 4.000 restoran. Pesan dari Delivery Club.</string>
+	<string name="banner_lamoda_title">Toko pakaian dan sepatu online</string>
+	<string name="banner_lamoda_message">Lebih dari 1.000 merek. Diskon hingga 70%f. Gratis pengiriman ke seluruh negeri.</string>
+	<string name="banner_tutu_title">Tiket kereta api online</string>
+	<string name="banner_tutu_message">Tiket kereta ke setiap kota online - harga, pencarian, dan pemesanan.</string>
+	<string name="banner_geerbest_title">Toko elektronik online</string>
+	<string name="banner_geerbest_message">Cari cepat di antara lebih dari 50.000 barang berharga murah.</string>
+	<string name="banner_rentalcars_title">Penyewaan mobil online</string>
+	<string name="banner_rentalcars_message">800 perusahaan penyewaan mobil di lebih dari 49.000 lokasi penyewaan mobil.</string>
+	<string name="banner_viator_title">Pencarian wisata online</string>
+	<string name="banner_viator_message">Cari di antara lebih dari 50.000 wisata di seluruh dunia.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">Data Lalu Lintas di 36 Negara</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">Info lalu lintas terbaru dan rute berkendara tercepat berdasarkan ini!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">Info Lalu Lintas saat Roaming</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">Memerlukan kurang dari 1 MB dari bandwidth seluler perjalanan.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">Pesan Taksi</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">Sebagian besar halaman lokasi sekarang mempunyai tombol untuk memesan taksi.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">Pencarian yang Diperbagus</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">Bahkan pertanyaan dengan kesalahan eja akan memberikan hasil pencarian yang akurat.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">Filter Pencarian</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">Cari hotel berdasarkan harga dan peringkat.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">Ukuran Huruf</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">Label pada peta bisa dijadikan lebih besar.</string>
 </resources>

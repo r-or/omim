@@ -27,6 +27,7 @@
 #include "platform/local_country_file_utils.hpp"
 #include "platform/location.hpp"
 #include "platform/measurement_utils.hpp"
+#include "platform/network_policy.hpp"
 #include "platform/platform.hpp"
 #include "platform/preferred_languages.hpp"
 #include "platform/settings.hpp"
@@ -37,9 +38,19 @@
 
 android::Framework * g_framework = 0;
 
+namespace platform
+{
+// Dummy, implementation and location should be chosen by android developer.
+NetworkPolicy ToNativeNetworkPolicy(jobject obj)
+{
+  return NetworkPolicy(true);
+}
+}  // namespace platform
+
 using namespace storage;
 using platform::CountryFile;
 using platform::LocalCountryFile;
+using platform::ToNativeNetworkPolicy;
 
 static_assert(sizeof(int) >= 4, "Size of jint in less than 4 bytes.");
 
@@ -73,6 +84,8 @@ Framework::Framework()
 {
   ASSERT_EQUAL ( g_framework, 0, () );
   g_framework = this;
+
+  m_work.GetTrafficManager().SetStateListener(bind(&Framework::TrafficStateChanged, this, _1));
 }
 
 void Framework::OnLocationError(int errorCode)
@@ -114,6 +127,12 @@ void Framework::MyPositionModeChanged(location::EMyPositionMode mode, bool routi
 {
   if (m_myPositionModeSignal)
     m_myPositionModeSignal(mode, routingActive);
+}
+
+void Framework::TrafficStateChanged(TrafficManager::TrafficState state)
+{
+  if (m_onTrafficStateChangedFn)
+    m_onTrafficStateChangedFn(state);
 }
 
 void Framework::SetMyPositionMode(location::EMyPositionMode mode)
@@ -175,6 +194,7 @@ void Framework::DetachSurface(bool destroyContext)
     LOG(LINFO, ("Destroy context."));
     m_isContextDestroyed = true;
     m_work.EnterBackground();
+    m_work.OnDestroyGLContext();
   }
   m_work.SetRenderingDisabled(destroyContext);
 
@@ -204,7 +224,7 @@ bool Framework::AttachSurface(JNIEnv * env, jobject jSurface)
   if (m_isContextDestroyed)
   {
     LOG(LINFO, ("Recover GL resources, viewport size:", factory->GetWidth(), factory->GetHeight()));
-    m_work.UpdateDrapeEngine(factory->GetWidth(), factory->GetHeight());
+    m_work.OnRecoverGLContext(factory->GetWidth(), factory->GetHeight());
     m_isContextDestroyed = false;
 
     m_work.EnterForeground();
@@ -401,6 +421,23 @@ void Framework::ShowTrack(int category, int track)
   NativeFramework()->ShowTrack(*nTrack);
 }
 
+void Framework::SetTrafficStateListener(TrafficManager::TrafficStateChangedFn const & fn)
+{
+  m_onTrafficStateChangedFn = fn;
+}
+
+void Framework::EnableTraffic()
+{
+  m_work.GetTrafficManager().SetEnabled(true);
+  NativeFramework()->SaveTrafficEnabled(true);
+}
+
+void Framework::DisableTraffic()
+{
+  m_work.GetTrafficManager().SetEnabled(false);
+  NativeFramework()->SaveTrafficEnabled(false);
+}
+
 void Framework::SetMyPositionModeListener(location::TMyPositionModeChanged const & fn)
 {
   m_myPositionModeSignal = fn;
@@ -473,13 +510,21 @@ place_page::Info & Framework::GetPlacePageInfo()
 
 void Framework::RequestBookingMinPrice(string const & hotelId, string const & currencyCode, function<void(string const &, string const &)> const & callback)
 {
-  return m_work.GetBookingApi().GetMinPrice(hotelId, currencyCode, callback);
+  // Stub obj must be changed.
+  jobject obj;
+  auto const bookingApi = m_work.GetBookingApi(ToNativeNetworkPolicy(obj));
+  if (bookingApi)
+    bookingApi->GetMinPrice(hotelId, currencyCode, callback);
 }
 
 void Framework::RequestBookingInfo(string const & hotelId, string const & lang,
                                    function<void(BookingApi::HotelInfo const &)> const & callback)
 {
-  return m_work.GetBookingApi().GetHotelInfo(hotelId, lang, callback);
+  // Stub obj must be changed.
+  jobject obj;
+  auto const bookingApi = m_work.GetBookingApi(ToNativeNetworkPolicy(obj));
+  if (bookingApi)
+    bookingApi->GetHotelInfo(hotelId, lang, callback);
 }
 
 bool Framework::HasSpaceForMigration()
@@ -517,7 +562,13 @@ uint64_t Framework::RequestUberProducts(ms::LatLon const & from, ms::LatLon cons
                                         uber::ProductsCallback const & callback,
                                         uber::ErrorCallback const & errorCallback)
 {
-  return m_work.GetUberApi().GetAvailableProducts(from, to, callback, errorCallback);
+  // Stub obj must be changed.
+  jobject obj;
+  auto const uberApi = m_work.GetUberApi(ToNativeNetworkPolicy(obj));
+  if (!uberApi)
+    return 0;
+
+  return uberApi->GetAvailableProducts(from, to, callback, errorCallback);
 }
 
 uber::RideRequestLinks Framework::GetUberLinks(string const & productId, ms::LatLon const & from, ms::LatLon const & to)

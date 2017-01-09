@@ -1,9 +1,10 @@
 #import "MWMAlertViewController.h"
-#import "Common.h"
+#import "MWMCommon.h"
 #import "MWMController.h"
 #import "MWMDownloadTransitMapAlert.h"
 #import "MWMLocationAlert.h"
 #import "MWMLocationNotFoundAlert.h"
+#import "MWMMobileInternetAlert.h"
 #import "MWMSearchNoResultsAlert.h"
 #import "MapViewController.h"
 #import "MapsAppDelegate.h"
@@ -20,15 +21,10 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
 
 + (nonnull MWMAlertViewController *)activeAlertController
 {
-  UIWindow * window = UIApplication.sharedApplication.delegate.window;
-  UIViewController * rootViewController = window.rootViewController;
-  ASSERT([rootViewController isKindOfClass:[UINavigationController class]], ());
-  UINavigationController * navigationController =
-      static_cast<UINavigationController *>(rootViewController);
-  UIViewController * topViewController = navigationController.topViewController;
-  ASSERT([topViewController conformsToProtocol:@protocol(MWMController)], ());
+  UIViewController * tvc = topViewController();
+  ASSERT([tvc conformsToProtocol:@protocol(MWMController)], ());
   UIViewController<MWMController> * mwmController =
-      static_cast<UIViewController<MWMController> *>(topViewController);
+      static_cast<UIViewController<MWMController> *>(tvc);
   return mwmController.alertController;
 }
 
@@ -40,11 +36,14 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
   return self;
 }
 
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
-                                duration:(NSTimeInterval)duration
+- (void)viewWillTransitionToSize:(CGSize)size
+       withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
-  for (MWMAlert * alert in self.view.subviews)
-    [alert rotate:toInterfaceOrientation duration:duration];
+  auto const orient = size.width > size.height ? UIInterfaceOrientationLandscapeLeft : UIInterfaceOrientationPortrait;
+  [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+    for (MWMAlert * alert in self.view.subviews)
+      [alert rotate:orient duration:context.transitionDuration];
+  } completion:^(id<UIViewControllerTransitionCoordinatorContext> context) {}];
 }
 
 #pragma mark - Actions
@@ -117,10 +116,7 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
 
 - (void)presentRoutingDisclaimerAlertWithOkBlock:(TMWMVoidBlock)block
 {
-  [self
-      displayAlert:[MWMAlert routingDisclaimerAlertWithInitialOrientation:self.ownerViewController
-                                                                              .interfaceOrientation
-                                                                  okBlock:block]];
+  [self displayAlert:[MWMAlert routingDisclaimerAlertWithOkBlock:block]];
 }
 
 - (void)presentDisabledLocationAlert { [self displayAlert:MWMAlert.disabledLocationAlert]; }
@@ -205,6 +201,10 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
   [alert update];
 }
 
+- (void)presentMobileInternetAlertWithBlock:(nonnull TMWMVoidBlock)block
+{
+  [self displayAlert:[MWMMobileInternetAlert alertWithBlock:block]];
+}
 - (void)presentEditorViralAlert { [self displayAlert:[MWMAlert editorViralAlert]]; }
 - (void)presentOsmAuthAlert { [self displayAlert:[MWMAlert osmAuthAlert]]; }
 - (void)displayAlert:(MWMAlert *)alert

@@ -23,7 +23,6 @@
     <attr name="ppButtonsBackground" format="color"/>
     <attr name="ppPreviewHeadOpen" format="reference"/>
     <attr name="ppPreviewHeadClosed" format="reference"/>
-    <attr name="ppArrowDrawable" format="reference"/>
     <attr name="ppRatingBackground" format="color"/>
     <attr name="ppRatingText" format="color"/>
     <attr name="ppPositive" format="reference"/>
@@ -56,6 +55,7 @@
 
     <attr name="myPositionButtonAnimation" format="reference"/>
     <attr name="wheelPendingAnimation" format="reference"/>
+    <attr name="trafficLoadingAnimation" format="reference"/>
 
     <attr name="navButtonsTheme" format="reference"/>
     <attr name="downloaderTheme" format="reference"/>
@@ -66,6 +66,14 @@
     <attr name="routingButtonHint" format="color"/>
     <attr name="routingButtonPressedHint" format="color"/>
     <attr name="routingButtonActivatedHint" format="color"/>
+
+    <attr name="bannerText" format="color"/>
+    <attr name="bannerBackground" format="color"/>
+
+    <attr name="steadyIconTint" format="color"/>
+    <attr name="steadyIconBackground" format="color"/>
+    <attr name="activeIconTint" format="color"/>
+    <attr name="activeIconBackground" format="color"/>
   </declare-styleable>
 
   <declare-styleable name="ThemeAttrs.NavButtons">

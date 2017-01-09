@@ -26,6 +26,7 @@ OTHER_FILES += \
     shaders/dashed_vertex_shader.vsh \
     shaders/debug_rect_fragment_shader.fsh \
     shaders/debug_rect_vertex_shader.vsh \
+    shaders/discarded_texturing_fragment_shader.fsh \
     shaders/line_fragment_shader.fsh \
     shaders/line_vertex_shader.vsh \
     shaders/masked_texturing_billboard_vertex_shader.vsh \
@@ -56,6 +57,8 @@ OTHER_FILES += \
     shaders/trackpoint_fragment_shader.fsh \
     shaders/traffic_fragment_shader.fsh \
     shaders/traffic_vertex_shader.vsh \
+    shaders/traffic_line_fragment_shader.fsh \
+    shaders/traffic_line_vertex_shader.vsh \
     shaders/transparent_layer_fragment_shader.fsh \
     shaders/transparent_layer_vertex_shader.vsh \
     shaders/user_mark.vsh \

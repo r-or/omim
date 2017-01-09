@@ -958,7 +958,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">บริเวณใกล้เคียง</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">สั่ง</string>
+	<string name="taxi_order">เรียกแท็กซี่</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">คาดว่าภายใน %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -973,12 +973,12 @@
 	<string name="booking_filters_rating_very_good">ดีมาก</string>
 	<string name="booking_filters_rating_excellent">ยอดเยี่ยม</string>
 	<string name="booking_filters_price_category">หมวดหมู่ราคา</string>
-	<string name="booking_filters_no_results">ไม่พบผลลัพธ์</string>
-	<string name="booking_filters_nores_message">ลองค้นหาด้วยคำทั่ว ๆ ไปดู ซูมออกหรือรีเซ็ตตัวกรอง</string>
-	<string name="booking_filters_expand_area_button">ซูมออก</string>
-	<string name="booking_filters_reset_button">รีเซ็ตตัวกรอง</string>
+	<string name="search_no_results_title">ไม่พบผลลัพธ์</string>
+	<string name="search_no_results_message">ลองค้นหาด้วยคำทั่ว ๆ ไปดู ซูมออกหรือรีเซ็ตตัวกรอง</string>
+	<string name="search_no_results_expand_area_button">ซูมออก</string>
+	<string name="search_no_results_reset_button">รีเซ็ตตัวกรอง</string>
 	<!-- noun -->
-	<string name="booking_list">รายการ</string>
+	<string name="search_in_table">รายการ</string>
 	<string name="booking_based_on_reviews">ตาม %d รีวิวโรงแรม</string>
 	<string name="booking_show_more">แสดงเพิ่มเติม</string>
 	<string name="booking_reviews">รีวิว</string>
@@ -993,4 +993,57 @@
 	<string name="whatsnew_uber_message">เรียกแท็กซี่ Uber โดยตรงจากแอป!</string>
 	<string name="dialog_taxi_offline">ไม่สามารถทำการจองแท็กซี่ได้ในโหมดออฟไลน์</string>
 	<string name="dialog_taxi_error">ไม่สามารถทำการจองแท็กซี่ได้ชั่วคราว</string>
+	<string name="advertisement">โฆษณา</string>
+	<string name="mobile_data_dialog">ใช้อินเทอร์เน็ตมือถือแสดงข้อมูลโดยรายละเอียดหรือไม่?</string>
+	<string name="mobile_data_option_always">ใช้เสมอ</string>
+	<string name="mobile_data_option_today">วันนี้เท่านั้น</string>
+	<string name="mobile_data_option_not_today">ไม่ใช้วันนี้</string>
+	<string name="mobile_data">อินเทอร์เน็ตมือถือ</string>
+	<string name="mobile_data_description">จำเป็นต้องใช้อินเทอร์เน็ตมือถือในการแสดงข้อมูลโดยรายละเอียดเกี่ยวกับสถานที่ เช่น รูปถ่าย ราคา และรีวิว</string>
+	<string name="mobile_data_option_never">ไม่ใช้เลย</string>
+	<string name="mobile_data_option_ask">ถามก่อนเสมอ</string>
+	<string name="traffic_update_maps_text">ต้องอัปเดตแผนที่เพื่อแสดงข้อมูลการจราจร</string>
+	<string name="traffic_outdated">ข้อมูลการจราจรเก่าเกินไปแล้ว</string>
+	<string name="big_font">ป้ายใหญ่ขึ้น</string>
+	<string name="traffic_update_app">กรุณาอัปเดต MAPS.ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">ในการแสดงข้อมูลการจราจร แอปพลิเคชั่นจะต้องอัปเดตก่อน</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">ไม่มีข้อมูลการจราจร</string>
+	<string name="banner_deliveryclub_title">อาหารส่งถึงที่</string>
+	<string name="banner_deliveryclub_message">อาหารส่งถึงที่จาก 4,000 ร้าน สั่งจาก Delivery Club.</string>
+	<string name="banner_lamoda_title">ร้านค้าเสื้อผ้าและรองเท้าออนไลน์</string>
+	<string name="banner_lamoda_message">กว่า 1,000 ยี่ห้อ ลดถึง 70% จัดส่งฟรีทั่วประเทศ</string>
+	<string name="banner_tutu_title">ตั๋วรถไฟออนไลน์</string>
+	<string name="banner_tutu_message">ตั๋วรถไฟออนไลน์ไปทุกเมือง - ราคา การค้นหา และการจอง</string>
+	<string name="banner_geerbest_title">ร้านอุปกรณ์อิเล็กทรอนิกส์ออนไลน์</string>
+	<string name="banner_geerbest_message">การค้นหาทันทีในกว่า 50,000 รายการในราคาที่ต่ำ</string>
+	<string name="banner_rentalcars_title">การเช่ารถออนไลน์</string>
+	<string name="banner_rentalcars_message">800 บริษัทเช่ารถในสถานเช่ารถมากกว่า 49,000 แห่ง</string>
+	<string name="banner_viator_title">การค้นหาทัวร์ออนไลน์</string>
+	<string name="banner_viator_message">ค้นหาในทัวร์มากกว่า 50,000 แห่งทั่วโลก</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">ข้อมูลการจราจรใน 36 ประเทศ</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">ข้อมูลการจราจรที่ทันสมัยและเส้นทางการขับรถที่เร็วที่สุดตามข้อมูลนั้น!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">ข้อมูลการจราจรในการใช้โรมมิ่ง</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">ใช้แบนด์วิดท์มือถือน้อยกว่า 1 MB ต่อเที่ยว</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">เรียกแท็กซี่</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">หน้าตำแหน่งที่ตั้งส่วนใหญ่ในขณะนี้มีปุ่มเรียกแท็กซี่</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">การค้นหาที่ได้รับการปรับปรุง</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">แม้แต่คำถามที่สะกดผิดก็ยังให้ผลลัพธ์การค้นหาที่ถูกต้องได้</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">ตัวกรองการค้นหา</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">ค้นหาโรงแรมตามราคาและการจัดอันดับ</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">ขนาดฟอนต์</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">ป้ายบนแผนที่สามารถทำให้ใหญ่ขึ้นได้</string>
 </resources>

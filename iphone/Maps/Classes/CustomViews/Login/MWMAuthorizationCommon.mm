@@ -1,4 +1,4 @@
-#import "Common.h"
+#import "MWMCommon.h"
 #import "MWMAuthorizationCommon.h"
 #import "UIButton+RuntimeAttributes.h"
 #import "UIColor+MapsMeColor.h"
@@ -26,7 +26,7 @@ void SetOSMUserNameWithCredentials(osm::TKeySecret const & keySecret)
       [ud setObject:@(api.GetUserPreferences().m_displayName.c_str()) forKey:kOSMUserName];
       [ud synchronize];
     }
-    catch (exception const & ex)
+    catch (std::exception const & ex)
     {
        LOG(LWARNING, ("Can't load user preferences from OSM server:", ex.what()));
     }

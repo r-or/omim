@@ -49,7 +49,7 @@ public class Utils
 
   public interface Proc<T>
   {
-    void invoke(T param);
+    void invoke(@NonNull T param);
   }
 
   private Utils() {}
@@ -428,5 +428,26 @@ public class Utils
       intent.setData(Uri.parse(links.getUniversalLink()));
     }
     context.startActivity(intent);
+  }
+
+  public static void sendTo(@NonNull Context context, @NonNull String email)
+  {
+    Intent intent = new Intent(Intent.ACTION_SENDTO);
+    intent.setData(Utils.buildMailUri(email, "", ""));
+    context.startActivity(intent);
+  }
+
+  public static void callPhone(@NonNull Context context, @NonNull String phone)
+  {
+    Intent intent = new Intent(Intent.ACTION_DIAL);
+    intent.setData(Uri.parse("tel:" + phone));
+    try
+    {
+      context.startActivity(intent);
+    }
+    catch (ActivityNotFoundException e)
+    {
+      AlohaHelper.logException(e);
+    }
   }
 }

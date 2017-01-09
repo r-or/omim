@@ -1,11 +1,10 @@
 #import "LocalNotificationManager.h"
 #import "CLLocation+Mercator.h"
-#import "Common.h"
+#import "MWMCommon.h"
 #import "MWMStorage.h"
 #import "MapViewController.h"
 #import "MapsAppDelegate.h"
 #import "Statistics.h"
-#import "TimeUtils.h"
 
 #import "3party/Alohalytics/src/alohalytics_objc.h"
 
@@ -70,7 +69,6 @@ using namespace storage;
             kStatScenario : kStatDownload
           }];
     [MWMStorage downloadNode:countryId
-             alertController:mapViewController.alertController
                    onSuccess:^{
                      GetFramework().ShowNode(countryId);
                    }];

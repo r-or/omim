@@ -8,6 +8,7 @@
 
 #include "std/condition_variable.hpp"
 #include "std/deque.hpp"
+#include "std/functional.hpp"
 #include "std/mutex.hpp"
 
 namespace df
@@ -43,6 +44,7 @@ private:
   bool m_isWaiting;
   using TMessageNode = pair<drape_ptr<Message>, MessagePriority>;
   deque<TMessageNode> m_messages;
+  deque<drape_ptr<Message>> m_lowPriorityMessages;
 };
 
 } // namespace df

@@ -6,6 +6,8 @@ set(
   SRC
   altitude_loader.cpp
   altitude_loader.hpp
+  banners.cpp
+  banners.hpp
   categories_holder_loader.cpp
   categories_holder.cpp
   categories_holder.hpp
@@ -138,4 +140,5 @@ file(COPY ${OTHER_FILES} DESTINATION ${CMAKE_BINARY_DIR})
 
 add_library(${PROJECT_NAME} ${SRC})
 
+omim_add_test_subdirectory(indexer_tests_support)
 #omim_add_test_subdirectory(indexer_tests)

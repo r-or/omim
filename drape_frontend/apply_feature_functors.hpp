@@ -9,6 +9,7 @@
 #include "indexer/point_to_int64.hpp"
 
 #include "geometry/point2d.hpp"
+#include "geometry/polyline2d.hpp"
 #include "geometry/spline.hpp"
 
 #include "std/unordered_map.hpp"
@@ -101,7 +102,7 @@ public:
   ApplyAreaFeature(m2::PointD const & tileCenter,
                    TInsertShapeFn const & insertShape, FeatureID const & id,
                    m2::RectD const & clipRect, bool isBuilding, float minPosZ,
-                   float posZ, int minVisibleScale, uint8_t rank,
+                   float posZ, int minVisibleScale, uint8_t rank, bool generateOutline,
                    CaptionDescription const & captions);
 
   using TBase::operator ();
@@ -127,6 +128,7 @@ private:
   float const m_minPosZ;
   bool const m_isBuilding;
   m2::RectD m_clipRect;
+  bool m_generateOutline;
 };
 
 class ApplyLineFeature : public BaseApplyFeature
@@ -143,6 +145,8 @@ public:
   bool HasGeometry() const;
   void ProcessRule(Stylist::TRuleWrapper const & rule);
   void Finish();
+
+  m2::PolylineD GetPolyline() const;
 
 private:
   m2::SharedSpline m_spline;

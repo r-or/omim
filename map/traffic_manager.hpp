@@ -13,11 +13,15 @@
 #include "indexer/index.hpp"
 #include "indexer/mwm_set.hpp"
 
+#include "base/thread.hpp"
+
+#include "std/algorithm.hpp"
+#include "std/atomic.hpp"
 #include "std/chrono.hpp"
 #include "std/map.hpp"
 #include "std/mutex.hpp"
 #include "std/set.hpp"
-#include "std/thread.hpp"
+#include "std/string.hpp"
 #include "std/vector.hpp"
 
 namespace df
@@ -28,6 +32,18 @@ class DrapeEngine;
 class TrafficManager final
 {
 public:
+  enum class TrafficState
+  {
+    Disabled,
+    Enabled,
+    WaitingData,
+    Outdated,
+    NoData,
+    NetworkError,
+    ExpiredData,
+    ExpiredApp
+  };
+
   struct MyPosition
   {
     m2::PointD m_position = m2::PointD(0.0, 0.0);
@@ -40,66 +56,130 @@ public:
     {}
   };
 
+  using TrafficStateChangedFn = function<void(TrafficState)>;
   using GetMwmsByRectFn = function<vector<MwmSet::MwmId>(m2::RectD const &)>;
 
-  TrafficManager(Index const & index, GetMwmsByRectFn const & getMwmsByRectFn,
-                 size_t maxCacheSizeBytes);
+  TrafficManager(GetMwmsByRectFn const & getMwmsByRectFn, size_t maxCacheSizeBytes,
+                 traffic::TrafficObserver & observer);
+  TrafficManager(TrafficManager && /* trafficManager */) = default;
   ~TrafficManager();
+
+  void Teardown();
+
+  void SetStateListener(TrafficStateChangedFn const & onStateChangedFn);
+  void SetDrapeEngine(ref_ptr<df::DrapeEngine> engine);
+  void SetCurrentDataVersion(int64_t dataVersion);
 
   void SetEnabled(bool enabled);
 
   void UpdateViewport(ScreenBase const & screen);
   void UpdateMyPosition(MyPosition const & myPosition);
 
-  void OnRecover();
+  void Invalidate();
 
-  void SetDrapeEngine(ref_ptr<df::DrapeEngine> engine);
+  void OnDestroyGLContext();
+  void OnRecoverGLContext();
+  void OnMwmDelete(MwmSet::MwmId const & mwmId);
+
+  void OnEnterForeground();
+  void OnEnterBackground();
 
 private:
-  void CalculateSegmentsGeometry(traffic::TrafficInfo const & trafficInfo,
-                                 df::TrafficSegmentsGeometry & output) const;
-  void CalculateSegmentsColoring(traffic::TrafficInfo const & trafficInfo,
-                                 df::TrafficSegmentsColoring & output) const;
+  struct CacheEntry
+  {
+    CacheEntry();
+    CacheEntry(time_point<steady_clock> const & requestTime);
+
+    bool m_isLoaded;
+    size_t m_dataSize;
+
+    time_point<steady_clock> m_lastActiveTime;
+    time_point<steady_clock> m_lastRequestTime;
+    time_point<steady_clock> m_lastResponseTime;
+
+    int m_retriesCount;
+    bool m_isWaitingForResponse;
+
+    traffic::TrafficInfo::Availability m_lastAvailability;
+  };
 
   void ThreadRoutine();
   bool WaitForRequest(vector<MwmSet::MwmId> & mwms);
+
+  void OnTrafficDataResponse(traffic::TrafficInfo && info);
+  void OnTrafficRequestFailed(traffic::TrafficInfo && info);
+
+  /// \brief Updates |activeMwms| and request traffic data.
+  /// \param rect is a rectangle covering a new active mwm set.
+  /// \note |lastMwmsByRect|/|activeMwms| may be either |m_lastDrapeMwmsByRect/|m_activeDrapeMwms|
+  /// or |m_lastRoutingMwmsByRect|/|m_activeRoutingMwms|.
+  /// \note |m_mutex| is locked inside the method. So the method should be called without |m_mutex|.
+  void UpdateActiveMwms(m2::RectD const & rect, vector<MwmSet::MwmId> & lastMwmsByRect,
+                        set<MwmSet::MwmId> & activeMwms);
+
+  // This is a group of methods that haven't their own synchronization inside.
   void RequestTrafficData();
-  void RequestTrafficData(MwmSet::MwmId const & mwmId);
-  void OnTrafficDataResponse(traffic::TrafficInfo const & info);
-  void CheckCacheSize();
+  void RequestTrafficData(MwmSet::MwmId const & mwmId, bool force);
 
-  bool m_isEnabled;
+  void Clear();
+  void ClearCache(MwmSet::MwmId const & mwmId);
+  void ShrinkCacheToAllowableSize();
 
-  Index const & m_index;
+  void UpdateState();
+  void ChangeState(TrafficState newState);
+
+  bool IsInvalidState() const;
+  bool IsEnabled() const;
+
+  void UniteActiveMwms(set<MwmSet::MwmId> & activeMwms) const;
+
+  void Pause();
+  void Resume();
+
+  template <class F>
+  void ForEachActiveMwm(F && f) const
+  {
+    set<MwmSet::MwmId> activeMwms;
+    UniteActiveMwms(activeMwms);
+    for_each(activeMwms.begin(), activeMwms.end(), forward<F>(f));
+  }
+
   GetMwmsByRectFn m_getMwmsByRectFn;
+  traffic::TrafficObserver & m_observer;
 
   ref_ptr<df::DrapeEngine> m_drapeEngine;
+  atomic<int64_t> m_currentDataVersion;
 
-  MyPosition m_currentPosition;
-  ScreenBase m_currentModelView;
+  // These fields have a flag of their initialization.
+  pair<MyPosition, bool> m_currentPosition = {MyPosition(), false};
+  pair<ScreenBase, bool> m_currentModelView = {ScreenBase(), false};
 
-  struct MwmTrafficInfo
-  {
-    MwmTrafficInfo() = default;
-
-    MwmTrafficInfo(time_point<steady_clock> const & requestTime) : m_lastRequestTime(requestTime) {}
-    bool m_isLoaded = false;
-    time_point<steady_clock> m_lastSeenTime;
-    time_point<steady_clock> m_lastRequestTime;
-    size_t m_dataSize = 0;
-  };
+  atomic<TrafficState> m_state;
+  TrafficStateChangedFn m_onStateChangedFn;
 
   size_t m_maxCacheSizeBytes;
-  size_t m_currentCacheSizeBytes;
+  size_t m_currentCacheSizeBytes = 0;
 
-  map<MwmSet::MwmId, MwmTrafficInfo> m_mwmInfos;
+  map<MwmSet::MwmId, CacheEntry> m_mwmCache;
 
   bool m_isRunning;
   condition_variable m_condition;
 
-  vector<MwmSet::MwmId> m_activeMwms;
+  vector<MwmSet::MwmId> m_lastDrapeMwmsByRect;
+  set<MwmSet::MwmId> m_activeDrapeMwms;
+  vector<MwmSet::MwmId> m_lastRoutingMwmsByRect;
+  set<MwmSet::MwmId> m_activeRoutingMwms;
+
+  // The ETag or entity tag is part of HTTP, the protocol for the World Wide Web.
+  // It is one of several mechanisms that HTTP provides for web cache validation,
+  // which allows a client to make conditional requests.
+  map<MwmSet::MwmId, string> m_trafficETags;
+
+  atomic<bool> m_isPaused;
 
   vector<MwmSet::MwmId> m_requestedMwms;
-  mutex m_requestedMwmsLock;
-  thread m_thread;
+  mutex m_mutex;
+  threads::SimpleThread m_thread;
 };
+
+extern string DebugPrint(TrafficManager::TrafficState state);

@@ -1,5 +1,5 @@
 #import "MWMRoutingDisclaimerAlert.h"
-#import "Common.h"
+#import "MWMCommon.h"
 #import "MWMAlertViewController.h"
 #import "Statistics.h"
 #import "UIColor+MapsMeColor.h"
@@ -18,8 +18,7 @@ static NSString * const kStatisticsEvent = @"Routing Disclaimer Alert";
 
 @implementation MWMRoutingDisclaimerAlert
 
-+ (instancetype)alertWithInitialOrientation:(UIInterfaceOrientation)orientation
-                                    okBlock:(TMWMVoidBlock)block
++ (instancetype)alertWithOkBlock:(TMWMVoidBlock)block
 {
   [Statistics logEvent:kStatisticsEvent withParameters:@{kStatAction : kStatOpen}];
   MWMRoutingDisclaimerAlert * alert =

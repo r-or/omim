@@ -18,6 +18,8 @@
 #include "base/logging.hpp"
 #include "base/macros.hpp"
 
+#include "std/chrono.hpp"
+
 #ifdef DEBUG
 #define TEST_CALL(action) if (m_testFn) m_testFn(action)
 #else
@@ -491,7 +493,7 @@ bool UserEventStream::InterruptFollowAnimations(bool force)
   if (followAnim != nullptr)
   {
     if (force || followAnim->CouldBeInterrupted())
-      ResetAnimations(followAnim->GetType(), followAnim->GetCustomType());
+      ResetAnimations(followAnim->GetType(), followAnim->GetCustomType(), !followAnim->CouldBeInterrupted());
     else
       return false;
   }
@@ -575,18 +577,18 @@ void UserEventStream::SetAutoPerspective(bool isAutoPerspective)
   return;
 }
 
-void UserEventStream::ResetAnimations(Animation::Type animType, bool finishAll)
+void UserEventStream::ResetAnimations(Animation::Type animType, bool rewind, bool finishAll)
 {
   bool const hasAnimations = m_animationSystem.HasAnimations();
-  m_animationSystem.FinishAnimations(animType, true /* rewind */, finishAll);
+  m_animationSystem.FinishAnimations(animType, rewind, finishAll);
   if (hasAnimations)
     ApplyAnimations();
 }
 
-void UserEventStream::ResetAnimations(Animation::Type animType, string const & customType, bool finishAll)
+void UserEventStream::ResetAnimations(Animation::Type animType, string const & customType, bool rewind, bool finishAll)
 {
   bool const hasAnimations = m_animationSystem.HasAnimations();
-  m_animationSystem.FinishAnimations(animType, customType, true /* rewind */, finishAll);
+  m_animationSystem.FinishAnimations(animType, customType, rewind, finishAll);
   if (hasAnimations)
     ApplyAnimations();
 }

@@ -5,24 +5,52 @@
 #include "drape_frontend/drape_engine.hpp"
 #include "drape_frontend/visual_params.hpp"
 
+#include "indexer/ftypes_matcher.hpp"
 #include "indexer/scales.hpp"
+
+#include "geometry/mercator.hpp"
+
+#include "platform/platform.hpp"
+
+#include "3party/Alohalytics/src/alohalytics.h"
 
 namespace
 {
-auto const kUpdateInterval = minutes(1);
+auto constexpr kUpdateInterval = minutes(1);
+auto constexpr kOutdatedDataTimeout = minutes(5) + kUpdateInterval;
+auto constexpr kNetworkErrorTimeout = minutes(20);
 
-int const kMinTrafficZoom = 10;
+auto constexpr kMaxRetriesCount = 5;
+} // namespace
 
-}  // namespace
 
-TrafficManager::TrafficManager(Index const & index, GetMwmsByRectFn const & getMwmsByRectFn,
-                               size_t maxCacheSizeBytes)
-  : m_isEnabled(true)  // TODO: true is temporary
-  , m_index(index)
-  , m_getMwmsByRectFn(getMwmsByRectFn)
+TrafficManager::CacheEntry::CacheEntry()
+  : m_isLoaded(false)
+  , m_dataSize(0)
+  , m_retriesCount(0)
+  , m_isWaitingForResponse(false)
+  , m_lastAvailability(traffic::TrafficInfo::Availability::Unknown)
+{}
+
+TrafficManager::CacheEntry::CacheEntry(time_point<steady_clock> const & requestTime)
+  : m_isLoaded(false)
+  , m_dataSize(0)
+  , m_lastActiveTime(requestTime)
+  , m_lastRequestTime(requestTime)
+  , m_retriesCount(0)
+  , m_isWaitingForResponse(true)
+  , m_lastAvailability(traffic::TrafficInfo::Availability::Unknown)
+{}
+
+TrafficManager::TrafficManager(GetMwmsByRectFn const & getMwmsByRectFn, size_t maxCacheSizeBytes,
+                               traffic::TrafficObserver & observer)
+  : m_getMwmsByRectFn(getMwmsByRectFn)
+  , m_observer(observer)
+  , m_currentDataVersion(0)
+  , m_state(TrafficState::Disabled)
   , m_maxCacheSizeBytes(maxCacheSizeBytes)
-  , m_currentCacheSizeBytes(0)
   , m_isRunning(true)
+  , m_isPaused(false)
   , m_thread(&TrafficManager::ThreadRoutine, this)
 {
   CHECK(m_getMwmsByRectFn != nullptr, ());
@@ -30,17 +58,77 @@ TrafficManager::TrafficManager(Index const & index, GetMwmsByRectFn const & getM
 
 TrafficManager::~TrafficManager()
 {
+#ifdef DEBUG
   {
-    lock_guard<mutex> lock(m_requestedMwmsLock);
+    lock_guard<mutex> lock(m_mutex);
+    ASSERT(!m_isRunning, ());
+  }
+#endif
+}
+
+void TrafficManager::Teardown()
+{
+  {
+    lock_guard<mutex> lock(m_mutex);
+    if (!m_isRunning)
+      return;
     m_isRunning = false;
   }
   m_condition.notify_one();
   m_thread.join();
 }
 
+void TrafficManager::SetStateListener(TrafficStateChangedFn const & onStateChangedFn)
+{
+  GetPlatform().RunOnGuiThread([this, onStateChangedFn]()
+  {
+    m_onStateChangedFn = onStateChangedFn;
+  });
+}
+
 void TrafficManager::SetEnabled(bool enabled)
 {
-  m_isEnabled = enabled;
+  {
+    lock_guard<mutex> lock(m_mutex);
+    if (enabled == IsEnabled())
+    {
+       LOG(LWARNING, ("Invalid attempt to", enabled ? "enable" : "disable",
+                      "traffic manager, it's already", enabled ? "enabled" : "disabled",
+                      ", doing nothing."));
+       return;
+    }
+
+    Clear();
+    ChangeState(enabled ? TrafficState::Enabled : TrafficState::Disabled);
+  }
+
+  if (m_drapeEngine != nullptr)
+    m_drapeEngine->EnableTraffic(enabled);
+
+  if (enabled)
+  {
+    Invalidate();
+    GetPlatform().GetMarketingService().SendPushWooshTag(marketing::kTrafficDiscovered);
+    alohalytics::LogEvent(
+        "$TrafficEnabled",
+        alohalytics::TStringMap({{"dataVersion", strings::to_string(m_currentDataVersion.load())}}));
+  }
+  else
+  {
+    m_observer.OnTrafficInfoClear();
+  }
+}
+
+void TrafficManager::Clear()
+{
+  m_currentCacheSizeBytes = 0;
+  m_mwmCache.clear();
+  m_lastDrapeMwmsByRect.clear();
+  m_lastRoutingMwmsByRect.clear();
+  m_activeDrapeMwms.clear();
+  m_activeRoutingMwms.clear();
+  m_requestedMwms.clear();
+  m_trafficETags.clear();
 }
 
 void TrafficManager::SetDrapeEngine(ref_ptr<df::DrapeEngine> engine)
@@ -48,104 +136,98 @@ void TrafficManager::SetDrapeEngine(ref_ptr<df::DrapeEngine> engine)
   m_drapeEngine = engine;
 }
 
-void TrafficManager::OnRecover()
+void TrafficManager::SetCurrentDataVersion(int64_t dataVersion)
 {
-  m_mwmInfos.clear();
-
-  UpdateViewport(m_currentModelView);
-  UpdateMyPosition(m_currentPosition);
+  m_currentDataVersion = dataVersion;
 }
 
-void TrafficManager::UpdateViewport(ScreenBase const & screen)
+void TrafficManager::OnMwmDelete(MwmSet::MwmId const & mwmId)
 {
-  m_currentModelView = screen;
-
-  if (!m_isEnabled)
+  if (!IsEnabled())
     return;
-
-  if (df::GetZoomLevel(screen.GetScale()) < kMinTrafficZoom)
-    return;
-
-  // Request traffic.
-  auto mwms = m_getMwmsByRectFn(screen.ClipRect());
 
   {
-    lock_guard<mutex> lock(m_requestedMwmsLock);
+    lock_guard<mutex> lock(m_mutex);
+    ClearCache(mwmId);
+  }
+  Invalidate();
+}
 
-    m_activeMwms.clear();
+void TrafficManager::OnDestroyGLContext()
+{
+  Pause();
+}
+
+void TrafficManager::OnRecoverGLContext()
+{
+  Resume();
+}
+
+void TrafficManager::Invalidate()
+{
+  if (!IsEnabled())
+    return;
+
+  m_lastDrapeMwmsByRect.clear();
+  m_lastRoutingMwmsByRect.clear();
+
+  if (m_currentModelView.second)
+    UpdateViewport(m_currentModelView.first);
+  if (m_currentPosition.second)
+    UpdateMyPosition(m_currentPosition.first);
+}
+
+void TrafficManager::UpdateActiveMwms(m2::RectD const & rect,
+                                      vector<MwmSet::MwmId> & lastMwmsByRect,
+                                      set<MwmSet::MwmId> & activeMwms)
+{
+  auto mwms = m_getMwmsByRectFn(rect);
+  if (lastMwmsByRect == mwms)
+    return;
+  lastMwmsByRect = mwms;
+
+  {
+    lock_guard<mutex> lock(m_mutex);
+    activeMwms.clear();
     for (auto const & mwm : mwms)
     {
       if (mwm.IsAlive())
-        m_activeMwms.push_back(mwm);
+        activeMwms.insert(mwm);
     }
-
     RequestTrafficData();
   }
 }
 
 void TrafficManager::UpdateMyPosition(MyPosition const & myPosition)
 {
-  m_currentPosition = myPosition;
+  // Side of square around |myPosition|. Every mwm which is covered by the square
+  // will get traffic info.
+  double const kSquareSideM = 5000.0;
+  m_currentPosition = {myPosition, true /* initialized */};
 
-  if (!m_isEnabled)
+  if (!IsEnabled() || IsInvalidState() || m_isPaused)
     return;
 
-  // 1. Determine mwm's nearby "my position".
+  m2::RectD const rect =
+      MercatorBounds::RectByCenterXYAndSizeInMeters(myPosition.m_position, kSquareSideM / 2.0);
+  // Request traffic.
+  UpdateActiveMwms(rect, m_lastRoutingMwmsByRect, m_activeRoutingMwms);
 
-  // 2. Request traffic for this mwm's.
-
-  // 3. Do all routing stuff.
+  // @TODO Do all routing stuff.
 }
 
-void TrafficManager::CalculateSegmentsGeometry(traffic::TrafficInfo const & trafficInfo,
-                                               df::TrafficSegmentsGeometry & output) const
+void TrafficManager::UpdateViewport(ScreenBase const & screen)
 {
-  size_t const coloringSize = trafficInfo.GetColoring().size();
-  output.reserve(coloringSize);
+  m_currentModelView = {screen, true /* initialized */};
 
-  vector<FeatureID> features;
-  features.reserve(coloringSize);
-  for (auto const & c : trafficInfo.GetColoring())
-    features.emplace_back(trafficInfo.GetMwmId(), c.first.m_fid);
+  if (!IsEnabled() || IsInvalidState() || m_isPaused)
+    return;
 
-  int constexpr kScale = scales::GetUpperScale();
-  unordered_map<uint32_t, m2::PolylineD> polylines;
-  auto featureReader = [&polylines](FeatureType & ft)
-  {
-    uint32_t const fid = ft.GetID().m_index;
-    if (polylines.find(fid) != polylines.end())
-      return;
+  if (df::GetZoomLevel(screen.GetScale()) < df::kRoadClass0ZoomLevel)
+    return;
 
-    if (routing::IsRoad(feature::TypesHolder(ft)))
-    {
-      m2::PolylineD polyline;
-      ft.ForEachPoint([&polyline](m2::PointD const & pt) { polyline.Add(pt); }, kScale);
-      if (polyline.GetSize() > 1)
-        polylines[fid] = polyline;
-    }
-  };
-  m_index.ReadFeatures(featureReader, features);
-
-  for (auto const & c : trafficInfo.GetColoring())
-  {
-    auto it = polylines.find(c.first.m_fid);
-    if (it == polylines.end())
-      continue;
-    bool const isReversed = (c.first.m_dir == traffic::TrafficInfo::RoadSegmentId::kReverseDirection);
-    m2::PolylineD polyline = it->second.ExtractSegment(c.first.m_idx, isReversed);
-    if (polyline.GetSize() > 1)
-      output.emplace_back(df::TrafficSegmentID(trafficInfo.GetMwmId(), c.first), move(polyline));
-  }
-}
-
-void TrafficManager::CalculateSegmentsColoring(traffic::TrafficInfo const & trafficInfo,
-                                               df::TrafficSegmentsColoring & output) const
-{
-  for (auto const & c : trafficInfo.GetColoring())
-  {
-    df::TrafficSegmentID const sid (trafficInfo.GetMwmId(), c.first);
-    output.emplace_back(sid, c.second);
-  }
+  // Request traffic.
+  UpdateActiveMwms(screen.ClipRect(), m_lastDrapeMwmsByRect, m_activeDrapeMwms);
 }
 
 void TrafficManager::ThreadRoutine()
@@ -155,12 +237,32 @@ void TrafficManager::ThreadRoutine()
   {
     for (auto const & mwm : mwms)
     {
-      traffic::TrafficInfo info(mwm);
+      auto const & mwmInfo = mwm.GetInfo();
+      if (!mwmInfo)
+        continue;
 
-      if (info.ReceiveTrafficData())
-        OnTrafficDataResponse(info);
+      traffic::TrafficInfo info(mwm, m_currentDataVersion);
+
+      string tag;
+      {
+        lock_guard<mutex> lock(m_mutex);
+        tag = m_trafficETags[mwm];
+      }
+
+      if (info.ReceiveTrafficData(tag))
+      {
+        OnTrafficDataResponse(move(info));
+      }
       else
+      {
         LOG(LWARNING, ("Traffic request failed. Mwm =", mwm));
+        OnTrafficRequestFailed(move(info));
+      }
+
+      {
+        lock_guard<mutex> lock(m_mutex);
+        m_trafficETags[mwm] = tag;
+      }
     }
     mwms.clear();
   }
@@ -168,108 +270,316 @@ void TrafficManager::ThreadRoutine()
 
 bool TrafficManager::WaitForRequest(vector<MwmSet::MwmId> & mwms)
 {
-  unique_lock<mutex> lock(m_requestedMwmsLock);
-  bool const timeout = !m_condition.wait_for(lock, kUpdateInterval, [this] { return !m_isRunning || !m_requestedMwms.empty(); });
+  unique_lock<mutex> lock(m_mutex);
+
+  bool const timeout = !m_condition.wait_for(lock, kUpdateInterval, [this]
+  {
+    return !m_isRunning || !m_requestedMwms.empty();
+  });
+
   if (!m_isRunning)
     return false;
+
   if (timeout)
+    RequestTrafficData();
+
+  if (!m_requestedMwms.empty())
+    mwms.swap(m_requestedMwms);
+
+  return true;
+}
+
+void TrafficManager::RequestTrafficData(MwmSet::MwmId const & mwmId, bool force)
+{
+  bool needRequesting = false;
+  auto const currentTime = steady_clock::now();
+  auto const it = m_mwmCache.find(mwmId);
+  if (it == m_mwmCache.end())
   {
-    mwms = m_activeMwms;
+    needRequesting = true;
+    m_mwmCache.insert(make_pair(mwmId, CacheEntry(currentTime)));
   }
   else
   {
-    ASSERT(!m_requestedMwms.empty(), ());
-    mwms.swap(m_requestedMwms);
+    auto const passedSeconds = currentTime - it->second.m_lastRequestTime;
+    if (passedSeconds >= kUpdateInterval || force)
+    {
+      needRequesting = true;
+      it->second.m_isWaitingForResponse = true;
+      it->second.m_lastRequestTime = currentTime;
+    }
+    if (!force)
+      it->second.m_lastActiveTime = currentTime;
   }
-  return true;
+
+  if (needRequesting)
+  {
+    m_requestedMwms.push_back(mwmId);
+    m_condition.notify_one();
+  }
 }
 
 void TrafficManager::RequestTrafficData()
 {
-  if (m_activeMwms.empty())
+  if ((m_activeDrapeMwms.empty() && m_activeRoutingMwms.empty()) || !IsEnabled() ||
+      IsInvalidState() || m_isPaused)
+  {
+    return;
+  }
+
+  ForEachActiveMwm([this](MwmSet::MwmId const & mwmId) {
+    ASSERT(mwmId.IsAlive(), ());
+    RequestTrafficData(mwmId, false /* force */);
+  });
+  UpdateState();
+}
+
+void TrafficManager::OnTrafficRequestFailed(traffic::TrafficInfo && info)
+{
+  lock_guard<mutex> lock(m_mutex);
+
+  auto it = m_mwmCache.find(info.GetMwmId());
+  if (it == m_mwmCache.end())
     return;
 
-  for (auto const & mwmId : m_activeMwms)
-  {
-    ASSERT(mwmId.IsAlive(), ());
-    bool needRequesting = false;
+  it->second.m_isWaitingForResponse = false;
+  it->second.m_lastAvailability = info.GetAvailability();
 
-    auto it = m_mwmInfos.find(mwmId);
-    if (it == m_mwmInfos.end())
+  if (info.GetAvailability() == traffic::TrafficInfo::Availability::Unknown &&
+      !it->second.m_isLoaded)
+  {
+    if (m_activeDrapeMwms.find(info.GetMwmId()) != m_activeDrapeMwms.cend() ||
+        m_activeRoutingMwms.find(info.GetMwmId()) != m_activeRoutingMwms.cend())
     {
-      needRequesting = true;
-      m_mwmInfos.insert(make_pair(mwmId, MwmTrafficInfo(steady_clock::now())));
+      if (it->second.m_retriesCount < kMaxRetriesCount)
+        RequestTrafficData(info.GetMwmId(), true /* force */);
+      ++it->second.m_retriesCount;
     }
     else
     {
-      auto const passedSeconds = steady_clock::now() - it->second.m_lastRequestTime;
-      if (passedSeconds >= kUpdateInterval)
-      {
-        needRequesting = true;
-        it->second.m_lastRequestTime = steady_clock::now();
-      }
+      it->second.m_retriesCount = 0;
+    }
+  }
+
+  UpdateState();
+}
+
+void TrafficManager::OnTrafficDataResponse(traffic::TrafficInfo && info)
+{
+  {
+    lock_guard<mutex> lock(m_mutex);
+
+    auto it = m_mwmCache.find(info.GetMwmId());
+    if (it == m_mwmCache.end())
+      return;
+
+    it->second.m_isLoaded = true;
+    it->second.m_lastResponseTime = steady_clock::now();
+    it->second.m_isWaitingForResponse = false;
+    it->second.m_lastAvailability = info.GetAvailability();
+
+    if (!info.GetColoring().empty())
+    {
+      // Update cache.
+      size_t constexpr kElementSize = sizeof(traffic::TrafficInfo::RoadSegmentId) + sizeof(traffic::SpeedGroup);
+      size_t const dataSize = info.GetColoring().size() * kElementSize;
+      m_currentCacheSizeBytes += (dataSize - it->second.m_dataSize);
+      it->second.m_dataSize = dataSize;
+      ShrinkCacheToAllowableSize();
     }
 
-    if (needRequesting)
-      RequestTrafficData(mwmId);
+    UpdateState();
   }
-}
 
-void TrafficManager::RequestTrafficData(MwmSet::MwmId const & mwmId)
-{
-  m_requestedMwms.push_back(mwmId);
-  m_condition.notify_one();
-}
-
-void TrafficManager::OnTrafficDataResponse(traffic::TrafficInfo const & info)
-{
-  auto it = m_mwmInfos.find(info.GetMwmId());
-  if (it == m_mwmInfos.end())
-    return;
-
-  // Cache geometry for rendering if it's necessary.
-  if (!it->second.m_isLoaded)
+  if (!info.GetColoring().empty())
   {
-    df::TrafficSegmentsGeometry geometry;
-    CalculateSegmentsGeometry(info, geometry);
-    it->second.m_isLoaded = true;
-    m_drapeEngine->CacheTrafficSegmentsGeometry(geometry);
+    m_drapeEngine->UpdateTraffic(info);
+
+    // Update traffic colors for routing.
+    m_observer.OnTrafficInfoAdded(move(info));
   }
-
-  // Update traffic colors.
-  df::TrafficSegmentsColoring coloring;
-  CalculateSegmentsColoring(info, coloring);
-
-  size_t dataSize = coloring.size() * sizeof(df::TrafficSegmentColoring);
-  it->second.m_dataSize = dataSize;
-  m_currentCacheSizeBytes += dataSize;
-
-  CheckCacheSize();
-
-  m_drapeEngine->UpdateTraffic(coloring);
 }
 
-void TrafficManager::CheckCacheSize()
+void TrafficManager::UniteActiveMwms(set<MwmSet::MwmId> & activeMwms) const
 {
-  if ((m_currentCacheSizeBytes > m_maxCacheSizeBytes) && (m_mwmInfos.size() > m_activeMwms.size()))
+  activeMwms.insert(m_activeDrapeMwms.cbegin(), m_activeDrapeMwms.cend());
+  activeMwms.insert(m_activeRoutingMwms.cbegin(), m_activeRoutingMwms.cend());
+}
+
+void TrafficManager::ShrinkCacheToAllowableSize()
+{
+  // Calculating number of different active mwms.
+  set<MwmSet::MwmId> activeMwms;
+  UniteActiveMwms(activeMwms);
+  size_t const numActiveMwms = activeMwms.size();
+
+  if (m_currentCacheSizeBytes > m_maxCacheSizeBytes && m_mwmCache.size() > numActiveMwms)
   {
     std::multimap<time_point<steady_clock>, MwmSet::MwmId> seenTimings;
-    for (auto const & mwmInfo : m_mwmInfos)
-      seenTimings.insert(make_pair(mwmInfo.second.m_lastSeenTime, mwmInfo.first));
+    for (auto const & mwmInfo : m_mwmCache)
+      seenTimings.insert(make_pair(mwmInfo.second.m_lastActiveTime, mwmInfo.first));
 
     auto itSeen = seenTimings.begin();
-    while ((m_currentCacheSizeBytes > m_maxCacheSizeBytes) &&
-           (m_mwmInfos.size() > m_activeMwms.size()))
+    while (m_currentCacheSizeBytes > m_maxCacheSizeBytes && m_mwmCache.size() > numActiveMwms)
     {
-      auto const mwmId = itSeen->second;
-      auto const it = m_mwmInfos.find(mwmId);
-      if (it->second.m_isLoaded)
-      {
-        m_currentCacheSizeBytes -= it->second.m_dataSize;
-        m_drapeEngine->ClearTrafficCache(mwmId);
-      }
-      m_mwmInfos.erase(it);
+      ClearCache(itSeen->second);
       ++itSeen;
     }
   }
+}
+
+void TrafficManager::ClearCache(MwmSet::MwmId const & mwmId)
+{
+  auto const it = m_mwmCache.find(mwmId);
+  if (it == m_mwmCache.end())
+    return;
+
+  if (it->second.m_isLoaded)
+  {
+    ASSERT_GREATER_OR_EQUAL(m_currentCacheSizeBytes, it->second.m_dataSize, ());
+    m_currentCacheSizeBytes -= it->second.m_dataSize;
+
+    m_drapeEngine->ClearTrafficCache(mwmId);
+    GetPlatform().RunOnGuiThread([this, mwmId]()
+    {
+      m_observer.OnTrafficInfoRemoved(mwmId);
+    });
+  }
+  m_mwmCache.erase(it);
+  m_trafficETags.erase(mwmId);
+}
+
+bool TrafficManager::IsEnabled() const
+{
+  return m_state != TrafficState::Disabled;
+}
+
+bool TrafficManager::IsInvalidState() const
+{
+  return m_state == TrafficState::NetworkError;
+}
+
+void TrafficManager::UpdateState()
+{
+  if (!IsEnabled() || IsInvalidState())
+    return;
+
+  auto const currentTime = steady_clock::now();
+  auto maxPassedTime = steady_clock::duration::zero();
+
+  bool waiting = false;
+  bool networkError = false;
+  bool expiredApp = false;
+  bool expiredData = false;
+  bool noData = false;
+
+  for (MwmSet::MwmId const & mwmId : m_activeDrapeMwms)
+  {
+    auto it = m_mwmCache.find(mwmId);
+    ASSERT(it != m_mwmCache.end(), ());
+
+    if (it->second.m_isWaitingForResponse)
+    {
+      waiting = true;
+    }
+    else
+    {
+      expiredApp |= it->second.m_lastAvailability == traffic::TrafficInfo::Availability::ExpiredApp;
+      expiredData |= it->second.m_lastAvailability == traffic::TrafficInfo::Availability::ExpiredData;
+      noData |= it->second.m_lastAvailability == traffic::TrafficInfo::Availability::NoData;
+
+      if (it->second.m_isLoaded)
+      {
+        auto const timeSinceLastResponse = currentTime - it->second.m_lastResponseTime;
+        if (timeSinceLastResponse > maxPassedTime)
+          maxPassedTime = timeSinceLastResponse;
+      }
+      else if (it->second.m_retriesCount >= kMaxRetriesCount)
+      {
+        networkError = true;
+      }
+    }
+  }
+
+  if (networkError || maxPassedTime >= kNetworkErrorTimeout)
+    ChangeState(TrafficState::NetworkError);
+  else if (waiting)
+    ChangeState(TrafficState::WaitingData);
+  else if (expiredApp)
+    ChangeState(TrafficState::ExpiredApp);
+  else if (expiredData)
+    ChangeState(TrafficState::ExpiredData);
+  else if (noData)
+    ChangeState(TrafficState::NoData);
+  else if (maxPassedTime >= kOutdatedDataTimeout)
+    ChangeState(TrafficState::Outdated);
+  else
+    ChangeState(TrafficState::Enabled);
+}
+
+void TrafficManager::ChangeState(TrafficState newState)
+{
+  if (m_state == newState)
+    return;
+
+  m_state = newState;
+  alohalytics::LogEvent(
+      "$TrafficChangeState",
+      alohalytics::TStringMap({{"state", DebugPrint(m_state.load())}}));
+
+  GetPlatform().RunOnGuiThread([this, newState]()
+  {
+    if (m_onStateChangedFn != nullptr)
+      m_onStateChangedFn(newState);
+  });
+}
+
+void TrafficManager::OnEnterForeground()
+{
+  Resume();
+}
+
+void TrafficManager::OnEnterBackground()
+{
+  Pause();
+}
+
+void TrafficManager::Pause()
+{
+  m_isPaused = true;
+}
+
+void TrafficManager::Resume()
+{
+  if (!m_isPaused)
+    return;
+
+  m_isPaused = false;
+  Invalidate();
+}
+
+string DebugPrint(TrafficManager::TrafficState state)
+{
+  switch (state)
+  {
+  case TrafficManager::TrafficState::Disabled:
+    return "Disabled";
+  case TrafficManager::TrafficState::Enabled:
+    return "Enabled";
+  case TrafficManager::TrafficState::WaitingData:
+    return "WaitingData";
+  case TrafficManager::TrafficState::Outdated:
+    return "Outdated";
+  case TrafficManager::TrafficState::NoData:
+    return "NoData";
+  case TrafficManager::TrafficState::NetworkError:
+    return "NetworkError";
+  case TrafficManager::TrafficState::ExpiredData:
+    return "ExpiredData";
+  case TrafficManager::TrafficState::ExpiredApp:
+    return "ExpiredApp";
+    default:
+      ASSERT(false, ("Unknown state"));
+  }
+  return "Unknown";
 }

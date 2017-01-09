@@ -6,7 +6,13 @@
 
 #include "std/cstdint.hpp"
 #include "std/map.hpp"
+#include "std/shared_ptr.hpp"
 #include "std/vector.hpp"
+
+namespace platform
+{
+class HttpClient;
+}
 
 namespace traffic
 {
@@ -16,11 +22,23 @@ namespace traffic
 class TrafficInfo
 {
 public:
+  static uint8_t const kLatestKeysVersion;
+  static uint8_t const kLatestValuesVersion;
+
+  enum class Availability
+  {
+    IsAvailable,
+    NoData,
+    ExpiredData,
+    ExpiredApp,
+    Unknown
+  };
+
   struct RoadSegmentId
   {
     // m_dir can be kForwardDirection or kReverseDirection.
-    static int constexpr kForwardDirection = 0;
-    static int constexpr kReverseDirection = 1;
+    static uint8_t constexpr kForwardDirection = 0;
+    static uint8_t constexpr kReverseDirection = 1;
 
     RoadSegmentId();
 
@@ -40,6 +58,10 @@ public:
       return m_dir < o.m_dir;
     }
 
+    uint32_t GetFid() const { return m_fid; }
+    uint16_t GetIdx() const { return m_idx; }
+    uint8_t GetDir() const { return m_dir; }
+
     // The ordinal number of feature this segment belongs to.
     uint32_t m_fid;
 
@@ -56,26 +78,96 @@ public:
 
   TrafficInfo() = default;
 
-  TrafficInfo(MwmSet::MwmId const & mwmId);
+  TrafficInfo(MwmSet::MwmId const & mwmId, int64_t currentDataVersion);
 
-  // Fetches the latest traffic data from the server and updates the coloring.
+  static TrafficInfo BuildForTesting(Coloring && coloring);
+  void SetTrafficKeysForTesting(vector<RoadSegmentId> const & keys);
+
+  // Fetches the latest traffic data from the server and updates the coloring and ETag.
   // Construct the url by passing an MwmId.
+  // The ETag or entity tag is part of HTTP, the protocol for the World Wide Web.
+  // It is one of several mechanisms that HTTP provides for web cache validation,
+  // which allows a client to make conditional requests.
   // *NOTE* This method must not be called on the UI thread.
-  bool ReceiveTrafficData();
+  bool ReceiveTrafficData(string & etag);
 
-  // Returns the latest known speed group by a feature segment's id.
+  // Returns the latest known speed group by a feature segment's id
+  // or SpeedGroup::Unknown if there is no information about the segment.
   SpeedGroup GetSpeedGroup(RoadSegmentId const & id) const;
 
   MwmSet::MwmId const & GetMwmId() const { return m_mwmId; }
   Coloring const & GetColoring() const { return m_coloring; }
+  Availability GetAvailability() const { return m_availability; }
 
-  static void SerializeTrafficData(Coloring const & coloring, vector<uint8_t> & result);
+  // Extracts RoadSegmentIds from mwm and stores them in a sorted order.
+  static void ExtractTrafficKeys(string const & mwmPath, vector<RoadSegmentId> & result);
 
-  static void DeserializeTrafficData(vector<uint8_t> const & data, Coloring & coloring);
+  // Adds the unknown values to the partially known coloring map |knownColors|
+  // so that the keys of the resulting map are exactly |keys|.
+  static void CombineColorings(vector<TrafficInfo::RoadSegmentId> const & keys,
+                               TrafficInfo::Coloring const & knownColors,
+                               TrafficInfo::Coloring & result);
+
+  // Serializes the keys of the coloring map to |result|.
+  // The keys are road segments ids which do not change during
+  // an mwm's lifetime so there's no point in downloading them every time.
+  // todo(@m) Document the format.
+  static void SerializeTrafficKeys(vector<RoadSegmentId> const & keys, vector<uint8_t> & result);
+
+  static void DeserializeTrafficKeys(vector<uint8_t> const & data, vector<RoadSegmentId> & result);
+
+  static void SerializeTrafficValues(vector<SpeedGroup> const & values, vector<uint8_t> & result);
+
+  static void DeserializeTrafficValues(vector<uint8_t> const & data, vector<SpeedGroup> & result);
 
 private:
+  enum class ServerDataStatus
+  {
+    New,
+    NotChanged,
+    NotFound,
+    Error,
+  };
+
+  friend void UnitTest_TrafficInfo_UpdateTrafficData();
+
+  // todo(@m) A temporary method. Remove it once the keys are added
+  // to the generator and the data is regenerated.
+  bool ReceiveTrafficKeys();
+
+  // Tries to read the values of the Coloring map from server into |values|.
+  // Returns result of communicating with server as ServerDataStatus.
+  // Otherwise, returns false and does not change m_coloring.
+  ServerDataStatus ReceiveTrafficValues(string & etag, vector<SpeedGroup> & values);
+
+  // Updates the coloring and changes the availability status if needed.
+  bool UpdateTrafficData(vector<SpeedGroup> const & values);
+
+  ServerDataStatus ProcessFailure(platform::HttpClient const & request, uint64_t const mwmVersion);
+
   // The mapping from feature segments to speed groups (see speed_groups.hpp).
   Coloring m_coloring;
+
+  // The keys of the coloring map. The values are downloaded periodically
+  // and combined with the keys to form m_coloring.
+  // *NOTE* The values must be received in the exact same order that the
+  // keys are saved in.
+  vector<RoadSegmentId> m_keys;
+
   MwmSet::MwmId m_mwmId;
+  Availability m_availability = Availability::Unknown;
+  int64_t m_currentDataVersion = 0;
 };
+
+class TrafficObserver
+{
+public:
+  virtual ~TrafficObserver() = default;
+
+  virtual void OnTrafficInfoClear() = 0;
+  virtual void OnTrafficInfoAdded(traffic::TrafficInfo && info) = 0;
+  virtual void OnTrafficInfoRemoved(MwmSet::MwmId const & mwmId) = 0;
+};
+
+string DebugPrint(TrafficInfo::RoadSegmentId const & id);
 }  // namespace traffic

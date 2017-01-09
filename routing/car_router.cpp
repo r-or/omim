@@ -7,7 +7,10 @@
 #include "routing/osrm_helpers.hpp"
 #include "routing/osrm_path_segment_factory.hpp"
 #include "routing/road_graph_router.hpp"
+#include "routing/road_point.hpp"
 #include "routing/turns_generator.hpp"
+
+#include "traffic/traffic_info.hpp"
 
 #include "platform/country_file.hpp"
 #include "platform/platform.hpp"
@@ -63,7 +66,7 @@ class OSRMRoutingResult : public turns::IRoutingResult
 public:
   // turns::IRoutingResult overrides:
   TUnpackedPathSegments const & GetSegments() const override { return m_loadedSegments; }
-  void GetPossibleTurns(TNodeId node, m2::PointD const & ingoingPoint,
+  void GetPossibleTurns(UniNodeId const & node, m2::PointD const & ingoingPoint,
                         m2::PointD const & junctionPoint, size_t & ingoingCount,
                         turns::TurnCandidates & outgoingTurns) const override
   {
@@ -84,9 +87,10 @@ public:
     // Filtering virtual edges.
     vector<NodeID> adjacentNodes;
     ingoingCount = 0;
-    for (EdgeID const e : m_routingMapping.m_dataFacade.GetAdjacentEdgeRange(node))
+    for (EdgeID const e : m_routingMapping.m_dataFacade.GetAdjacentEdgeRange(node.GetNodeId()))
     {
-      QueryEdge::EdgeData const data = m_routingMapping.m_dataFacade.GetEdgeData(e, node);
+      QueryEdge::EdgeData const data =
+          m_routingMapping.m_dataFacade.GetEdgeData(e, node.GetNodeId());
       if (data.shortcut)
         continue;
       if (data.forward)
@@ -102,11 +106,11 @@ public:
 
     for (NodeID const adjacentNode : geomNodes)
     {
-      if (adjacentNode == node)
+      if (adjacentNode == node.GetNodeId())
         continue;
       for (EdgeID const e : m_routingMapping.m_dataFacade.GetAdjacentEdgeRange(adjacentNode))
       {
-        if (m_routingMapping.m_dataFacade.GetTarget(e) != node)
+        if (m_routingMapping.m_dataFacade.GetTarget(e) != node.GetNodeId())
           continue;
         QueryEdge::EdgeData const data = m_routingMapping.m_dataFacade.GetEdgeData(e, adjacentNode);
         if (data.shortcut)
@@ -142,7 +146,7 @@ public:
       outgoingTurns.isCandidatesAngleValid = true;
       double const a =
           my::RadToDeg(turns::PiMinusTwoVectorsAngle(junctionPoint, ingoingPoint, outgoingPoint));
-      outgoingTurns.candidates.emplace_back(a, targetNode, ftypes::GetHighwayClass(ft));
+      outgoingTurns.candidates.emplace_back(a, UniNodeId(targetNode), ftypes::GetHighwayClass(ft));
     }
 
     sort(outgoingTurns.candidates.begin(), outgoingTurns.candidates.end(),
@@ -168,7 +172,7 @@ public:
     for (auto const & pathSegments : m_rawResult.unpackedPathSegments)
     {
       auto numSegments = pathSegments.size();
-      m_loadedSegments.resize(numSegments);
+      m_loadedSegments.resize(numSegments, LoadedPathSegment(UniNodeId::Type::Osrm));
       for (size_t segmentIndex = 0; segmentIndex < numSegments; ++segmentIndex)
       {
         bool isStartNode = (segmentIndex == 0);
@@ -204,6 +208,7 @@ IRouter::ResultCode FindSingleOsrmRoute(FeatureGraphNode const & source,
   Route::TTurns turns;
   Route::TTimes times;
   Route::TStreets streets;
+  vector<traffic::TrafficInfo::RoadSegmentId> trafficSegs;
 
   LOG(LINFO, ("OSRM route from", MercatorBounds::ToLatLon(source.segmentPoint), "to",
               MercatorBounds::ToLatLon(target.segmentPoint)));
@@ -214,7 +219,7 @@ IRouter::ResultCode FindSingleOsrmRoute(FeatureGraphNode const & source,
 
   OSRMRoutingResult routingResult(index, *mapping, rawRoutingResult);
   routing::IRouter::ResultCode const result =
-      MakeTurnAnnotation(routingResult, delegate, geometry, turns, times, streets);
+      MakeTurnAnnotation(routingResult, delegate, geometry, turns, times, streets, trafficSegs);
   if (result != routing::IRouter::NoError)
   {
     LOG(LWARNING, ("Can't load road path data from disk for", mapping->GetCountryName(),
@@ -225,6 +230,7 @@ IRouter::ResultCode FindSingleOsrmRoute(FeatureGraphNode const & source,
   route.SetTurnInstructions(move(turns));
   route.SetSectionTimes(move(times));
   route.SetStreetNames(move(streets));
+  route.SetTraffic({} /* No traffic info in case of OSRM */);
 
   vector<m2::PointD> mwmPoints;
   JunctionsToPoints(geometry, mwmPoints);
@@ -244,8 +250,8 @@ bool CarRouter::CheckRoutingAbility(m2::PointD const & startPoint, m2::PointD co
 }
 
 CarRouter::CarRouter(Index & index, TCountryFileFn const & countryFileFn,
-                     unique_ptr<IRouter> router)
-  : m_index(index), m_indexManager(countryFileFn, index), m_router(move(router))
+                     unique_ptr<SingleMwmRouter> localRouter)
+  : m_index(index), m_indexManager(countryFileFn, index), m_router(move(localRouter))
 {
 }
 
@@ -256,11 +262,6 @@ void CarRouter::ClearState()
   m_cachedTargets.clear();
   m_cachedTargetPoint = m2::PointD::Zero();
   m_indexManager.Clear();
-
-  if (m_router)
-    m_router->ClearState();
-  else
-    LOG(LERROR, ("m_router is not initialized."));
 }
 
 bool CarRouter::FindRouteMSMT(TFeatureGraphNodeVec const & sources,
@@ -276,8 +277,25 @@ bool CarRouter::FindRouteMSMT(TFeatureGraphNodeVec const & sources,
   {
     for (auto const & sourceEdge : sources)
     {
-      if (FindSingleRouteDispatcher(sourceEdge, targetEdge, delegate, mapping, route) == NoError)
-        return true;
+      IRouter::ResultCode const code =
+          FindSingleRouteDispatcher(sourceEdge, targetEdge, delegate, mapping, route);
+      switch (code)
+      {
+      case NoError: return true;
+      case Cancelled: return false;
+      case NoCurrentPosition:
+        LOG(LERROR, ("NoCurrentPosition routing result returned by FindSingleRouteDispatcher()"));
+        return false;
+      case InconsistentMWMandRoute: return false;
+      case RouteFileNotExist: return false;
+      case StartPointNotFound: continue;
+      case EndPointNotFound: continue;
+      case PointsInDifferentMWM: return false;
+      case RouteNotFound: continue;
+      case NeedMoreMaps: return false;
+      case InternalError: return false;
+      case FileTooOld: return false;
+      }
     }
   }
   return false;
@@ -471,7 +489,12 @@ CarRouter::ResultCode CarRouter::CalculateRoute(m2::PointD const & startPoint,
     }
     INTERRUPT_WHEN_CANCELLED(delegate);
 
-    if (crossCode == NoError && crossDistanceM < route.GetTotalDistanceMeters())
+    // Cross mwm and single mwm routes are built by different algorithms.
+    // It is not correct to compare distances from different algorithms.
+    // Add some penalty to cross mwm route to avoid inadequate manoeuvres near the mwm borders.
+    // TODO: remove this hack together with OSRM routing.
+    double constexpr kCrossMwmPenalty = 0.8;
+    if (crossCode == NoError && crossDistanceM < kCrossMwmPenalty * route.GetTotalDistanceMeters())
     {
       LOG(LINFO, ("Cross mwm path is shorter than single mwm path. Cross distance:",
                   crossDistanceM, "single distance:", route.GetTotalDistanceMeters()));
@@ -570,10 +593,11 @@ IRouter::ResultCode CarRouter::FindSingleRouteDispatcher(FeatureGraphNode const 
       LOG(LERROR, ("m_router is not initialized."));
       return IRouter::InternalError;
     }
-    LOG(LINFO, (m_router->GetName(), "route from", MercatorBounds::ToLatLon(source.segmentPoint), "to",
-                MercatorBounds::ToLatLon(target.segmentPoint)));
-    result = m_router->CalculateRoute(source.segmentPoint, m2::PointD(0, 0) /* direction */,
-                                      target.segmentPoint, delegate, mwmRoute);
+    LOG(LINFO, (m_router->GetName(), "route from", MercatorBounds::ToLatLon(source.segmentPoint),
+                "to", MercatorBounds::ToLatLon(target.segmentPoint)));
+    result = m_router->CalculateRoute(source.mwmId, source.segmentPoint,
+                                      m2::PointD(0, 0) /* direction */, target.segmentPoint,
+                                      delegate, mwmRoute);
   }
   else
   {

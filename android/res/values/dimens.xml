@@ -59,10 +59,11 @@
   <dimen name="direction_frame_min_height">36dp</dimen>
 
   <!-- map widgets -->
-  <dimen name="margin_compass_left">32dp</dimen>
-  <dimen name="margin_compass_bottom">80dp</dimen>
-  <dimen name="margin_ruler_right">8dp</dimen>
-  <dimen name="margin_ruler_bottom">56dp</dimen>
+  <dimen name="margin_compass">34dp</dimen>
+  <dimen name="margin_compass_top">28dp</dimen>
+  <dimen name="margin_ruler_left">10dp</dimen>
+  <dimen name="margin_ruler_bottom">58dp</dimen>
+  <dimen name="compass_height">40dp</dimen>
 
   <!-- routing layout -->
   <dimen name="routing_info_height">48dp</dimen>
@@ -109,9 +110,12 @@
   <dimen name="nav_icon_size">48dp</dimen>
   <dimen name="nav_bottom_gap">12dp</dimen>
 
-  <dimen name="nav_frame_padding">@dimen/margin_half</dimen>
+  <dimen name="nav_frame_padding">@dimen/margin_eighth</dimen>
   <dimen name="nav_button">28dp</dimen>
   <dimen name="nav_zoom_bottom">160dp</dimen>
+  <dimen name="nav_zoom_top">258dp</dimen>
+  <dimen name="nav_button_top_limit">68dp</dimen>
+  <dimen name="nav_my_position_bottom">136dp</dimen>
 
   <dimen name="panel_elevation">12dp</dimen>
   <dimen name="appbar_elevation">4dp</dimen>
@@ -157,7 +161,13 @@
   <!-- Rating-->
   <dimen name="placepage_margin_rating">20dp</dimen>
 
-  <!-- Compass offset-->
-  <dimen name="compass_navigation_landscape_offset">-54dp</dimen>
+  <!-- Banner-->
+  <dimen name="placepage_banner_height">46dp</dimen>
+  <dimen name="placepage_banner_icon_size">22dp</dimen>
+  <dimen name="placepage_banner_icon_size_full">40dp</dimen>
 
+  <!-- Place page taxi-->
+  <dimen name="placepage_taxi_button_min_width">96dp</dimen>
+  <dimen name="placepage_taxi_padding_vert">14dp</dimen>
+  <dimen name="placepage_taxi_button_padding_vert">10dp</dimen>
 </resources>

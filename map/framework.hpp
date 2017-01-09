@@ -18,10 +18,11 @@
 
 #include "drape/oglcontextfactory.hpp"
 
+#include "indexer/banners.hpp"
 #include "indexer/data_header.hpp"
+#include "indexer/index_helpers.hpp"
 #include "indexer/map_style.hpp"
 #include "indexer/new_feature_categories.hpp"
-#include "indexer/index_helpers.hpp"
 
 #include "editor/user_stats.hpp"
 
@@ -89,6 +90,11 @@ namespace df
   {
     class CPUDrawer;
   }
+}
+
+namespace platform
+{
+class NetworkPolicy;
 }
 
 /// Uncomment line to make fixed position settings and
@@ -160,9 +166,10 @@ protected:
 
   BookmarkManager m_bmManager;
 
-  BookingApi m_bookingApi;
+  unique_ptr<BookingApi> m_bookingApi = make_unique<BookingApi>();
+  unique_ptr<uber::Api> m_uberApi = make_unique<uber::Api>();
 
-  uber::Api m_uberApi;
+  banner::BannerSet m_bannerSet;
 
   df::DrapeApi m_drapeApi;
 
@@ -195,12 +202,11 @@ public:
   virtual ~Framework();
 
   /// Get access to booking api helpers
-  BookingApi & GetBookingApi() { return m_bookingApi; }
-  BookingApi const & GetBookingApi() const { return m_bookingApi; }
+  BookingApi * GetBookingApi(platform::NetworkPolicy const & policy);
+  BookingApi const * GetBookingApi(platform::NetworkPolicy const & policy) const;
+  uber::Api * GetUberApi(platform::NetworkPolicy const & policy);
 
   df::DrapeApi & GetDrapeApi() { return m_drapeApi; }
-
-  uber::Api & GetUberApi() { return m_uberApi;}
 
   /// Migrate to new version of very different data.
   bool IsEnoughSpaceForMigrate() const;
@@ -442,7 +448,8 @@ public:
   void SetRenderingEnabled(ref_ptr<dp::OGLContextFactory> contextFactory = nullptr);
   void SetRenderingDisabled(bool destroyContext);
 
-  void UpdateDrapeEngine(int width, int height);
+  void OnRecoverGLContext(int width, int height);
+  void OnDestroyGLContext();
 
   void SetFontScaleFactor(double scaleFactor);
 
@@ -725,7 +732,7 @@ public:
   /// lambdas/functors before calling RunOnGuiThread.
   void SetRouteBuildingListener(TRouteBuildingCallback const & buildingCallback) { m_routingCallback = buildingCallback; }
   /// See warning above.
-  void SetRouteProgressListener(TRouteProgressCallback const & progressCallback) { m_progressCallback = progressCallback; }
+  void SetRouteProgressListener(TRouteProgressCallback const & progressCallback) { m_routingSession.SetProgressCallback(progressCallback); }
   void FollowRoute();
   void CloseRouting();
   void GetRouteFollowingInfo(location::FollowingInfo & info) const { m_routingSession.GetRouteFollowingInfo(info); }
@@ -772,6 +779,11 @@ public:
   bool LoadAutoZoom();
   void AllowAutoZoom(bool allowAutoZoom);
   void SaveAutoZoom(bool allowAutoZoom);
+
+  TrafficManager & GetTrafficManager();
+
+  bool LoadTrafficEnabled();
+  void SaveTrafficEnabled(bool trafficEnabled);
 
   /// \returns true if altitude information along |m_route| is available and
   /// false otherwise.
@@ -822,9 +834,10 @@ private:
                         storage::TCountriesVec const & absentCountries);
   void MatchLocationToRoute(location::GpsInfo & info, location::RouteMatchingInfo & routeMatchingInfo) const;
   string GetRoutingErrorMessage(routing::IRouter::ResultCode code);
+  void OnBuildRouteReady(routing::Route const & route, routing::IRouter::ResultCode code);
+  void OnRebuildRouteReady(routing::Route const & route, routing::IRouter::ResultCode code);
 
   TRouteBuildingCallback m_routingCallback;
-  TRouteProgressCallback m_progressCallback;
   routing::RouterType m_currentRouterType;
   //@}
 

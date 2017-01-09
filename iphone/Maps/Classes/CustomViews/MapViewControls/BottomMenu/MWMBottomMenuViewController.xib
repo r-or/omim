@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11201" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="16B2555" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -14,6 +18,7 @@
                 <outlet property="distanceLegendLabel" destination="5ad-tg-al9" id="KFC-sq-rNA"/>
                 <outlet property="distanceWithLegendLabel" destination="LOZ-cm-r9V" id="H0T-Dh-0Q0"/>
                 <outlet property="estimateLabel" destination="EQy-vz-gyi" id="gJq-I7-TaC"/>
+                <outlet property="mainButtonsHeight" destination="HtR-j8-Qpc" id="uZ3-Im-taa"/>
                 <outlet property="p2pButton" destination="xQ0-ZK-UXk" id="LdY-Rt-Dh4"/>
                 <outlet property="progressView" destination="qvF-jY-5Gi" id="vS9-Cr-K1S"/>
                 <outlet property="routingInfoPageControl" destination="7hO-Gk-BGJ" id="gDI-Bk-PCb"/>
@@ -22,6 +27,7 @@
                 <outlet property="speedLegendLabel" destination="P9v-a6-EaA" id="Bsq-v2-iGX"/>
                 <outlet property="speedWithLegendLabel" destination="azs-RS-4KE" id="v35-2h-E3B"/>
                 <outlet property="timeLabel" destination="jSU-Ns-SpQ" id="iJI-uD-Nz2"/>
+                <outlet property="trafficButton" destination="yHt-kJ-gHg" id="74n-Pu-wHS"/>
                 <outlet property="ttsSoundButton" destination="q6M-3k-tKX" id="rQp-HS-cub"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
@@ -32,8 +38,10 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <view opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="kbJ-If-gUR" userLabel="MainButtons">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="48"/>
                     <subviews>
                         <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" horizontalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IzQ-aQ-aPH" userLabel="Search" customClass="MWMButton">
+                            <rect key="frame" x="0.0" y="0.0" width="60" height="48"/>
                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                             <accessibility key="accessibilityConfiguration" identifier="searchButton"/>
                             <constraints>
@@ -48,6 +56,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xQ0-ZK-UXk" userLabel="P2P" customClass="MWMButton">
+                            <rect key="frame" x="88" y="0.0" width="60" height="48"/>
                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                             <accessibility key="accessibilityConfiguration" identifier="p2pButton"/>
                             <constraints>
@@ -62,6 +71,7 @@
                             </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qVh-dm-DDH" userLabel="Bookmarks" customClass="MWMButton">
+                            <rect key="frame" x="176" y="0.0" width="60" height="48"/>
                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                             <accessibility key="accessibilityConfiguration" identifier="bookmarksButton"/>
                             <constraints>
@@ -76,15 +86,20 @@
                             </connections>
                         </button>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="c75-ZF-hKn">
+                            <rect key="frame" x="0.0" y="0.0" width="320" height="48"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="600" text="33 мин • 7.0 км" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EQy-vz-gyi">
+                                    <rect key="frame" x="16" y="14" width="122" height="21"/>
                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                     <nil key="highlightedColor"/>
                                 </label>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4Xc-Kl-hAm">
+                                    <rect key="frame" x="154" y="12" width="54" height="24"/>
                                     <subviews>
-                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="150" verticalHuggingPriority="150" horizontalCompressionResistancePriority="240" verticalCompressionResistancePriority="240" translatesAutoresizingMaskIntoConstraints="NO" id="ViI-p6-hUf"/>
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="150" verticalHuggingPriority="150" horizontalCompressionResistancePriority="240" verticalCompressionResistancePriority="240" translatesAutoresizingMaskIntoConstraints="NO" id="ViI-p6-hUf">
+                                            <rect key="frame" x="0.0" y="0.0" width="54" height="24"/>
+                                        </imageView>
                                     </subviews>
                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                     <constraints>
@@ -95,14 +110,17 @@
                                     </constraints>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nD5-wx-7Ui">
+                                    <rect key="frame" x="16" y="24" width="50" height="12"/>
                                     <subviews>
                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ic_elevation" translatesAutoresizingMaskIntoConstraints="NO" id="FpX-u9-FuR">
+                                            <rect key="frame" x="0.0" y="0.0" width="10" height="12"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="12" id="Wup-Xg-5Ce"/>
                                                 <constraint firstAttribute="width" constant="10" id="rVv-JG-SyM"/>
                                             </constraints>
                                         </imageView>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="270" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dVz-cc-LUM">
+                                            <rect key="frame" x="14" y="-2" width="36" height="17"/>
                                             <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -123,6 +141,7 @@
                                     </constraints>
                                 </view>
                                 <button hidden="YES" clipsSubviews="YES" contentMode="scaleToFill" horizontalHuggingPriority="501" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pLD-sZ-ejH" userLabel="Go" customClass="MWMStartButton">
+                                    <rect key="frame" x="224" y="0.0" width="96" height="48"/>
                                     <accessibility key="accessibilityConfiguration" identifier="goButton"/>
                                     <constraints>
                                         <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="96" id="ZHw-Ha-INX"/>
@@ -144,13 +163,16 @@
                                     </connections>
                                 </button>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UhW-en-7qq">
+                                    <rect key="frame" x="0.0" y="0.0" width="72" height="48"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="azs-RS-4KE">
+                                            <rect key="frame" x="36" y="4" width="0.0" height="0.0"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Y2P-la-daO">
+                                            <rect key="frame" x="36" y="4" width="0.0" height="0.0"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -159,6 +181,7 @@
                                             </userDefinedRuntimeAttributes>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="P9v-a6-EaA">
+                                            <rect key="frame" x="36" y="11" width="0.0" height="0.0"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="12"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -180,13 +203,16 @@
                                     </constraints>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Z68-6z-5Ph">
+                                    <rect key="frame" x="104" y="0.0" width="112" height="48"/>
                                     <subviews>
                                         <pageControl opaque="NO" contentMode="scaleToFill" verticalCompressionResistancePriority="100" contentHorizontalAlignment="center" contentVerticalAlignment="center" numberOfPages="2" translatesAutoresizingMaskIntoConstraints="NO" id="7hO-Gk-BGJ">
+                                            <rect key="frame" x="45" y="4" width="23" height="13"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="13" id="a7i-03-Hg1"/>
                                             </constraints>
                                         </pageControl>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jSU-Ns-SpQ">
+                                            <rect key="frame" x="56" y="4" width="0.0" height="0.0"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -205,13 +231,16 @@
                                     </constraints>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mab-rl-ueg">
+                                    <rect key="frame" x="248" y="0.0" width="72" height="48"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LOZ-cm-r9V">
+                                            <rect key="frame" x="36" y="4" width="0.0" height="0.0"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LBZ-kD-25J">
+                                            <rect key="frame" x="36" y="4" width="0.0" height="0.0"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="22"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -220,6 +249,7 @@
                                             </userDefinedRuntimeAttributes>
                                         </label>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5ad-tg-al9">
+                                            <rect key="frame" x="36" y="11" width="0.0" height="0.0"/>
                                             <fontDescription key="fontDescription" type="boldSystem" pointSize="12"/>
                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <nil key="highlightedColor"/>
@@ -240,8 +270,10 @@
                                     </constraints>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qvF-jY-5Gi">
+                                    <rect key="frame" x="0.0" y="44" width="320" height="4"/>
                                     <subviews>
                                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xqD-Zl-BRc">
+                                            <rect key="frame" x="0.0" y="0.0" width="0.0" height="4"/>
                                             <color key="backgroundColor" red="0.11764705882352941" green="0.58823529411764708" blue="0.94117647058823528" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" id="pSf-au-FVR"/>
@@ -260,14 +292,17 @@
                                     </constraints>
                                 </view>
                                 <button contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3oJ-Rv-JS7" userLabel="ToggleInfo">
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="48"/>
                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                     <connections>
                                         <action selector="toggleInfoTouchUpInside" destination="-1" eventType="touchUpInside" id="kuP-Ue-Syq"/>
                                     </connections>
                                 </button>
                                 <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iYj-za-A2N" userLabel="Taxi View">
+                                    <rect key="frame" x="0.0" y="0.0" width="224" height="48"/>
                                     <subviews>
                                         <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" pagingEnabled="YES" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="pUj-hX-AzZ" customClass="MWMTaxiCollectionView">
+                                            <rect key="frame" x="0.0" y="0.0" width="224" height="48"/>
                                             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                             <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="7nN-GY-zbW" customClass="MWMTaxiCollectionLayout">
                                                 <size key="itemSize" width="50" height="50"/>
@@ -335,6 +370,7 @@
                             </userDefinedRuntimeAttributes>
                         </view>
                         <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YLY-C4-SBu" userLabel="Menu" customClass="MWMButton">
+                            <rect key="frame" x="260" y="0.0" width="60" height="48"/>
                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                             <accessibility key="accessibilityConfiguration" identifier="menuButton"/>
                             <constraints>
@@ -349,6 +385,7 @@
                             </connections>
                         </button>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WLn-2O-Ivv" userLabel="DownloadBadge">
+                            <rect key="frame" x="293" y="11" width="10" height="10"/>
                             <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
                                 <constraint firstAttribute="width" constant="10" id="ToN-Zr-4oh"/>
@@ -391,6 +428,7 @@
                     </constraints>
                 </view>
                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="nYy-JN-hGA" userLabel="Separator">
+                    <rect key="frame" x="0.0" y="48" width="320" height="1"/>
                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.12" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="1" id="Kgm-bO-O6Q"/>
@@ -400,6 +438,7 @@
                     </userDefinedRuntimeAttributes>
                 </view>
                 <collectionView clipsSubviews="YES" contentMode="scaleToFill" bounces="NO" scrollEnabled="NO" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" delaysContentTouches="NO" bouncesZoom="NO" dataMode="none" translatesAutoresizingMaskIntoConstraints="NO" id="hSd-fM-qKd" userLabel="AdditionalButtons">
+                    <rect key="frame" x="0.0" y="49" width="320" height="148"/>
                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
                         <constraint firstAttribute="height" constant="148" id="fsD-HQ-mF9"/>
@@ -411,11 +450,43 @@
                     </connections>
                 </collectionView>
                 <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Z8y-bh-6dN">
+                    <rect key="frame" x="0.0" y="48" width="320" height="64"/>
                     <subviews>
-                        <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="o9v-sB-QHp" customClass="MWMButton">
+                        <button opaque="NO" contentMode="center" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="q6M-3k-tKX" customClass="MWMButton">
+                            <rect key="frame" x="8" y="0.0" width="64" height="64"/>
                             <constraints>
-                                <constraint firstAttribute="height" priority="750" constant="64" id="pvz-bi-FpY"/>
-                                <constraint firstAttribute="width" constant="64" id="q3s-yb-6lU"/>
+                                <constraint firstAttribute="height" constant="64" id="10m-d2-9gu"/>
+                                <constraint firstAttribute="width" priority="750" constant="64" id="7Ac-c5-WC7"/>
+                            </constraints>
+                            <state key="normal" image="ic_voice_on"/>
+                            <state key="selected" image="ic_voice_off"/>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="coloringName" value="MWMBlack"/>
+                            </userDefinedRuntimeAttributes>
+                            <connections>
+                                <action selector="soundTouchUpInside:" destination="-1" eventType="touchUpInside" id="CEW-OG-NlS"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="center" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="yHt-kJ-gHg" userLabel="Traffic" customClass="MWMButton">
+                            <rect key="frame" x="72" y="0.0" width="60" height="64"/>
+                            <constraints>
+                                <constraint firstAttribute="width" priority="750" constant="64" id="K7h-UL-AI3"/>
+                                <constraint firstAttribute="height" constant="64" id="xes-CM-P6R"/>
+                            </constraints>
+                            <state key="normal" image="ic_setting_traffic_on"/>
+                            <state key="selected" image="ic_setting_traffic_off"/>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="string" keyPath="coloringName" value="MWMBlack"/>
+                            </userDefinedRuntimeAttributes>
+                            <connections>
+                                <action selector="trafficTouchUpInside:" destination="-1" eventType="touchUpInside" id="4Fg-pP-9MU"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="center" horizontalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="o9v-sB-QHp" userLabel="Settings" customClass="MWMButton">
+                            <rect key="frame" x="132" y="0.0" width="64" height="64"/>
+                            <constraints>
+                                <constraint firstAttribute="width" priority="750" constant="64" id="Jnf-Lp-dkq"/>
+                                <constraint firstAttribute="height" constant="64" id="sw9-N1-meA"/>
                             </constraints>
                             <state key="normal" image="ic_menu_settings"/>
                             <userDefinedRuntimeAttributes>
@@ -425,21 +496,8 @@
                                 <action selector="menuActionOpenSettings" destination="-1" eventType="touchUpInside" id="CTJ-mX-3im"/>
                             </connections>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="q6M-3k-tKX" customClass="MWMButton">
-                            <constraints>
-                                <constraint firstAttribute="height" priority="750" constant="64" id="6Us-Z7-JyL"/>
-                                <constraint firstAttribute="width" constant="64" id="GtG-l1-K05"/>
-                            </constraints>
-                            <state key="normal" image="ic_voice_on"/>
-                            <state key="selected" image="ic_voice_off"/>
-                            <userDefinedRuntimeAttributes>
-                                <userDefinedRuntimeAttribute type="string" keyPath="coloringName" value="MWMBlue"/>
-                            </userDefinedRuntimeAttributes>
-                            <connections>
-                                <action selector="soundTouchUpInside:" destination="-1" eventType="touchUpInside" id="CEW-OG-NlS"/>
-                            </connections>
-                        </button>
                         <button opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kyc-p0-3HI" customClass="MWMStopButton">
+                            <rect key="frame" x="204" y="14" width="96" height="36"/>
                             <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <constraints>
                                 <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="96" id="aRk-9J-VLI"/>
@@ -451,7 +509,7 @@
                             <userDefinedRuntimeAttributes>
                                 <userDefinedRuntimeAttribute type="string" keyPath="fontName" value="regular17"/>
                                 <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                    <integer key="value" value="4"/>
+                                    <integer key="value" value="8"/>
                                 </userDefinedRuntimeAttribute>
                                 <userDefinedRuntimeAttribute type="string" keyPath="localizedText" value="current_location_unknown_stop_button"/>
                                 <userDefinedRuntimeAttribute type="string" keyPath="textColorName" value="whitePrimaryText"/>
@@ -465,13 +523,18 @@
                     </subviews>
                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
-                        <constraint firstAttribute="trailing" secondItem="q6M-3k-tKX" secondAttribute="trailing" id="1Zb-qW-cfl"/>
                         <constraint firstAttribute="height" constant="64" id="7YS-h4-f40"/>
-                        <constraint firstItem="o9v-sB-QHp" firstAttribute="top" secondItem="Z8y-bh-6dN" secondAttribute="top" id="8w9-Cl-M4G"/>
-                        <constraint firstItem="Kyc-p0-3HI" firstAttribute="centerX" secondItem="Z8y-bh-6dN" secondAttribute="centerX" id="91V-mv-9HQ"/>
-                        <constraint firstItem="q6M-3k-tKX" firstAttribute="top" secondItem="Z8y-bh-6dN" secondAttribute="top" id="ANW-b9-ohp"/>
+                        <constraint firstItem="q6M-3k-tKX" firstAttribute="top" secondItem="Z8y-bh-6dN" secondAttribute="top" id="7fw-Gt-Pc2"/>
+                        <constraint firstItem="yHt-kJ-gHg" firstAttribute="top" secondItem="Z8y-bh-6dN" secondAttribute="top" id="Gps-YB-s6h"/>
+                        <constraint firstItem="o9v-sB-QHp" firstAttribute="leading" secondItem="yHt-kJ-gHg" secondAttribute="trailing" priority="250" constant="28" id="LLg-EQ-Wfh"/>
+                        <constraint firstItem="yHt-kJ-gHg" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="q6M-3k-tKX" secondAttribute="trailing" id="QB4-T9-JP4"/>
                         <constraint firstItem="Kyc-p0-3HI" firstAttribute="top" secondItem="Z8y-bh-6dN" secondAttribute="top" priority="750" constant="14" id="YXv-ir-H20"/>
-                        <constraint firstItem="o9v-sB-QHp" firstAttribute="leading" secondItem="Z8y-bh-6dN" secondAttribute="leading" id="pnq-rJ-TfJ"/>
+                        <constraint firstItem="q6M-3k-tKX" firstAttribute="leading" secondItem="Z8y-bh-6dN" secondAttribute="leading" constant="8" id="YYg-F1-zgo"/>
+                        <constraint firstItem="yHt-kJ-gHg" firstAttribute="leading" secondItem="q6M-3k-tKX" secondAttribute="trailing" priority="250" constant="28" id="eRQ-gN-oVh"/>
+                        <constraint firstItem="Kyc-p0-3HI" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="o9v-sB-QHp" secondAttribute="trailing" constant="8" id="qOR-b7-Cd3"/>
+                        <constraint firstAttribute="trailing" secondItem="Kyc-p0-3HI" secondAttribute="trailing" constant="20" id="tcG-sa-4ho"/>
+                        <constraint firstItem="o9v-sB-QHp" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="yHt-kJ-gHg" secondAttribute="trailing" id="tnG-Yt-PSq"/>
+                        <constraint firstItem="o9v-sB-QHp" firstAttribute="top" secondItem="Z8y-bh-6dN" secondAttribute="top" id="tuu-Qe-DE7"/>
                     </constraints>
                 </view>
             </subviews>
@@ -539,8 +602,6 @@
                 <outlet property="timeView" destination="Z68-6z-5Ph" id="x9I-5l-x9o"/>
                 <outlet property="timeWidth" destination="GYP-RF-12U" id="kyM-Ym-X1y"/>
                 <outlet property="toggleInfoButton" destination="3oJ-Rv-JS7" id="M1f-kU-SY5"/>
-                <outletCollection property="routingAdditionalButtonsOffset" destination="pnq-rJ-TfJ" id="fHC-g5-9e8"/>
-                <outletCollection property="routingAdditionalButtonsOffset" destination="1Zb-qW-cfl" id="gnD-xP-k5z"/>
                 <outletCollection property="speedDistanceOffset" destination="ZCC-xJ-5Vg" id="IfJ-Mb-OUw"/>
                 <outletCollection property="speedDistanceOffset" destination="w4c-fR-znA" id="q0p-e4-syx"/>
                 <outletCollection property="heightProfileContainerVerticalOrientation" destination="mac-YL-Cyx" id="L7C-H0-A6R"/>
@@ -548,6 +609,7 @@
                 <outletCollection property="heightProfileContainerVerticalOrientation" destination="CRC-g9-WLM" id="Zr9-y7-E9U"/>
                 <outletCollection property="heightProfileContainerVerticalOrientation" destination="h5a-LJ-T8H" id="89A-IH-XBE"/>
             </connections>
+            <point key="canvasLocation" x="34" y="53.5"/>
         </view>
     </objects>
     <resources>
@@ -557,6 +619,8 @@
         <image name="ic_menu_point_to_point" width="48" height="48"/>
         <image name="ic_menu_search" width="48" height="48"/>
         <image name="ic_menu_settings" width="28" height="28"/>
+        <image name="ic_setting_traffic_off" width="24" height="24"/>
+        <image name="ic_setting_traffic_on" width="24" height="24"/>
         <image name="ic_voice_off" width="28" height="28"/>
         <image name="ic_voice_on" width="28" height="28"/>
     </resources>

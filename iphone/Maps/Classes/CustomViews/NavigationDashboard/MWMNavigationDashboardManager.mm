@@ -1,6 +1,6 @@
 #import "MWMNavigationDashboardManager.h"
 #import <AudioToolbox/AudioServices.h>
-#import "Common.h"
+#import "MWMCommon.h"
 #import "MWMLocationHelpers.h"
 #import "MWMMapViewControlsManager.h"
 #import "MWMNavigationInfoView.h"
@@ -8,7 +8,6 @@
 #import "MWMRouter.h"
 #import "MWMTaxiPreviewDataSource.h"
 #import "MWMTextToSpeech.h"
-#import "Macros.h"
 #import "MapViewController.h"
 #import "MapsAppDelegate.h"
 #import "Statistics.h"
@@ -42,8 +41,6 @@ using TInfoDisplays = NSHashTable<__kindof TInfoDisplay>;
 
 @property(nonatomic) MWMNavigationDashboardEntity * entity;
 
-@property(nonatomic) MWMTaxiPreviewDataSource * taxiDataSource;
-
 @end
 
 @implementation MWMNavigationDashboardManager
@@ -70,7 +67,7 @@ using TInfoDisplays = NSHashTable<__kindof TInfoDisplay>;
 {
   if (GetFramework().IsRouteFinished())
   {
-    [[MWMRouter router] stop];
+    [MWMRouter stopRouting];
     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate);
     return;
   }
@@ -109,8 +106,7 @@ using TInfoDisplays = NSHashTable<__kindof TInfoDisplay>;
 {
   if (IPAD && self.state != MWMNavigationDashboardStateNavigation)
     [self.delegate routePreviewDidChangeFrame:{}];
-  [[MWMRouter router] stop];
-  self.taxiDataSource = nil;
+  [MWMRouter stopRouting];
 }
 
 #pragma mark - MWMTaxiDataSource
@@ -137,7 +133,6 @@ using TInfoDisplays = NSHashTable<__kindof TInfoDisplay>;
   self.routePreview = nil;
   [self.navigationInfoView remove];
   self.navigationInfoView = nil;
-  [MWMMapViewControlsManager manager].searchHidden = YES;
 }
 
 - (void)showStatePrepare
@@ -342,13 +337,6 @@ using TInfoDisplays = NSHashTable<__kindof TInfoDisplay>;
   if (!_entity)
     _entity = [[MWMNavigationDashboardEntity alloc] init];
   return _entity;
-}
-
-- (CGFloat)extraCompassBottomOffset
-{
-  if (!_navigationInfoView)
-    return 0;
-  return self.navigationInfoView.extraCompassBottomOffset;
 }
 
 - (void)setMapSearch

@@ -22,12 +22,8 @@ set(
   routing_test_tools.hpp
 )
 
-# if (APPLE)
-#  target_compile_options(${PROJECT_NAME} PUBLIC "-fobjc-arc")
-#endif()
-
-
 omim_add_test(${PROJECT_NAME} ${SRC})
+
 omim_link_libraries(
   ${PROJECT_NAME}
   map
@@ -36,6 +32,7 @@ omim_link_libraries(
   storage
   indexer
   editor
+  traffic
   platform
   oauthcpp
   geometry
@@ -51,12 +48,3 @@ omim_link_libraries(
   ${Qt5Core_LIBRARIES}
   ${LIBZ}
 )
-
-if (PLATFORM_MAC)
-  omim_link_libraries(
-    ${PROJECT_NAME}
-    "-framework Cocoa"
-    "-framework IOKit"
-    "-framework SystemConfiguration"
-  )
-endif()

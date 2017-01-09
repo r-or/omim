@@ -1,7 +1,7 @@
 #import "MWMSideButtons.h"
-#import "Common.h"
+#import "MWMCommon.h"
 #import "MWMButton.h"
-#import "MWMRouter.h"
+#import "MWMMapViewControlsManager.h"
 #import "MWMSettings.h"
 #import "MWMSideButtonsView.h"
 #import "Statistics.h"
@@ -33,6 +33,12 @@ NSArray<UIImage *> * animationImages(NSString * animationTemplate, NSUInteger im
 }
 }  // namespace
 
+@interface MWMMapViewControlsManager ()
+
+@property(nonatomic) MWMSideButtons * sideButtons;
+
+@end
+
 @interface MWMSideButtons ()
 
 @property(nonatomic) IBOutlet MWMSideButtonsView * sideView;
@@ -49,6 +55,7 @@ NSArray<UIImage *> * animationImages(NSString * animationTemplate, NSUInteger im
 
 @implementation MWMSideButtons
 
++ (MWMSideButtons *)buttons { return [MWMMapViewControlsManager manager].sideButtons; }
 - (instancetype)initWithParentView:(UIView *)view
 {
   self = [super init];
@@ -56,7 +63,7 @@ NSArray<UIImage *> * animationImages(NSString * animationTemplate, NSUInteger im
   {
     [[NSBundle mainBundle] loadNibNamed:kMWMSideButtonsViewNibName owner:self options:nil];
     [view addSubview:self.sideView];
-    [self.sideView layoutIfNeeded];
+    [self.sideView setNeedsLayout];
     self.sideView.topBound = 0.0;
     self.sideView.bottomBound = view.height;
     self.zoomSwipeEnabled = NO;
@@ -91,7 +98,6 @@ NSArray<UIImage *> * animationImages(NSString * animationTemplate, NSUInteger im
 - (void)processMyPositionStateModeEvent:(location::EMyPositionMode)mode
 {
   UIButton * locBtn = self.locationButton;
-  locBtn.hidden = GetFramework().IsOnRoute() && mode == location::FollowAndRotate;
   [locBtn.imageView stopAnimating];
 
   NSArray<UIImage *> * images =

@@ -11,6 +11,7 @@
 
 #include "indexer/drawing_rules.hpp"
 #include "indexer/drules_include.hpp"
+#include "indexer/map_style_reader.hpp"
 #include "indexer/osm_editor.hpp"
 
 #include "geometry/clipping.hpp"
@@ -269,7 +270,7 @@ string BaseApplyFeature::ExtractHotelInfo() const
     return "";
 
   ostringstream out;
-  if (!m_hotelData.m_rating.empty())
+  if (!m_hotelData.m_rating.empty() && m_hotelData.m_rating != "0")
   {
     out << m_hotelData.m_rating << kStarSymbol;
     if (m_hotelData.m_priceCategory != 0)
@@ -365,7 +366,9 @@ void ApplyPointFeature::ProcessRule(Stylist::TRuleWrapper const & rule)
     {
       params.m_primaryOptional = false;
       params.m_primaryTextFont.m_size *= 1.2;
-      params.m_primaryTextFont.m_outlineColor = dp::Color(255, 255, 255, 153);
+      auto const style = GetStyleReader().GetCurrentStyle();
+      params.m_primaryTextFont.m_outlineColor = (style == MapStyle::MapStyleDark) ?
+                                                dp::Color(0, 0, 0, 153) : dp::Color(255, 255, 255, 153);
       params.m_secondaryTextFont = params.m_primaryTextFont;
       params.m_secondaryText = ExtractHotelInfo();
       params.m_secondaryOptional = false;
@@ -426,12 +429,13 @@ void ApplyPointFeature::Finish()
 ApplyAreaFeature::ApplyAreaFeature(m2::PointD const & tileCenter,
                                    TInsertShapeFn const & insertShape, FeatureID const & id,
                                    m2::RectD const & clipRect, bool isBuilding, float minPosZ,
-                                   float posZ, int minVisibleScale, uint8_t rank,
+                                   float posZ, int minVisibleScale, uint8_t rank, bool generateOutline,
                                    CaptionDescription const & captions)
   : TBase(tileCenter, insertShape, id, minVisibleScale, rank, captions, posZ)
   , m_minPosZ(minPosZ)
   , m_isBuilding(isBuilding)
   , m_clipRect(clipRect)
+  , m_generateOutline(generateOutline)
 {}
 
 void ApplyAreaFeature::operator()(m2::PointD const & p1, m2::PointD const & p2, m2::PointD const & p3)
@@ -598,10 +602,13 @@ void ApplyAreaFeature::ProcessRule(Stylist::TRuleWrapper const & rule)
     params.m_posZ = m_posZ;
 
     BuildingOutline outline;
-    bool const calculateNormals = m_posZ > 0.0;
     if (m_isBuilding)
+    {
+      outline.m_generateOutline = m_generateOutline;
+      bool const calculateNormals = m_posZ > 0.0;
       CalculateBuildingOutline(calculateNormals, outline);
-    params.m_is3D = !outline.m_indices.empty() && calculateNormals;
+      params.m_is3D = !outline.m_indices.empty() && calculateNormals;
+    }
 
     m_insertShape(make_unique_dp<AreaShape>(move(m_triangles), move(outline), params));
   }
@@ -800,6 +807,11 @@ void ApplyLineFeature::Finish()
       }
     }
   }
+}
+
+m2::PolylineD ApplyLineFeature::GetPolyline() const
+{
+  return HasGeometry() ? m2::PolylineD(m_spline->GetPath()) : m2::PolylineD();
 }
 
 } // namespace df

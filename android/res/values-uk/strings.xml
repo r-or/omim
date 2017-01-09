@@ -956,7 +956,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">Поблизу</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">Замовити</string>
+	<string name="taxi_order">Замовлення таксі</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">Очікується через %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -971,12 +971,12 @@
 	<string name="booking_filters_rating_very_good">Дуже добре</string>
 	<string name="booking_filters_rating_excellent">Чудово</string>
 	<string name="booking_filters_price_category">Цінова категорія</string>
-	<string name="booking_filters_no_results">Не знайдено жодного результату</string>
-	<string name="booking_filters_nores_message">Спробуйте пошук за більш узагальненим пошуковим виразом, зменшіть масштаб або скиньте фільтри.</string>
-	<string name="booking_filters_expand_area_button">Зменшити масштаб</string>
-	<string name="booking_filters_reset_button">Скинути фільтри</string>
+	<string name="search_no_results_title">Не знайдено жодного результату</string>
+	<string name="search_no_results_message">Спробуйте пошук за більш узагальненим пошуковим виразом, зменшіть масштаб або скиньте фільтри.</string>
+	<string name="search_no_results_expand_area_button">Зменшити масштаб</string>
+	<string name="search_no_results_reset_button">Скинути фільтри</string>
 	<!-- noun -->
-	<string name="booking_list">Список</string>
+	<string name="search_in_table">Список</string>
 	<string name="booking_based_on_reviews">На основі %d відгуків(-у) про готель</string>
 	<string name="booking_show_more">Показати більше</string>
 	<string name="booking_reviews">Відгуки</string>
@@ -991,4 +991,57 @@
 	<string name="whatsnew_uber_message">Замовляйте таксі прямо з додатку!</string>
 	<string name="dialog_taxi_offline">Замовлення таксі неможливе в автономному режимі.</string>
 	<string name="dialog_taxi_error">Замовлення таксі тимчасово недоступне.</string>
+	<string name="advertisement">Реклама</string>
+	<string name="mobile_data_dialog">Використовувати мобільні дані для перегляду докладної інформації?</string>
+	<string name="mobile_data_option_always">Завжди</string>
+	<string name="mobile_data_option_today">Тільки сьогодні</string>
+	<string name="mobile_data_option_not_today">За винятком сьогодні</string>
+	<string name="mobile_data">Мобільні дані</string>
+	<string name="mobile_data_description">Використання мобільних даних необхідно для відображення докладної інформації про місця (наприклад, фотографій, цін і відгуків).</string>
+	<string name="mobile_data_option_never">Ніколи</string>
+	<string name="mobile_data_option_ask">Завжди питати</string>
+	<string name="traffic_update_maps_text">Для відображення інформації про трафік необхідно оновити карти.</string>
+	<string name="traffic_outdated">Дані про трафік застаріли.</string>
+	<string name="big_font">Більші написи</string>
+	<string name="traffic_update_app">Будь ласка, встановіть оновлення MAPS.ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">Для відображення даних про трафік оновіть додаток.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">Дані про трафік недоступні</string>
+	<string name="banner_deliveryclub_title">Доставка їжі</string>
+	<string name="banner_deliveryclub_message">Швидка доставка з 4000 ресторанів. Замовляйте з Delivery Club.</string>
+	<string name="banner_lamoda_title">Онлайн-магазини одягу та взуття</string>
+	<string name="banner_lamoda_message">Понад 1000 брендів. Знижки до 70%. Безкоштовна доставка по всій країні.</string>
+	<string name="banner_tutu_title">Онлайн-замовлення залізничних квитків</string>
+	<string name="banner_tutu_message">Онлайн-пошук і замовлення квитків на поїзд до будь-якого міста.</string>
+	<string name="banner_geerbest_title">Онлайн-магазин електроніки</string>
+	<string name="banner_geerbest_message">Миттєвий пошук по більш ніж 50 000 виробів за зниженими цінами.</string>
+	<string name="banner_rentalcars_title">Онлайн-оренда автомобілів</string>
+	<string name="banner_rentalcars_message">800 компаній з прокату автомобілів та понад 49 000 агентів.</string>
+	<string name="banner_viator_title">Онлайн-пошук турів</string>
+	<string name="banner_viator_message">Вибір з понад 50 000 турів у різних куточках світу.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">Дані про трафік у 36 країнах</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">Актуальні відомості про трафік та найменш перевантажені дороги!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">Інформація про трафік у роумінгу</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">Менше 1 МБ мобільних даних на одну поїздку.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">Замовлення таксі</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">На більшості сторінок місцязнаходження тепер є кнопка замовлення таксі.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">Вдосконалений пошук</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">Видача правильних результатів навіть за наявності помилок у запиті.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">Пошукові фільтри</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">Пошук готелів виходячи з ціни та рейтингу.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">Розмір шрифту</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">Можливість збільшення розміру написів на карті.</string>
 </resources>

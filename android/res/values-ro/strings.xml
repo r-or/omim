@@ -948,7 +948,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">În apropiere</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">Comandă</string>
+	<string name="taxi_order">Comandați un taxi</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">Așteptat în %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -963,12 +963,12 @@
 	<string name="booking_filters_rating_very_good">Foarte bine</string>
 	<string name="booking_filters_rating_excellent">Excelent</string>
 	<string name="booking_filters_price_category">Categorie de preț</string>
-	<string name="booking_filters_no_results">Nu au fost găsite rezultate</string>
-	<string name="booking_filters_nores_message">Încercați un termen mai general, micșorați sau resetați filtrul.</string>
-	<string name="booking_filters_expand_area_button">Micșorare</string>
-	<string name="booking_filters_reset_button">Resetare filtru</string>
+	<string name="search_no_results_title">Nu au fost găsite rezultate</string>
+	<string name="search_no_results_message">Încercați un termen mai general, micșorați sau resetați filtrul.</string>
+	<string name="search_no_results_expand_area_button">Micșorare</string>
+	<string name="search_no_results_reset_button">Resetare filtru</string>
 	<!-- noun -->
-	<string name="booking_list">Listă</string>
+	<string name="search_in_table">Listă</string>
 	<string name="booking_based_on_reviews">Bazat pe comentariile privind hotelul %d</string>
 	<string name="booking_show_more">Arată mai multe</string>
 	<string name="booking_reviews">Comentarii</string>
@@ -983,4 +983,57 @@
 	<string name="whatsnew_uber_message">Comandați un taxi Uber direct din aplicație!</string>
 	<string name="dialog_taxi_offline">Comandarea unui taxi nu se poate face în modul offline.</string>
 	<string name="dialog_taxi_error">Comandarea unui taxi este momentan indisponibilă.</string>
+	<string name="advertisement">Reclamă</string>
+	<string name="mobile_data_dialog">Folosiți internetul mobil pentru a afişa informaţii detaliate?</string>
+	<string name="mobile_data_option_always">Folosiți întotdeauna</string>
+	<string name="mobile_data_option_today">Doar astăzi</string>
+	<string name="mobile_data_option_not_today">Nu folosiți astăzi</string>
+	<string name="mobile_data">Internet mobil</string>
+	<string name="mobile_data_description">Internetul mobil este necesar pentru afişarea de informaţii detaliate despre locuri, precum fotografii, preţuri şi recenzii.</string>
+	<string name="mobile_data_option_never">Nu utilizați niciodată</string>
+	<string name="mobile_data_option_ask">Întrebați întotdeauna</string>
+	<string name="traffic_update_maps_text">Pentru a afişa datele privind traficul, hărțile trebuie actualizate.</string>
+	<string name="traffic_outdated">Datele privind traficul sunt învechite.</string>
+	<string name="big_font">Etichete mai mari</string>
+	<string name="traffic_update_app">Vă rugăm să actualizaţi MAPS.ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">Pentru a afişa datele privind traficul, aplicația trebuie actualizată.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">Datele privind traficul nu sunt disponibile</string>
+	<string name="banner_deliveryclub_title">Livrare mâncare</string>
+	<string name="banner_deliveryclub_message">Livrare rapidă din 4.000 de restaurante. Comandați de la Delivery Club.</string>
+	<string name="banner_lamoda_title">Îmbrăcăminte și magazin de pantofi online</string>
+	<string name="banner_lamoda_message">Peste 1.000 de branduri. Până la 70% reducere. Livrare gratuită în toată țara.</string>
+	<string name="banner_tutu_title">Bilete de tren online</string>
+	<string name="banner_tutu_message">Bilete de tren către orice oraș online - prețuri, căutare şi rezervare.</string>
+	<string name="banner_geerbest_title">Magazin de produse electronice online</string>
+	<string name="banner_geerbest_message">Căutare instantanee printre peste 50.000 de articole la prețuri mici.</string>
+	<string name="banner_rentalcars_title">Închiriere mașini online</string>
+	<string name="banner_rentalcars_message">800 de firme care închiriază mașini în peste 49.000 de locații de închiriere mașini.</string>
+	<string name="banner_viator_title">Căutare excursii online</string>
+	<string name="banner_viator_message">Căutați în peste 50.000 de excursii din întreaga lume.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">Date privind traficul în 36 de țări</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">Informații actualizate privind traficul și rutele cele mai rapide calculate în funcție de acestea!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">Informații privind traficul în roaming</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">Necesită mai puţin de 1 MB de lățime de bandă mobilă pe călătorie.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">Comandați un taxi</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">Majoritatea paginilor privind locația conțin acum un buton pentru a comanda un taxi.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">Căutare îmbunătățită</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">Chiar și căutările scrise greșit aduc rezultate de căutare precise.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">Filtre de căutare</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">Căutați hoteluri în funcție de preț și calificare.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">Dimensiunea fontului</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">Etichetele de pe hartă pot fi făcute mai mari.</string>
 </resources>

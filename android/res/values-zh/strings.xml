@@ -958,7 +958,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">附近</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">预订</string>
+	<string name="taxi_order">预订出租车</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">预计 %s后到达</string>
 	<!-- When there are no available taxis nearby -->
@@ -973,12 +973,12 @@
 	<string name="booking_filters_rating_very_good">很好</string>
 	<string name="booking_filters_rating_excellent">极好</string>
 	<string name="booking_filters_price_category">价格类别</string>
-	<string name="booking_filters_no_results">未找到任何结果</string>
-	<string name="booking_filters_nores_message">尝试一个更普通的搜索词、缩小显示或重置筛选器。</string>
-	<string name="booking_filters_expand_area_button">缩小</string>
-	<string name="booking_filters_reset_button">重置筛选器</string>
+	<string name="search_no_results_title">未找到任何结果</string>
+	<string name="search_no_results_message">尝试一个更普通的搜索词、缩小显示或重置筛选器。</string>
+	<string name="search_no_results_expand_area_button">缩小</string>
+	<string name="search_no_results_reset_button">重置筛选器</string>
 	<!-- noun -->
-	<string name="booking_list">列表</string>
+	<string name="search_in_table">列表</string>
 	<string name="booking_based_on_reviews">根据 %d 条酒店点评</string>
 	<string name="booking_show_more">显示更多</string>
 	<string name="booking_reviews">点评</string>
@@ -993,4 +993,57 @@
 	<string name="whatsnew_uber_message">从应用直接叫优步出租车！</string>
 	<string name="dialog_taxi_offline">叫出租车服务在离线模式下无法使用。</string>
 	<string name="dialog_taxi_error">叫出租车服务暂时无法使用。</string>
+	<string name="advertisement">广告</string>
+	<string name="mobile_data_dialog">使用移动网络显示详细信息？</string>
+	<string name="mobile_data_option_always">始终使用</string>
+	<string name="mobile_data_option_today">仅在今天</string>
+	<string name="mobile_data_option_not_today">今天不使用</string>
+	<string name="mobile_data">移动网络</string>
+	<string name="mobile_data_description">要显示地点的详细信息（例如照片、价格和评价），需要使用移动网络。</string>
+	<string name="mobile_data_option_never">从不使用</string>
+	<string name="mobile_data_option_ask">总是询问</string>
+	<string name="traffic_update_maps_text">要显示交通数据，必须更新地图。</string>
+	<string name="traffic_outdated">交通数据已过时。</string>
+	<string name="big_font">更大的标签</string>
+	<string name="traffic_update_app">请更新 MAPS.ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">要显示交通数据，必须更新应用。</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">交通数据不可用</string>
+	<string name="banner_deliveryclub_title">送餐</string>
+	<string name="banner_deliveryclub_message">4,000 家餐厅的快速送餐。从 Delivery Club 订餐。</string>
+	<string name="banner_lamoda_title">在线服装和鞋店</string>
+	<string name="banner_lamoda_message">超过 1,000 个品牌。最低三折起。全国免费派送。</string>
+	<string name="banner_tutu_title">在线火车票</string>
+	<string name="banner_tutu_message">在线购买前往任何城市的火车票 - 价格、搜索和预订。</string>
+	<string name="banner_geerbest_title">在线电子产品商店</string>
+	<string name="banner_geerbest_message">立即搜索价格超低的 50,000 余种商品。</string>
+	<string name="banner_rentalcars_title">在线租车</string>
+	<string name="banner_rentalcars_message">800 家租车公司，超过 49,000 个租车网点。</string>
+	<string name="banner_viator_title">在线导游搜索</string>
+	<string name="banner_viator_message">搜索全世界范围内的 50,000 多位导游。</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">36 个国家/地区的交通数据</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">最快的驾驶路线离不开最新的交通信息！</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">交通信息漫游</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">每次旅行需要的移动带宽小于 1 MB。</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">预订出租车</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">大多数地点页面现在都包含一个用于预订出租车的按钮。</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">改进了搜索</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">即使查询存在拼写错误也能得到准确的搜索结果。</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">搜索筛选器</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">基于价格和评分搜索酒店。</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">字体大小</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">可以增大地图上的标签。</string>
 </resources>

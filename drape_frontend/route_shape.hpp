@@ -9,6 +9,8 @@
 #include "drape/utils/vertex_decl.hpp"
 #include "drape/pointers.hpp"
 
+#include "traffic/speed_groups.hpp"
+
 #include "geometry/polyline2d.hpp"
 
 #include "std/vector.hpp"
@@ -16,17 +18,21 @@
 namespace df
 {
 
-double const kArrowSize = 0.001;
+double const kArrowSize = 0.0008;
 
 // Constants below depend on arrow texture.
-double const kArrowHeadSize = 124.0 / 400.0;
-float const kArrowHeadFactor = 124.0f / 96.0f;
+double const kArrowTextureWidth = 74.0;
+double const kArrowTextureHeight = 44.0;
+double const kArrowBodyHeight = 24.0;
+double const kArrowHeadTextureWidth = 32.0;
+double const kArrowTailTextureWidth = 4.0;
 
-double const kArrowTailSize = 20.0 / 400.0;
-float const kArrowTailFactor = 20.0f / 96.0f;
-
-double const kArrowHeightFactor = 96.0 / 36.0;
-double const kArrowAspect = 400.0 / 192.0;
+double const kArrowHeadSize = kArrowHeadTextureWidth / kArrowTextureWidth;
+float const kArrowHeadFactor = 2.0 * kArrowHeadTextureWidth / kArrowTextureHeight;
+double const kArrowTailSize = kArrowTailTextureWidth / kArrowTextureWidth;
+float const kArrowTailFactor = 2.0 * kArrowTailTextureWidth / kArrowTextureHeight;
+double const kArrowHeightFactor = kArrowTextureHeight / kArrowBodyHeight;
+double const kArrowAspect = kArrowTextureWidth / kArrowTextureHeight;
 
 struct RoutePattern
 {
@@ -64,6 +70,7 @@ struct RouteData
   vector<double> m_sourceTurns;
   m2::PointD m_pivot;
   df::ColorConstant m_color;
+  vector<traffic::SpeedGroup> m_traffic;
   double m_length;
   RouteRenderProperty m_route;
   RoutePattern m_pattern;
@@ -101,10 +108,11 @@ public:
 
 private:
   static void PrepareGeometry(vector<m2::PointD> const & path, m2::PointD const & pivot,
+                              vector<glsl::vec4> const & segmentsColors,
                               TGeometryBuffer & geometry, TGeometryBuffer & joinsGeometry,
                               double & outputLength);
   static void PrepareArrowGeometry(vector<m2::PointD> const & path, m2::PointD const & pivot,
-                                   m2::RectF const & texRect, float depth,
+                                   m2::RectF const & texRect, float depthStep, float depth,
                                    TArrowGeometryBuffer & geometry, TArrowGeometryBuffer & joinsGeometry);
   static void BatchGeometry(dp::GLState const & state, ref_ptr<void> geometry, size_t geomSize,
                             ref_ptr<void> joinsGeometry, size_t joinsGeomSize,

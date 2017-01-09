@@ -19,7 +19,8 @@ public:
 
   void UpdateRoute(ScreenBase const & screen, TCacheRouteArrowsCallback const & callback);
 
-  void RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgramManager> mng,
+  void RenderRoute(ScreenBase const & screen, bool trafficShown,
+                   ref_ptr<dp::GpuProgramManager> mng,
                    dp::UniformValuesStorage const & commonUniforms);
 
   void RenderRouteSigns(ScreenBase const & screen, ref_ptr<dp::GpuProgramManager> mng,
@@ -40,7 +41,8 @@ public:
   void UpdateDistanceFromBegin(double distanceFromBegin);
 
 private:
-  void InterpolateByZoom(ScreenBase const & screen, float & halfWidth, float & alpha, double & zoom) const;
+  void InterpolateByZoom(ScreenBase const & screen, ColorConstant color,
+                         float & halfWidth, double & zoom) const;
   void RenderRouteSign(drape_ptr<RouteSignData> const & sign, ScreenBase const & screen,
                        ref_ptr<dp::GpuProgramManager> mng, dp::UniformValuesStorage const & commonUniforms);
 
@@ -54,7 +56,6 @@ private:
   drape_ptr<RouteSignData> m_finishRouteSign;
 
   float m_currentHalfWidth = 0.0f;
-  float m_currentAlpha = 0.0f;
 };
 
 } // namespace df

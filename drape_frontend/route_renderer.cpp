@@ -19,20 +19,20 @@ namespace df
 namespace
 {
 
-float const kHalfWidthInPixel[] =
+float const kHalfWidthInPixelVehicle[] =
 {
   // 1   2     3     4     5     6     7     8     9     10
-  2.0f, 2.0f, 3.0f, 3.0f, 3.0f, 4.0f, 4.0f, 4.0f, 5.0f, 5.0f,
-  //11   12    13    14    15    16    17    18    19     20
-  6.0f, 6.0f, 7.0f, 7.0f, 7.0f, 7.0f, 8.0f, 10.0f, 24.0f, 36.0f
+  1.0f, 1.0f, 1.5f, 1.5f, 1.5f, 2.0f, 2.0f, 2.0f, 2.5f, 2.5f,
+  //11   12    13    14    15   16    17    18    19     20
+  3.0f, 3.0f, 4.0f, 5.0f, 6.0, 8.0f, 10.0f, 10.0f, 18.0f, 27.0f
 };
 
-uint8_t const kAlphaValue[] =
+float const kHalfWidthInPixelOthers[] =
 {
-  //1   2    3    4    5    6    7    8    9    10
-  204, 204, 204, 204, 204, 204, 204, 204, 204, 204,
-  //11  12   13   14   15   16   17   18   19   20
-  204, 204, 204, 204, 190, 180, 170, 160, 140, 120
+  // 1   2     3     4     5     6     7     8     9     10
+  1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.2f, 1.2f,
+  //11   12    13    14    15   16    17    18    19     20
+  1.5f, 1.5f, 2.0f, 2.5f, 3.0, 4.0f, 5.0f, 5.0f, 9.0f, 13.0f
 };
 
 int const kArrowAppearingZoomLevel = 14;
@@ -114,32 +114,38 @@ bool AreEqualArrowBorders(vector<ArrowBorders> const & borders1, vector<ArrowBor
   return true;
 }
 
+dp::Color GetOutlineColor(df::ColorConstant routeColor)
+{
+  df::ColorConstant c = routeColor;
+  if (routeColor == df::ColorConstant::Route)
+    c = df::ColorConstant::RouteOutline;
+  return df::GetColorConstant(GetStyleReader().GetCurrentStyle(), c);
+}
+
 } // namespace
 
 RouteRenderer::RouteRenderer()
   : m_distanceFromBegin(0.0)
 {}
 
-void RouteRenderer::InterpolateByZoom(ScreenBase const & screen, float & halfWidth, float & alpha, double & zoom) const
+void RouteRenderer::InterpolateByZoom(ScreenBase const & screen, ColorConstant color,
+                                      float & halfWidth, double & zoom) const
 {
   double const zoomLevel = GetZoomLevel(screen.GetScale());
   zoom = trunc(zoomLevel);
   int const index = zoom - 1.0;
   float const lerpCoef = zoomLevel - zoom;
 
-  if (index < scales::UPPER_STYLE_SCALE)
-  {
-    halfWidth = kHalfWidthInPixel[index] + lerpCoef * (kHalfWidthInPixel[index + 1] - kHalfWidthInPixel[index]);
+  float const * halfWidthInPixel = kHalfWidthInPixelVehicle;
+  if (color != ColorConstant::Route)
+    halfWidthInPixel = kHalfWidthInPixelOthers;
 
-    float const alpha1 = static_cast<float>(kAlphaValue[index]) / numeric_limits<uint8_t>::max();
-    float const alpha2 = static_cast<float>(kAlphaValue[index + 1]) / numeric_limits<uint8_t>::max();
-    alpha = alpha1 + lerpCoef * (alpha2 - alpha1);
-  }
+  if (index < scales::UPPER_STYLE_SCALE)
+    halfWidth = halfWidthInPixel[index] + lerpCoef * (halfWidthInPixel[index + 1] - halfWidthInPixel[index]);
   else
-  {
-    halfWidth = kHalfWidthInPixel[scales::UPPER_STYLE_SCALE];
-    alpha = static_cast<float>(kAlphaValue[scales::UPPER_STYLE_SCALE]) / numeric_limits<uint8_t>::max();
-  }
+    halfWidth = halfWidthInPixel[scales::UPPER_STYLE_SCALE];
+
+  halfWidth *= df::VisualParams::Instance().GetVisualScale();
 }
 
 void RouteRenderer::UpdateRoute(ScreenBase const & screen, TCacheRouteArrowsCallback const & callback)
@@ -151,7 +157,7 @@ void RouteRenderer::UpdateRoute(ScreenBase const & screen, TCacheRouteArrowsCall
 
   // Interpolate values by zoom level.
   double zoom = 0.0;
-  InterpolateByZoom(screen, m_currentHalfWidth, m_currentAlpha, zoom);
+  InterpolateByZoom(screen, m_routeData->m_color, m_currentHalfWidth, zoom);
 
   // Update arrows.
   if (zoom >= kArrowAppearingZoomLevel && !m_routeData->m_sourceTurns.empty())
@@ -163,8 +169,8 @@ void RouteRenderer::UpdateRoute(ScreenBase const & screen, TCacheRouteArrowsCall
     if (glbHalfLen < glbHalfTextureLen)
       glbHalfLen = glbHalfTextureLen;
 
-    double const glbArrowHead =  2.0 * kArrowHeadSize * glbHalfTextureLen;
-    double const glbArrowTail =  2.0 * kArrowTailSize * glbHalfTextureLen;
+    double const glbArrowHead = 2.0 * kArrowHeadSize * glbHalfTextureLen;
+    double const glbArrowTail = 2.0 * kArrowTailSize * glbHalfTextureLen;
     double const glbMinArrowSize = glbArrowHead + glbArrowTail;
 
     double const kExtendCoef = 1.1;
@@ -228,7 +234,8 @@ void RouteRenderer::UpdateRoute(ScreenBase const & screen, TCacheRouteArrowsCall
   }
 }
 
-void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgramManager> mng,
+void RouteRenderer::RenderRoute(ScreenBase const & screen, bool trafficShown,
+                                ref_ptr<dp::GpuProgramManager> mng,
                                 dp::UniformValuesStorage const & commonUniforms)
 {
   if (!m_routeData || m_routeData->m_route.m_buckets.empty())
@@ -244,14 +251,20 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     uniforms.SetMatrix4x4Value("modelView", mv.m_data);
     glsl::vec4 const color = glsl::ToVec4(df::GetColorConstant(GetStyleReader().GetCurrentStyle(),
                                                                m_routeData->m_color));
-    uniforms.SetFloatValue("u_color", color.r, color.g, color.b, m_currentAlpha);
+    uniforms.SetFloatValue("u_color", color.r, color.g, color.b, color.a);
     double const screenScale = screen.GetScale();
-    uniforms.SetFloatValue("u_routeParams", m_currentHalfWidth, m_currentHalfWidth * screenScale, m_distanceFromBegin);
+    uniforms.SetFloatValue("u_routeParams", m_currentHalfWidth, m_currentHalfWidth * screenScale,
+                           m_distanceFromBegin, trafficShown ? 1.0f : 0.0f);
 
     if (m_routeData->m_pattern.m_isDashed)
     {
       uniforms.SetFloatValue("u_pattern", m_currentHalfWidth * m_routeData->m_pattern.m_dashLength * screenScale,
                              m_currentHalfWidth * m_routeData->m_pattern.m_gapLength * screenScale);
+    }
+    else
+    {
+      glsl::vec4 const outlineColor = glsl::ToVec4(GetOutlineColor(m_routeData->m_color));
+      uniforms.SetFloatValue("u_outlineColor", outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
     }
 
     // Set up shaders and apply uniforms.

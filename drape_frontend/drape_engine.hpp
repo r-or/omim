@@ -5,11 +5,12 @@
 #include "drape_frontend/frontend_renderer.hpp"
 #include "drape_frontend/route_shape.hpp"
 #include "drape_frontend/selection_shape.hpp"
-#include "drape_frontend/traffic_generator.hpp"
 #include "drape_frontend/threads_commutator.hpp"
 
 #include "drape/pointers.hpp"
 #include "drape/texture_manager.hpp"
+
+#include "traffic/traffic_info.hpp"
 
 #include "platform/location.hpp"
 
@@ -44,6 +45,7 @@ public:
            gui::TWidgetsInitInfo && info,
            pair<location::EMyPositionMode, bool> const & initialMyPositionMode,
            bool allow3dBuildings,
+           bool trafficEnabled,
            bool blockTapEvents,
            bool showChoosePositionMark,
            vector<m2::TriangleD> && boundAreaTriangles,
@@ -58,6 +60,7 @@ public:
       , m_info(move(info))
       , m_initialMyPositionMode(initialMyPositionMode)
       , m_allow3dBuildings(allow3dBuildings)
+      , m_trafficEnabled(trafficEnabled)
       , m_blockTapEvents(blockTapEvents)
       , m_showChoosePositionMark(showChoosePositionMark)
       , m_boundAreaTriangles(move(boundAreaTriangles))
@@ -74,6 +77,7 @@ public:
     gui::TWidgetsInitInfo m_info;
     pair<location::EMyPositionMode, bool> m_initialMyPositionMode;
     bool m_allow3dBuildings;
+    bool m_trafficEnabled;
     bool m_blockTapEvents;
     bool m_showChoosePositionMark;
     vector<m2::TriangleD> m_boundAreaTriangles;
@@ -131,7 +135,8 @@ public:
   SelectionShape::ESelectedObject GetSelectedObject();
 
   void AddRoute(m2::PolylineD const & routePolyline, vector<double> const & turns,
-                df::ColorConstant color, df::RoutePattern pattern = df::RoutePattern());
+                df::ColorConstant color, vector<traffic::SpeedGroup> const & traffic,
+                df::RoutePattern pattern = df::RoutePattern());
   void RemoveRoute(bool deactivateFollowing);
   void FollowRoute(int preferredZoomLevel, int preferredZoomLevel3d, bool enableAutoZoom);
   void DeactivateRouteFollowing();
@@ -162,8 +167,8 @@ public:
   void RequestSymbolsSize(vector<string> const & symbols,
                           TRequestSymbolsSizeCallback const & callback);
 
-  void CacheTrafficSegmentsGeometry(TrafficSegmentsGeometry const & segments);
-  void UpdateTraffic(TrafficSegmentsColoring const & segmentsColoring);
+  void EnableTraffic(bool trafficEnabled);
+  void UpdateTraffic(traffic::TrafficInfo const & info);
   void ClearTrafficCache(MwmSet::MwmId const & mwmId);
 
   void SetFontScaleFactor(double scaleFactor);

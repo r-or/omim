@@ -950,7 +950,9 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">I nærheten</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">Bestille</string>
+	<string name="taxi_order">Bestill drosje</string>
+	<!-- How long it is until the taxi arrives -->
+	<string name="taxi_wait">Forventet om %s</string>
 	<!-- When there are no available taxis nearby -->
 	<string name="taxi_not_found">Kunne ikke finne drosje i nærheten</string>
 	<string name="install_app">Installer</string>
@@ -963,12 +965,12 @@
 	<string name="booking_filters_rating_very_good">Veldig bra</string>
 	<string name="booking_filters_rating_excellent">Utmerket</string>
 	<string name="booking_filters_price_category">Prisklasse</string>
-	<string name="booking_filters_no_results">Fant ingen resultater</string>
-	<string name="booking_filters_nores_message">Prøv et mer generelt søkeord, zoom ut eller tilbakestill filteret.</string>
-	<string name="booking_filters_expand_area_button">Zoom ut</string>
-	<string name="booking_filters_reset_button">Tilbakestill filter</string>
+	<string name="search_no_results_title">Fant ingen resultater</string>
+	<string name="search_no_results_message">Prøv et mer generelt søkeord, zoom ut eller tilbakestill filteret.</string>
+	<string name="search_no_results_expand_area_button">Zoom ut</string>
+	<string name="search_no_results_reset_button">Tilbakestill filter</string>
 	<!-- noun -->
-	<string name="booking_list">Liste</string>
+	<string name="search_in_table">Liste</string>
 	<string name="booking_based_on_reviews">Basert på %d hotellvurderinger</string>
 	<string name="booking_show_more">Vis mer</string>
 	<string name="booking_reviews">Vurderinger</string>
@@ -983,4 +985,57 @@
 	<string name="whatsnew_uber_message">Bestill en Uber-drosje direkte fra appen!</string>
 	<string name="dialog_taxi_offline">Bestilling av taxi er ikke mulig i offlinemodus.</string>
 	<string name="dialog_taxi_error">Bestilling av taxi er ikke tilgjengelig for øyeblikket.</string>
+	<string name="advertisement">Reklame</string>
+	<string name="mobile_data_dialog">Bruke mobilt Internett til å vise detaljert informasjon?</string>
+	<string name="mobile_data_option_always">Bruk alltid</string>
+	<string name="mobile_data_option_today">Bare i dag</string>
+	<string name="mobile_data_option_not_today">Ikke bruk i dag</string>
+	<string name="mobile_data">Mobilt Internett</string>
+	<string name="mobile_data_description">Mobilt Internett er nødvendig for å vise detaljert informasjon om steder, for eksempel fotografier, priser og anmeldelser.</string>
+	<string name="mobile_data_option_never">Aldri bruk</string>
+	<string name="mobile_data_option_ask">Alltid spør</string>
+	<string name="traffic_update_maps_text">For å vise trafikkdata må kartene i appen være oppdaterte.</string>
+	<string name="traffic_outdated">Trafikkdata er utdatert.</string>
+	<string name="big_font">Større etiketter</string>
+	<string name="traffic_update_app">Vennligst oppdater MAPS.ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">Du må oppdatere applikasjonen for å kunne se trafikkdata.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">Trafikkdata er ikke tilgjengelig</string>
+	<string name="banner_deliveryclub_title">Matleveranse</string>
+	<string name="banner_deliveryclub_message">Hurtig leveranse fra 4000 restauranter. Bestill fra Delivery Club.</string>
+	<string name="banner_lamoda_title">Kles- og skobutikk online</string>
+	<string name="banner_lamoda_message">Flere enn 1000 ulike merker. Opptil 70 % rabatt. Gratis frakt over hele landet.</string>
+	<string name="banner_tutu_title">Togbilletter online</string>
+	<string name="banner_tutu_message">Togbilletter til alle byer – priser, søk og bestilling.</string>
+	<string name="banner_geerbest_title">Elektronikkbutikk online</string>
+	<string name="banner_geerbest_message">Hurtigsøk blant over 50 000 varer til lave priser.</string>
+	<string name="banner_rentalcars_title">Leie av bil online</string>
+	<string name="banner_rentalcars_message">800 leiebilfirmaer på over 49 000 steder.</string>
+	<string name="banner_viator_title">Søk etter omvisninger med guide online</string>
+	<string name="banner_viator_message">Søk blant over 50 000 omvisninger verden over.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">Trafikkdata i 36 land</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">Oppdatert trafikkinformasjon og raskeste kjøreruter basert på det!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">Trafikkinformasjon ved roaming</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">Bruker mindre enn 1MB mobildata per tur.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">Bestill drosje</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">De fleste sidene har nå en knapp til å bestille taxi.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">Forbedret søkefunksjon</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">Selv feilstavede forespørsler gir nøyaktige søkeresultater.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">Søkefiltre</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">Søk etter hoteller basert på pris og vurdering.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">Skriftstørrelse</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">Etiketter på kartet kan gjøres større.</string>
 </resources>

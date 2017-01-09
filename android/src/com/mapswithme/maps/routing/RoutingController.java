@@ -3,6 +3,7 @@ package com.mapswithme.maps.routing;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Rect;
 import android.support.annotation.DimenRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.MainThread;
@@ -340,15 +341,25 @@ public class RoutingController
       return;
     }
 
+    if (startPoint != null && endPoint != null)
+      mLastRouterType = Framework.nativeGetBestRouter(startPoint.getLat(), startPoint.getLon(),
+                                                      endPoint.getLat(), endPoint.getLon());
+    prepare(startPoint, endPoint, mLastRouterType);
+  }
+
+  public void prepare(@Nullable MapObject startPoint, @Nullable MapObject endPoint,
+                      @Framework.RouterType int routerType)
+  {
     cancel();
     mStartPoint = startPoint;
     mEndPoint = endPoint;
     setState(State.PREPARE);
 
-    if (mStartPoint != null && mEndPoint != null)
-      mLastRouterType = Framework.nativeGetBestRouter(mStartPoint.getLat(), mStartPoint.getLon(),
-                                                      mEndPoint.getLat(), mEndPoint.getLon());
+    mLastRouterType = routerType;
     Framework.nativeSetRouter(mLastRouterType);
+
+    if (mStartPoint != null || mEndPoint != null)
+      setPointsInternal();
 
     if (mContainer != null)
       mContainer.showRoutePlan(true, new Runnable()
@@ -750,8 +761,11 @@ public class RoutingController
     Statistics.INSTANCE.trackEvent(Statistics.EventName.ROUTING_SEARCH_POINT);
     AlohaHelper.logClick(AlohaHelper.ROUTING_SEARCH_POINT);
     mWaitingPoiPickSlot = slotId;
-    mContainer.showSearch();
-    mContainer.updateMenu();
+    if (mContainer != null)
+    {
+      mContainer.showSearch();
+      mContainer.updateMenu();
+    }
   }
 
   private void onPoiSelectedInternal(@Nullable MapObject point, int slot)

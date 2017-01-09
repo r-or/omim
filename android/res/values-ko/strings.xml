@@ -948,7 +948,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">근처</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">주문</string>
+	<string name="taxi_order">택시 주문</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">%s 예상</string>
 	<!-- When there are no available taxis nearby -->
@@ -963,12 +963,12 @@
 	<string name="booking_filters_rating_very_good">매우 양호</string>
 	<string name="booking_filters_rating_excellent">탁월</string>
 	<string name="booking_filters_price_category">가격 범주</string>
-	<string name="booking_filters_no_results">결과 찾지 못함</string>
-	<string name="booking_filters_nores_message">보다 일반적인 검색어로 시도하거나, 축소하거나, 필터를 재설정하세요.</string>
-	<string name="booking_filters_expand_area_button">축소</string>
-	<string name="booking_filters_reset_button">필터 재설정</string>
+	<string name="search_no_results_title">결과 찾지 못함</string>
+	<string name="search_no_results_message">보다 일반적인 검색어로 시도하거나, 축소하거나, 필터를 재설정하세요.</string>
+	<string name="search_no_results_expand_area_button">축소</string>
+	<string name="search_no_results_reset_button">필터 재설정</string>
 	<!-- noun -->
-	<string name="booking_list">목록</string>
+	<string name="search_in_table">목록</string>
 	<string name="booking_based_on_reviews">%d개 호텔 리뷰 기반</string>
 	<string name="booking_show_more">자세히 표시</string>
 	<string name="booking_reviews">리뷰</string>
@@ -983,4 +983,57 @@
 	<string name="whatsnew_uber_message">Uber 택시를 직접 앱에서 예약하세요.</string>
 	<string name="dialog_taxi_offline">오프라인 모드에서는 택시를 예약할 수 없습니다.</string>
 	<string name="dialog_taxi_error">일시적으로 택시를 예약할 수 없습니다.</string>
+	<string name="advertisement">광고</string>
+	<string name="mobile_data_dialog">모바일 인터넷을 사용하여 자세한 정보를 표시하시겠습니까?</string>
+	<string name="mobile_data_option_always">항상 사용</string>
+	<string name="mobile_data_option_today">오늘만</string>
+	<string name="mobile_data_option_not_today">오늘 사용 안 함</string>
+	<string name="mobile_data">모바일 인터넷</string>
+	<string name="mobile_data_description">모바일 인터넷은 사진, 가격, 리뷰 등 장소에 대한 자세한 정보를 표시하는 데 필요합니다.</string>
+	<string name="mobile_data_option_never">전혀 사용 안 함</string>
+	<string name="mobile_data_option_ask">항상 표시</string>
+	<string name="traffic_update_maps_text">교통 데이터를 표시하려면 지도를 업데이트해야 합니다.</string>
+	<string name="traffic_outdated">교통 데이터가 오래되었습니다.</string>
+	<string name="big_font">더 큰 레이블</string>
+	<string name="traffic_update_app">MAPS.ME를 업데이트하세요.</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">교통 데이터를 표시하려면 응용 프로그램을 업데이트해야 합니다.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">교통 데이터를 사용할 수 없습니다</string>
+	<string name="banner_deliveryclub_title">음식 배달</string>
+	<string name="banner_deliveryclub_message">4,000곳의 레스토랑에서 신속하게 배달합니다. Delivery Club에서 주문하세요.</string>
+	<string name="banner_lamoda_title">온라인 의류 및 신발 스토어</string>
+	<string name="banner_lamoda_message">1,000개 이상의 브랜드. 최대 70% 할인. 전국 무료 배송.</string>
+	<string name="banner_tutu_title">온라인 기차표</string>
+	<string name="banner_tutu_message">온라인으로 이용하는 모든 도시행 기차표 - 가격, 검색 및 예약.</string>
+	<string name="banner_geerbest_title">온라인 전자 기기 스토어</string>
+	<string name="banner_geerbest_message">저렴한 가격의 50,000개 이상 품목에서 즉시 검색.</string>
+	<string name="banner_rentalcars_title">온라인 자동차 렌트</string>
+	<string name="banner_rentalcars_message">800개의 자동차 렌트 회사와 49,000곳 이상의 자동차 렌트 지점</string>
+	<string name="banner_viator_title">온라인 투어 검색</string>
+	<string name="banner_viator_message">전 세계 50,000개 이상의 투어에서 검색하세요.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">36개국의 교통 데이터</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">최신 교통 정보 및 이 정보에 따른 가장 빠른 운전 경로!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">로밍의 교통 정보</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">승차당 모바일 대역폭 1MB 미만이 필요합니다.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">택시 주문</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">이제 대부분의 위치 페이지에 택시 주문을 위한 버튼이 포함되어 있습니다.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">향상된 검색</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">철자가 틀린 쿼리도 정확한 검색 결과를 표시합니다.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">검색 필터</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">가격 및 등급에 따라 호텔을 검색합니다.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">글꼴 크기</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">지도의 레이블을 더 크게 할 수 있습니다.</string>
 </resources>

@@ -952,7 +952,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">Közeli</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">Rendelés</string>
+	<string name="taxi_order">Taxi rendelés</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">Várható %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -967,12 +967,12 @@
 	<string name="booking_filters_rating_very_good">Nagyon jó</string>
 	<string name="booking_filters_rating_excellent">Kiváló</string>
 	<string name="booking_filters_price_category">Árkategória</string>
-	<string name="booking_filters_no_results">Nincs találat</string>
-	<string name="booking_filters_nores_message">Próbálkozzon általánosabb kereső kifejezéssel, tágítsa vagy törölje a szűrőt.</string>
-	<string name="booking_filters_expand_area_button">Kicsinyítés</string>
-	<string name="booking_filters_reset_button">Szűrő nullázása</string>
+	<string name="search_no_results_title">Nincs találat</string>
+	<string name="search_no_results_message">Próbálkozzon általánosabb kereső kifejezéssel, tágítsa vagy törölje a szűrőt.</string>
+	<string name="search_no_results_expand_area_button">Kicsinyítés</string>
+	<string name="search_no_results_reset_button">Szűrő nullázása</string>
 	<!-- noun -->
-	<string name="booking_list">Lista</string>
+	<string name="search_in_table">Lista</string>
 	<string name="booking_based_on_reviews">%d hotel-értékelés alapján</string>
 	<string name="booking_show_more">Több megjelenítése</string>
 	<string name="booking_reviews">Bírálatok</string>
@@ -987,4 +987,57 @@
 	<string name="whatsnew_uber_message">Hívj Uber-taxit közvetlenül az alkalmazásból!</string>
 	<string name="dialog_taxi_offline">Taxirendelés offline módban nem lehetséges.</string>
 	<string name="dialog_taxi_error">A taxirendelés átmenetileg nem elérhető.</string>
+	<string name="advertisement">Hirdetés</string>
+	<string name="mobile_data_dialog">Részletes információk megjelenítése a mobil internet segítségével?</string>
+	<string name="mobile_data_option_always">Mindig használja</string>
+	<string name="mobile_data_option_today">Csak ma</string>
+	<string name="mobile_data_option_not_today">Ma nem használhatja</string>
+	<string name="mobile_data">Mobil Internet</string>
+	<string name="mobile_data_description">Mobil internetre van szükség helyszínekre vonatkozó részletes információ, mint például fotók, árak és szemlék megjelenítéséhez.</string>
+	<string name="mobile_data_option_never">Soha se használja</string>
+	<string name="mobile_data_option_ask">Mindig kérdezze meg</string>
+	<string name="traffic_update_maps_text">Forgalmi adatok megjelenítéséhez a térképeket frissíteni kell.</string>
+	<string name="traffic_outdated">A forgalmi adatok elavultak.</string>
+	<string name="big_font">Nagyobb címkék</string>
+	<string name="traffic_update_app">Kérjük, frissítse a MAPS.ME alkalmazást</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">A forgalmi adatok megjelenítéséhez frissíteni kell az alkalmazást.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">Forgalmi adatok nem állnak rendelkezésre</string>
+	<string name="banner_deliveryclub_title">Ételfutár</string>
+	<string name="banner_deliveryclub_message">Gyors házhozszállítás 4000 étteremből. Rendelés a Delivery Club-ból.</string>
+	<string name="banner_lamoda_title">Online ruházati és cipő üzlet</string>
+	<string name="banner_lamoda_message">Több mint 1000 márka. Akár 70 % kedvezmény. Ingyenes szállítás az ország egész területén.</string>
+	<string name="banner_tutu_title">Vonatjegy az interneten keresztül</string>
+	<string name="banner_tutu_message">Vonatjegy interneten minden városba - árak, keresés és foglalás.</string>
+	<string name="banner_geerbest_title">Internetes elektronikai áruház</string>
+	<string name="banner_geerbest_message">Több mint 50.000 cikk azonnali keresése alacsony áron.</string>
+	<string name="banner_rentalcars_title">Autóbérlés az interneten</string>
+	<string name="banner_rentalcars_message">800 autókölcsönző cég több mint 49.000 autókölcsönzési helyszínen.</string>
+	<string name="banner_viator_title">Utazások keresése az interneten</string>
+	<string name="banner_viator_message">Több mint 50.000 utazás keresése a világ minden táján.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">Forgalmi adatok 36 országban</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">Aktuális forgalmi információk és a leggyorsabb útvonalak ezek alapján!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">Forgalmi információ a barangolásban</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">Utazásonként kevesebb, mint 1 MB mobil sávszélességet igényel.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">Taxi rendelés</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">A legtöbb helymeghatározó oldalon már megtalálható a taxirendelés gombja.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">Továbbfejlesztett keresés</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">Még a hibásan írt lekérdezések is pontos keresési eredményeket adnak.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">Keresési szűrők</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">Szálláshelyek keresése ár és minősítés alapján.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">Betűméret</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">A térképen a címkék lehetnek nagyobbak.</string>
 </resources>

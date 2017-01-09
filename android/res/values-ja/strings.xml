@@ -951,7 +951,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">近隣</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">予約</string>
+	<string name="taxi_order">タクシーを呼ぶ</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">%s 後に到着予定</string>
 	<!-- When there are no available taxis nearby -->
@@ -966,12 +966,12 @@
 	<string name="booking_filters_rating_very_good">非常に良い</string>
 	<string name="booking_filters_rating_excellent">最高</string>
 	<string name="booking_filters_price_category">価格帯</string>
-	<string name="booking_filters_no_results">結果が見つかりません</string>
-	<string name="booking_filters_nores_message">一般的な検索語句や、フィルター範囲を広げたりリセットしたりしてください。</string>
-	<string name="booking_filters_expand_area_button">広げる</string>
-	<string name="booking_filters_reset_button">フィルターをリセット</string>
+	<string name="search_no_results_title">結果が見つかりません</string>
+	<string name="search_no_results_message">一般的な検索語句や、フィルター範囲を広げたりリセットしたりしてください。</string>
+	<string name="search_no_results_expand_area_button">広げる</string>
+	<string name="search_no_results_reset_button">フィルターをリセット</string>
 	<!-- noun -->
-	<string name="booking_list">一覧</string>
+	<string name="search_in_table">一覧</string>
 	<string name="booking_based_on_reviews">%d 件のホテルのレビューに基づいています</string>
 	<string name="booking_show_more">さらに表示</string>
 	<string name="booking_reviews">レビュー</string>
@@ -986,4 +986,57 @@
 	<string name="whatsnew_uber_message">アプリから直接Uberの配車リクエストができます！</string>
 	<string name="dialog_taxi_offline">タクシーの予約がオフラインモードでは使用できません。</string>
 	<string name="dialog_taxi_error">タクシーの予約が一時的に使用できません。</string>
+	<string name="advertisement">広告</string>
+	<string name="mobile_data_dialog">モバイルインターネットを使用して詳細な情報を表示しますか？</string>
+	<string name="mobile_data_option_always">常に使用</string>
+	<string name="mobile_data_option_today">今日だけ</string>
+	<string name="mobile_data_option_not_today">今日は使用しない</string>
+	<string name="mobile_data">モバイルインターネット</string>
+	<string name="mobile_data_description">モバイルインターネットは場所、写真、価格やレビューのような詳細情報を表示するのに必要です。</string>
+	<string name="mobile_data_option_never">使用しない</string>
+	<string name="mobile_data_option_ask">常に確認</string>
+	<string name="traffic_update_maps_text">交通データを表示するには、地図を更新する必要があります。</string>
+	<string name="traffic_outdated">交通データが古くなっています。</string>
+	<string name="big_font">大きなラベル</string>
+	<string name="traffic_update_app">MAPS.ME をアップデートしてください</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">交通データを表示するには、アプリケーションをアップデートする必要があります。</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">交通データは利用できません</string>
+	<string name="banner_deliveryclub_title">出前・宅配</string>
+	<string name="banner_deliveryclub_message">4,000 軒のレストランから迅速にお届けします。Delivery Club からご注文ください。</string>
+	<string name="banner_lamoda_title">衣料品と靴のオンライン店舗</string>
+	<string name="banner_lamoda_message">1,000 件を超えるブランド。最大 70% オフ。全国無料配送。</string>
+	<string name="banner_tutu_title">オンライン鉄道チケット</string>
+	<string name="banner_tutu_message">どんな都市への鉄道チケットもオンラインで。価格を検索して、予約しましょう。</string>
+	<string name="banner_geerbest_title">オンライン家電量販店</string>
+	<string name="banner_geerbest_message">低価格で 50,000 件を超えるアイテムを素早く検索。</string>
+	<string name="banner_rentalcars_title">オンラインでレンタカーを予約</string>
+	<string name="banner_rentalcars_message">800 社のレンタカー会社による 49,000 カ所を超えるレンタカー店舗をご利用いただけます。</string>
+	<string name="banner_viator_title">オンラインツアー検索</string>
+	<string name="banner_viator_message">世界中から 50,000 件を超えるツアーを検索してください。</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">36か国の交通データ</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">最新の交通データと、データに基づく最速のドライブルートをご提供致します！</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">ローミング中の交通情報</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">移動毎に 1 MB 未満のモバイル帯域幅が必要です。</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">タクシーの呼び出し</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">ほとんど場所のページに、タクシーを呼ぶためのボタンが表示されるようになりました。</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">検索機能の向上</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">スペルミスのある検索を行なっても、正確な検索結果を表示します。</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">検索フィルター</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">価格と評価に基づくホテルの検索。</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">フォントサイズ</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">地図上のラベルを大きくすることができます。</string>
 </resources>

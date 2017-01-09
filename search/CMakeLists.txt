@@ -43,6 +43,8 @@ set(
   geometry_utils.hpp
   hotels_classifier.cpp
   hotels_classifier.hpp
+  hotels_filter.cpp
+  hotels_filter.hpp
   house_detector.cpp
   house_detector.hpp
   house_numbers_matcher.cpp
@@ -132,4 +134,4 @@ add_library(${PROJECT_NAME} ${SRC})
 
 omim_add_test_subdirectory(search_tests_support)
 omim_add_test_subdirectory(search_tests)
-#omim_add_test_subdirectory(search_integration_tests)
+omim_add_test_subdirectory(search_integration_tests)

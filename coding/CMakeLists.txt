@@ -1,9 +1,19 @@
 project(coding)
 
-include_directories(${OMIM_ROOT}/coding)
+include_directories(
+  ${OMIM_ROOT}/coding
+  ${OMIM_ROOT}/3party/expat
+  ${OMIM_ROOT}/3party/lodepng
+)
 
 set(
   SRC
+   ${OMIM_ROOT}/3party/expat/expat_impl.h
+   ${OMIM_ROOT}/3party/lodepng/lodepng.hpp
+   ${OMIM_ROOT}/3party/lodepng/lodepng_io.hpp
+   ${OMIM_ROOT}/3party/lodepng/lodepng_io_private.hpp
+   ${OMIM_ROOT}/3party/lodepng/lodepng.cpp
+
   base64.cpp
   base64.hpp
   bit_streams.hpp
@@ -80,6 +90,8 @@ set(
   zip_creator.hpp
   zip_reader.cpp
   zip_reader.hpp
+  zlib.cpp
+  zlib.hpp
 )
 
 add_library(${PROJECT_NAME} ${SRC})

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -23,6 +24,7 @@ import com.mapswithme.maps.MwmActivity;
 import com.mapswithme.maps.R;
 import com.mapswithme.maps.base.BaseMwmFragment;
 import com.mapswithme.maps.base.OnBackPressListener;
+import com.mapswithme.maps.bookmarks.data.Banner;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.downloader.CountrySuggestFragment;
 import com.mapswithme.maps.downloader.MapManager;
@@ -222,12 +224,10 @@ public class SearchFragment extends BaseMwmFragment
     mTabFrame = root.findViewById(R.id.tab_frame);
     ViewPager pager = (ViewPager) mTabFrame.findViewById(R.id.pages);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-      UiUtils.hide(mTabFrame.findViewById(R.id.tabs_divider));
-
     mToolbarController = new ToolbarController(view);
 
-    final TabAdapter tabAdapter = new TabAdapter(getChildFragmentManager(), pager, (TabLayout) root.findViewById(R.id.tabs));
+    TabLayout tabLayout = (TabLayout) root.findViewById(R.id.tabs);
+    final TabAdapter tabAdapter = new TabAdapter(getChildFragmentManager(), pager, tabLayout);
 
     mResultsFrame = root.findViewById(R.id.results_frame);
     RecyclerView results = (RecyclerView) mResultsFrame.findViewById(R.id.recycler);
@@ -266,8 +266,9 @@ public class SearchFragment extends BaseMwmFragment
     tabAdapter.setTabSelectedListener(new TabAdapter.OnTabSelectedListener()
     {
       @Override
-      public void onTabSelected(TabAdapter.Tab tab)
+      public void onTabSelected(@NonNull TabAdapter.Tab tab)
       {
+        Statistics.INSTANCE.trackSearchTabSelected(tab.name());
         mToolbarController.deactivate();
       }
     });
@@ -351,7 +352,8 @@ public class SearchFragment extends BaseMwmFragment
     if (mFromRoutePlan)
     {
       //noinspection ConstantConditions
-      final MapObject point = new MapObject(MapObject.SEARCH, result.name, result.description.featureType, "", result.lat, result.lon, "");
+      final MapObject point = new MapObject(MapObject.SEARCH, result.name,
+          result.description.featureType, "", result.lat, result.lon, "", Banner.EMPTY, false);
       RoutingController.get().onPoiSelected(point);
     }
 
@@ -476,10 +478,20 @@ public class SearchFragment extends BaseMwmFragment
     if (mFromRoutePlan)
     {
       RoutingController.get().onPoiSelected(null);
-      return !(getActivity() instanceof SearchActivity);
+      final boolean isSearchActivity = getActivity() instanceof SearchActivity;
+      if (isSearchActivity)
+        closeSearch();
+      return true;
     }
 
-    return false;
+    closeSearch();
+    return true;
+  }
+
+  private void closeSearch()
+  {
+    getActivity().finish();
+    getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
   }
 
   public void setRecyclerScrollListener(RecyclerView recycler)

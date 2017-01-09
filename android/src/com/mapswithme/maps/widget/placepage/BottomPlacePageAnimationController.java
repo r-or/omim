@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
@@ -36,6 +37,9 @@ class BottomPlacePageAnimationController extends BasePlacePageAnimationControlle
 
   private float mDetailMaxHeight;
   private float mScrollDelta;
+
+  @Nullable
+  private OnBannerOpenListener mBannerOpenListener;
 
   BottomPlacePageAnimationController(@NonNull PlacePageView placePage)
   {
@@ -313,7 +317,14 @@ class BottomPlacePageAnimationController extends BasePlacePageAnimationControlle
     }
 
     mDetailsScroll.setTranslationY(detailsTranslation);
+    notifyProgress();
     refreshToolbarVisibility();
+
+    if (mBannerOpenListener != null
+        && detailsTranslation < mDetailsScroll.getHeight() - mPreview.getHeight())
+    {
+      mBannerOpenListener.onNeedOpenBanner();
+    }
     return consumeEvent;
   }
 
@@ -353,7 +364,17 @@ class BottomPlacePageAnimationController extends BasePlacePageAnimationControlle
           case FULLSCREEN:
             if (isDetailContentScrollable())
               mDetailsScroll.setGestureDetector(null);
-            showFullscreen();
+            mDetailsScroll.addOnLayoutChangeListener(new View.OnLayoutChangeListener()
+            {
+              @Override
+              public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                                         int oldLeft, int oldTop, int oldRight, int oldBottom)
+              {
+                mDetailsScroll.removeOnLayoutChangeListener(this);
+                showFullscreen();
+              }
+            });
+            mDetailsScroll.requestLayout();
             break;
         }
       }
@@ -478,6 +499,7 @@ class BottomPlacePageAnimationController extends BasePlacePageAnimationControlle
       @Override
       public void onAnimationUpdate(ValueAnimator animation)
       {
+        // FIXME: This translation adds a weird jumping up at end of PP closing
         mPlacePage.setTranslationY((Float) animation.getAnimatedValue());
         notifyProgress();
       }
@@ -489,6 +511,7 @@ class BottomPlacePageAnimationController extends BasePlacePageAnimationControlle
       {
         initialVisibility();
         mPlacePage.setTranslationY(0);
+        mDetailsScroll.setTranslationY(mDetailsScroll.getHeight());
         notifyProgress();
         notifyVisibilityListener(false, false);
       }
@@ -528,7 +551,12 @@ class BottomPlacePageAnimationController extends BasePlacePageAnimationControlle
 
   private void notifyProgress()
   {
-    notifyProgress(0, mPreview.getTranslationY());
+    notifyProgress(0, mDetailsScroll.getTranslationY() + mPlacePage.getTranslationY());
+  }
+
+  void setBannerOpenListener(@Nullable OnBannerOpenListener bannerOpenListener)
+  {
+    mBannerOpenListener = bannerOpenListener;
   }
 
   private class UpdateListener implements ValueAnimator.AnimatorUpdateListener
@@ -552,5 +580,10 @@ class BottomPlacePageAnimationController extends BasePlacePageAnimationControlle
       mDetailsScroll.scrollTo(0, 0);
       notifyProgress();
     }
+  }
+
+  interface OnBannerOpenListener
+  {
+    void onNeedOpenBanner();
   }
 }

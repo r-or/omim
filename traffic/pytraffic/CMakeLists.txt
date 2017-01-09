@@ -30,10 +30,7 @@ if (PLATFORM_MAC)
   omim_link_libraries(
     ${PROJECT_NAME}
     ${Qt5Widgets_LIBRARIES}
-    "-framework Cocoa"
-    "-framework IOKit"
     "-framework QuartzCore"
-    "-framework SystemConfiguration"
   )
 endif()
 
@@ -46,12 +43,23 @@ endif()
 
 omim_link_libraries(
   ${PROJECT_NAME}
-  ${PYTHON_LIBRARIES}
-  ${Boost_LIBRARIES}
   traffic
+  routing
+  indexer
+  editor
   platform
   geometry
+  coding
   base
+  stats_client
+  jansson
+  oauthcpp
+  protobuf
+  pugixml
+  opening_hours
+  ${PYTHON_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${LIBZ}
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")

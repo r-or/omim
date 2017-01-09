@@ -274,9 +274,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 34F5585C1DBF3EFF00A4FC11 /* common-debug.xcconfig */;
 			buildSettings = {
+				GCC_WARN_INHIBIT_ALL_WARNINGS = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(OMIM_ROOT)/3party/fribidi",
+					"$(OMIM_ROOT)/3party/fribidi/lib",
 				);
 			};
 			name = Debug;
@@ -285,9 +287,11 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 34F5585D1DBF3EFF00A4FC11 /* common-release.xcconfig */;
 			buildSettings = {
+				GCC_WARN_INHIBIT_ALL_WARNINGS = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(OMIM_ROOT)/3party/fribidi",
+					"$(OMIM_ROOT)/3party/fribidi/lib",
 				);
 			};
 			name = Release;

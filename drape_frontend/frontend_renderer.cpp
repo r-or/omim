@@ -33,6 +33,7 @@
 #include "std/algorithm.hpp"
 #include "std/bind.hpp"
 #include "std/cmath.hpp"
+#include "std/chrono.hpp"
 
 namespace df
 {
@@ -132,6 +133,8 @@ FrontendRenderer::FrontendRenderer(Params const & params)
   , m_requestedTiles(params.m_requestedTiles)
   , m_maxGeneration(0)
   , m_needRestoreSize(false)
+  , m_needRegenerateTraffic(false)
+  , m_trafficEnabled(params.m_trafficEnabled)
 {
 #ifdef DRAW_INFO
   m_tpf = 0.0;
@@ -290,9 +293,11 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
           }
         }
       }
-
       if (changed)
         UpdateCanBeDeletedStatus();
+
+      if (m_notFinishedTiles.empty())
+        m_trafficRenderer->OnGeometryReady(m_currentZoomLevel);
       break;
     }
 
@@ -487,6 +492,10 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
 
       m2::PointD const finishPoint = routeData->m_sourcePolyline.Back();
       m_routeRenderer->SetRouteData(move(routeData), make_ref(m_gpuProgramManager));
+      // Here we have to recache route arrows.
+      m_routeRenderer->UpdateRoute(m_userEventStream.GetCurrentScreen(),
+                                   bind(&FrontendRenderer::OnCacheRouteArrows, this, _1, _2));
+
       if (!m_routeRenderer->GetFinishPoint())
       {
         m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
@@ -739,22 +748,27 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       break;
     }
 
-  case Message::UpdateTraffic:
+  case Message::EnableTraffic:
     {
-      ref_ptr<UpdateTrafficMessage> msg = message;
-      m_trafficRenderer->UpdateTraffic(msg->GetSegmentsColoring());
+      ref_ptr<EnableTrafficMessage> msg = message;
+      m_trafficEnabled = msg->IsTrafficEnabled();
+      if (msg->IsTrafficEnabled())
+        m_needRegenerateTraffic = true;
+      else
+        m_trafficRenderer->ClearGLDependentResources();
       break;
     }
 
-  case Message::SetTrafficTexCoords:
+  case Message::RegenerateTraffic:
     {
-      ref_ptr<SetTrafficTexCoordsMessage> msg = message;
-      m_trafficRenderer->SetTexCoords(move(msg->AcceptTexCoords()));
+      m_needRegenerateTraffic = true;
       break;
     }
 
   case Message::FlushTrafficData:
     {
+      if (!m_trafficEnabled)
+        break;
       ref_ptr<FlushTrafficDataMessage> msg = message;
       m_trafficRenderer->AddRenderData(make_ref(m_gpuProgramManager), msg->AcceptTrafficData());
       break;
@@ -819,11 +833,9 @@ void FrontendRenderer::UpdateGLResources()
   auto const & routeData = m_routeRenderer->GetRouteData();
   if (routeData != nullptr)
   {
-    auto recacheRouteMsg = make_unique_dp<AddRouteMessage>(routeData->m_sourcePolyline,
-                                                           routeData->m_sourceTurns,
-                                                           routeData->m_color,
-                                                           routeData->m_pattern,
-                                                           m_lastRecacheRouteId);
+    auto recacheRouteMsg = make_unique_dp<AddRouteMessage>(routeData->m_sourcePolyline, routeData->m_sourceTurns,
+                                                           routeData->m_color, routeData->m_traffic,
+                                                           routeData->m_pattern, m_lastRecacheRouteId);
     m_routeRenderer->ClearGLDependentResources();
     m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread, move(recacheRouteMsg),
                               MessagePriority::Normal);
@@ -834,7 +846,7 @@ void FrontendRenderer::UpdateGLResources()
   // Request new tiles.
   ScreenBase screen = m_userEventStream.GetCurrentScreen();
   m_lastReadedModelView = screen;
-  m_requestedTiles->Set(screen, m_isIsometry || screen.isPerspective(), ResolveTileKeys(screen));
+  m_requestedTiles->Set(screen, m_isIsometry || screen.isPerspective(), m_needRegenerateTraffic, ResolveTileKeys(screen));
   m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                             make_unique_dp<UpdateReadManagerMessage>(),
                             MessagePriority::UberHighSingleton);
@@ -889,7 +901,8 @@ void FrontendRenderer::InvalidateRect(m2::RectD const & gRect)
 
     // Request new tiles.
     m_lastReadedModelView = screen;
-    m_requestedTiles->Set(screen, m_isIsometry || screen.isPerspective(), ResolveTileKeys(screen));
+    m_requestedTiles->Set(screen, m_isIsometry || screen.isPerspective(),
+                          m_needRegenerateTraffic, ResolveTileKeys(screen));
     m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                               make_unique_dp<UpdateReadManagerMessage>(),
                               MessagePriority::UberHighSingleton);
@@ -1086,8 +1099,6 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
   BeforeDrawFrame();
 #endif
 
-  bool const isPerspective = modelView.isPerspective();
-
   GLFunctions::glEnable(gl_const::GLDepthTest);
   m_viewport.Apply();
   RefreshBgColor();
@@ -1095,10 +1106,22 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
 
   Render2dLayer(modelView);
 
-  bool hasSelectedPOI = false;
+  if (m_framebuffer->IsSupported())
+  {
+    RenderTrafficAndRouteLayer(modelView);
+    Render3dLayer(modelView, true /* useFramebuffer */);
+  }
+  else
+  {
+    Render3dLayer(modelView, false /* useFramebuffer */);
+    RenderTrafficAndRouteLayer(modelView);
+  }
+
+  // After this line we do not use depth buffer.
+  GLFunctions::glDisable(gl_const::GLDepthTest);
+
   if (m_selectionShape != nullptr)
   {
-    GLFunctions::glDisable(gl_const::GLDepthTest);
     SelectionShape::ESelectedObject selectedObject = m_selectionShape->GetSelectedObject();
     if (selectedObject == SelectionShape::OBJECT_MY_POSITION)
     {
@@ -1109,47 +1132,16 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
     }
     else if (selectedObject == SelectionShape::OBJECT_POI)
     {
-      if (!isPerspective && m_layers[RenderLayer::Geometry3dID].m_renderGroups.empty())
-        m_selectionShape->Render(modelView, m_currentZoomLevel,
-                                 make_ref(m_gpuProgramManager), m_generalUniforms);
-      else
-        hasSelectedPOI = true;
+      m_selectionShape->Render(modelView, m_currentZoomLevel, make_ref(m_gpuProgramManager), m_generalUniforms);
     }
   }
 
-  if (m_framebuffer->IsSupported())
-  {
-    m_framebuffer->Enable();
-    GLFunctions::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    GLFunctions::glClear();
-    Render3dLayer(modelView);
-    m_framebuffer->Disable();
-    GLFunctions::glDisable(gl_const::GLDepthTest);
-    m_transparentLayer->Render(m_framebuffer->GetTextureId(), make_ref(m_gpuProgramManager));
-  }
-  else
-  {
-    GLFunctions::glClearDepth();
-    Render3dLayer(modelView);
-  }
-
-  GLFunctions::glDisable(gl_const::GLDepthTest);
-  if (hasSelectedPOI)
-    m_selectionShape->Render(modelView, m_currentZoomLevel, make_ref(m_gpuProgramManager), m_generalUniforms);
-
-  m_trafficRenderer->RenderTraffic(modelView, m_currentZoomLevel, make_ref(m_gpuProgramManager), m_generalUniforms);
-
-  GLFunctions::glEnable(gl_const::GLDepthTest);
-  GLFunctions::glClearDepth();
   RenderOverlayLayer(modelView);
 
   m_gpsTrackRenderer->RenderTrack(modelView, m_currentZoomLevel, make_ref(m_gpuProgramManager), m_generalUniforms);
 
-  GLFunctions::glDisable(gl_const::GLDepthTest);
   if (m_selectionShape != nullptr && m_selectionShape->GetSelectedObject() == SelectionShape::OBJECT_USER_MARK)
     m_selectionShape->Render(modelView, m_currentZoomLevel, make_ref(m_gpuProgramManager), m_generalUniforms);
-
-  m_routeRenderer->RenderRoute(modelView, make_ref(m_gpuProgramManager), m_generalUniforms);
 
   RenderUserMarksLayer(modelView);
 
@@ -1160,9 +1152,7 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
   m_drapeApiRenderer->Render(modelView, make_ref(m_gpuProgramManager), m_generalUniforms);
 
   if (m_guiRenderer != nullptr)
-    m_guiRenderer->Render(make_ref(m_gpuProgramManager), modelView);
-
-  GLFunctions::glEnable(gl_const::GLDepthTest);
+    m_guiRenderer->Render(make_ref(m_gpuProgramManager), m_myPositionController->IsInRouting(), modelView);
 
 #if defined(RENDER_DEBUG_RECTS) && defined(COLLECT_DISPLACEMENT_INFO)
   for (auto const & arrow : m_overlayTree->GetDisplacementInfo())
@@ -1185,13 +1175,29 @@ void FrontendRenderer::Render2dLayer(ScreenBase const & modelView)
     RenderSingleGroup(modelView, make_ref(group));
 }
 
-void FrontendRenderer::Render3dLayer(ScreenBase const & modelView)
+void FrontendRenderer::Render3dLayer(ScreenBase const & modelView, bool useFramebuffer)
 {
+  if (useFramebuffer)
+  {
+    ASSERT(m_framebuffer->IsSupported(), ());
+    m_framebuffer->Enable();
+    GLFunctions::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    GLFunctions::glClear();
+  }
+
+  GLFunctions::glClearDepth();
   GLFunctions::glEnable(gl_const::GLDepthTest);
   RenderLayer & layer = m_layers[RenderLayer::Geometry3dID];
   layer.Sort(make_ref(m_overlayTree));
   for (drape_ptr<RenderGroup> const & group : layer.m_renderGroups)
     RenderSingleGroup(modelView, make_ref(group));
+
+  if (useFramebuffer)
+  {
+    m_framebuffer->Disable();
+    GLFunctions::glDisable(gl_const::GLDepthTest);
+    m_transparentLayer->Render(m_framebuffer->GetTextureId(), make_ref(m_gpuProgramManager));
+  }
 }
 
 void FrontendRenderer::RenderOverlayLayer(ScreenBase const & modelView)
@@ -1200,6 +1206,19 @@ void FrontendRenderer::RenderOverlayLayer(ScreenBase const & modelView)
   BuildOverlayTree(modelView);
   for (drape_ptr<RenderGroup> & group : overlay.m_renderGroups)
     RenderSingleGroup(modelView, make_ref(group));
+}
+
+void FrontendRenderer::RenderTrafficAndRouteLayer(ScreenBase const & modelView)
+{
+  GLFunctions::glClearDepth();
+  GLFunctions::glEnable(gl_const::GLDepthTest);
+  if (m_trafficRenderer->HasRenderData())
+  {
+    m_trafficRenderer->RenderTraffic(modelView, m_currentZoomLevel, 1.0f /* opacity */,
+                                     make_ref(m_gpuProgramManager), m_generalUniforms);
+  }
+  m_routeRenderer->RenderRoute(modelView, m_trafficRenderer->HasRenderData(),
+                               make_ref(m_gpuProgramManager), m_generalUniforms);
 }
 
 void FrontendRenderer::RenderUserMarksLayer(ScreenBase const & modelView)
@@ -1584,6 +1603,8 @@ TTilesCollection FrontendRenderer::ResolveTileKeys(ScreenBase const & screen)
     return group->GetTileKey().m_zoomLevel != m_currentZoomLevel;
   });
 
+  m_trafficRenderer->OnUpdateViewport(result, m_currentZoomLevel, tilesToDelete);
+
   return tiles;
 }
 
@@ -1633,7 +1654,6 @@ void FrontendRenderer::OnContextCreate()
   GLFunctions::AttachCache(this_thread::get_id());
 
   GLFunctions::glPixelStore(gl_const::GLUnpackAlignment, 1);
-  GLFunctions::glEnable(gl_const::GLDepthTest);
 
   GLFunctions::glClearDepthValue(1.0);
   GLFunctions::glDepthFunc(gl_const::GLLessOrEqual);
@@ -1704,7 +1724,7 @@ void FrontendRenderer::Routine::Do()
     isActiveFrame |= m_renderer.m_texMng->UpdateDynamicTextures();
     m_renderer.RenderScene(modelView);
 
-    if (modelViewChanged)
+    if (modelViewChanged || m_renderer.m_needRegenerateTraffic)
       m_renderer.UpdateScene(modelView);
 
     isActiveFrame |= InterpolationHolder::Instance().Advance(frameTime);
@@ -1853,14 +1873,16 @@ void FrontendRenderer::UpdateScene(ScreenBase const & modelView)
   for (RenderLayer & layer : m_layers)
     layer.m_isDirty |= RemoveGroups(removePredicate, layer.m_renderGroups, make_ref(m_overlayTree));
 
-  if (m_lastReadedModelView != modelView)
+  if (m_needRegenerateTraffic || m_lastReadedModelView != modelView)
   {
     EmitModelViewChanged(modelView);
     m_lastReadedModelView = modelView;
-    m_requestedTiles->Set(modelView, m_isIsometry || modelView.isPerspective(), ResolveTileKeys(modelView));
+    m_requestedTiles->Set(modelView, m_isIsometry || modelView.isPerspective(), m_needRegenerateTraffic,
+                          ResolveTileKeys(modelView));
     m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                               make_unique_dp<UpdateReadManagerMessage>(),
                               MessagePriority::UberHighSingleton);
+    m_needRegenerateTraffic = false;
   }
 }
 

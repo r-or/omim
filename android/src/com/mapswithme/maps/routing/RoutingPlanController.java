@@ -1,8 +1,10 @@
 package com.mapswithme.maps.routing;
 
+import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
@@ -41,7 +43,7 @@ import com.mapswithme.util.Utils;
 import com.mapswithme.util.statistics.AlohaHelper;
 import com.mapswithme.util.statistics.Statistics;
 
-public class RoutingPlanController extends ToolbarController
+public class RoutingPlanController extends ToolbarController implements SlotFrame.SlotClickListener
 {
   static final int ANIM_TOGGLE = MwmApplication.get().getResources().getInteger(R.integer.anim_slots_toggle);
   private static final String STATE_ALTITUDE_CHART_SHOWN = "altitude_chart_shown";
@@ -61,7 +63,7 @@ public class RoutingPlanController extends ToolbarController
   private final View mUberFrame;
 
   private final RotateDrawable mToggleImage = new RotateDrawable(R.drawable.ic_down);
-  private int mFrameHeight;
+  int mFrameHeight;
   private int mToolbarHeight;
   private boolean mOpen;
   @Nullable
@@ -69,6 +71,23 @@ public class RoutingPlanController extends ToolbarController
 
   @Nullable
   private UberInfo.Product mUberProduct;
+
+  @Nullable
+  private OnToggleListener mToggleListener;
+
+  @Nullable
+  private  SearchPoiTransitionListener mPoiTransitionListener;
+
+  public interface OnToggleListener
+  {
+    void onToggle(boolean state);
+  }
+
+  public interface SearchPoiTransitionListener
+  {
+    void animateSearchPoiTransition(@NonNull final Rect startRect,
+                                    @Nullable final Runnable runnable);
+  }
 
   private RadioButton setupRouterButton(@IdRes int buttonId, final @DrawableRes int iconRes, View.OnClickListener clickListener)
   {
@@ -100,6 +119,7 @@ public class RoutingPlanController extends ToolbarController
 
     mToggle = (ImageView) mToolbar.findViewById(R.id.toggle);
     mSlotFrame = (SlotFrame) root.findViewById(R.id.slots);
+    mSlotFrame.setSlotClickListener(this);
     mRouterTypes = (RadioGroup) mToolbar.findViewById(R.id.route_type);
 
     setupRouterButton(R.id.vehicle, R.drawable.ic_car, new View.OnClickListener()
@@ -177,7 +197,32 @@ public class RoutingPlanController extends ToolbarController
     RoutingController.get().cancelPlanning();
   }
 
-  private boolean checkFrameHeight()
+  @Override
+  public void onSlotClicked(final int order, @NonNull Rect rect)
+  {
+    if (mPoiTransitionListener != null)
+    {
+      mPoiTransitionListener.animateSearchPoiTransition(rect, new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          RoutingController.get().searchPoi(order);
+        }
+      });
+    }
+    else
+    {
+      RoutingController.get().searchPoi(order);
+    }
+  }
+
+  public void setPoiTransitionListener(@Nullable SearchPoiTransitionListener poiTransitionListener)
+  {
+    mPoiTransitionListener = poiTransitionListener;
+  }
+
+  boolean checkFrameHeight()
   {
     if (mFrameHeight > 0)
       return true;
@@ -352,6 +397,14 @@ public class RoutingPlanController extends ToolbarController
           mToggleImage.setAngle((1.0f - fraction) * 180.0f);
         }
       });
+      animator.addListener(new UiUtils.SimpleAnimatorListener() {
+        @Override
+        public void onAnimationEnd(Animator animation)
+        {
+          if (mToggleListener != null)
+            mToggleListener.onToggle(mOpen);
+        }
+      });
 
       animator.setDuration(ANIM_TOGGLE);
       animator.start();
@@ -362,6 +415,15 @@ public class RoutingPlanController extends ToolbarController
       animateSlotFrame(mOpen ? 0 : mFrameHeight);
       mToggleImage.setAngle(mOpen ? 180.0f : 0.0f);
       mSlotFrame.unfadeSlots();
+      mSlotFrame.post(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          if (mToggleListener != null)
+            mToggleListener.onToggle(mOpen);
+        }
+      });
     }
   }
 
@@ -543,5 +605,15 @@ public class RoutingPlanController extends ToolbarController
     MapObject to = RoutingController.get().getEndPoint();
     Location location = LocationHelper.INSTANCE.getLastKnownLocation();
     Statistics.INSTANCE.trackUber(from, to, location, isUberInstalled);
+  }
+
+  public int getHeight()
+  {
+    return mFrame.getHeight();
+  }
+
+  public void setOnToggleListener(@Nullable OnToggleListener listener)
+  {
+    mToggleListener = listener;
   }
 }

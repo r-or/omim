@@ -971,7 +971,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">Рядом</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">Заказать</string>
+	<string name="taxi_order">Заказать такси</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">Ожидание %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -986,12 +986,12 @@
 	<string name="booking_filters_rating_very_good">Очень хорошо</string>
 	<string name="booking_filters_rating_excellent">Отлично</string>
 	<string name="booking_filters_price_category">Ценовая категория</string>
-	<string name="booking_filters_no_results">Поиск не дал результатов</string>
-	<string name="booking_filters_nores_message">Попробуйте задать более общий запрос, уменьшить масштаб карты или сбросить фильтр.</string>
-	<string name="booking_filters_expand_area_button">Уменьшить масштаб карты</string>
-	<string name="booking_filters_reset_button">Сбросить фильтр</string>
+	<string name="search_no_results_title">Поиск не дал результатов</string>
+	<string name="search_no_results_message">Попробуйте задать более общий запрос, уменьшить масштаб карты или сбросить фильтр.</string>
+	<string name="search_no_results_expand_area_button">Уменьшить масштаб карты</string>
+	<string name="search_no_results_reset_button">Сбросить фильтр</string>
 	<!-- noun -->
-	<string name="booking_list">Список</string>
+	<string name="search_in_table">Список</string>
 	<string name="booking_based_on_reviews">По %d отзывам об отеле</string>
 	<string name="booking_show_more">Показать еще</string>
 	<string name="booking_reviews">Отзывы</string>
@@ -1006,4 +1006,57 @@
 	<string name="whatsnew_uber_message">Закажите такси прямо из приложения!</string>
 	<string name="dialog_taxi_offline">Заказ такси недоступен офлайн.</string>
 	<string name="dialog_taxi_error">Заказ такси временно недоступен.</string>
+	<string name="advertisement">Реклама</string>
+	<string name="mobile_data_dialog">Загружать дополнительную информацию через мобильный интернет?</string>
+	<string name="mobile_data_option_always">Всегда</string>
+	<string name="mobile_data_option_today">Только сегодня</string>
+	<string name="mobile_data_option_not_today">Не сегодня</string>
+	<string name="mobile_data">Мобильный интернет</string>
+	<string name="mobile_data_description">Мобильный интернет требуется для отображения более детальной информации о местах: фотографий, цен, отзывов.</string>
+	<string name="mobile_data_option_never">Никогда не использовать</string>
+	<string name="mobile_data_option_ask">Всегда спрашивать</string>
+	<string name="traffic_update_maps_text">Для отображения пробок необходимо обновить карты.</string>
+	<string name="traffic_outdated">Данные о пробках устарели.</string>
+	<string name="big_font">Увеличенные подписи</string>
+	<string name="traffic_update_app">Обновите MAPS.ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">Для отображения пробок необходимо обновить приложение.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">Данные о пробках недоступны</string>
+	<string name="banner_deliveryclub_title">Доставка еды</string>
+	<string name="banner_deliveryclub_message">Быстрая доставка еды из 4 тысяч ресторанов. Закажите на Delivery Club.</string>
+	<string name="banner_lamoda_title">Интернет-магазин одежды и обуви</string>
+	<string name="banner_lamoda_message">Более тысячи брендов. Скидки до 70%. Доставка по всей стране бесплатно.</string>
+	<string name="banner_tutu_title">Ж/д билеты онлайн</string>
+	<string name="banner_tutu_message">Ж/д билеты в любой город онлайн – цены, поиск и бронирование.</string>
+	<string name="banner_geerbest_title">Интернет-магазин электроники</string>
+	<string name="banner_geerbest_message">Мгновенный поиск по более чем 50 тысячам товаров по низким ценам.</string>
+	<string name="banner_rentalcars_title">Прокат автомобилей онлайн</string>
+	<string name="banner_rentalcars_message">800 прокатных компаний в более чем 49 тысячах пунктах проката.</string>
+	<string name="banner_viator_title">Онлайн-поиск экскурсий</string>
+	<string name="banner_viator_message">Поиск по более чем 50 тысячам экскурсий по всему миру.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">Пробки в 36 странах мира</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">Актуальная информация о пробках на дорогах и самые быстрые маршруты с их учетом!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">Пробки даже в роуминге</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">Требует менее 1 МБ мобильного трафика за поездку.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">Вызов такси</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">В карточке большинства объектов появилась кнопка заказа такси.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">Улучшен поиск</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">Опечатки в запросах не влияют на результаты поиска.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">Фильтры в поиске</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">Можно искать отели с учетом цены и рейтинга.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">Размер шрифта</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">Названия объектов на карте теперь можно сделать крупнее.</string>
 </resources>

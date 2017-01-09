@@ -970,7 +970,7 @@
 	<!-- For place page hotel nearby block -->
 	<string name="placepage_hotel_nearby">In der Nähe</string>
 	<!-- For ordering a taxi (as opposed to hotels or other things) -->
-	<string name="taxi_order">Bestellen</string>
+	<string name="taxi_order">Taxi rufen</string>
 	<!-- How long it is until the taxi arrives -->
 	<string name="taxi_wait">Erwartet in %s</string>
 	<!-- When there are no available taxis nearby -->
@@ -985,12 +985,12 @@
 	<string name="booking_filters_rating_very_good">Sehr gut</string>
 	<string name="booking_filters_rating_excellent">Ausgezeichnet</string>
 	<string name="booking_filters_price_category">Preiskategorie</string>
-	<string name="booking_filters_no_results">Keine Ergebnisse gefunden</string>
-	<string name="booking_filters_nores_message">Versuchen Sie es mit einem allgemeineren Suchbegriff, zoomen Sie heraus oder setzen Sie den Filter zurück.</string>
-	<string name="booking_filters_expand_area_button">Herauszoomen</string>
-	<string name="booking_filters_reset_button">Filter zurücksetzen</string>
+	<string name="search_no_results_title">Keine Ergebnisse gefunden</string>
+	<string name="search_no_results_message">Versuchen Sie es mit einem allgemeineren Suchbegriff, zoomen Sie heraus oder setzen Sie den Filter zurück.</string>
+	<string name="search_no_results_expand_area_button">Herauszoomen</string>
+	<string name="search_no_results_reset_button">Filter zurücksetzen</string>
 	<!-- noun -->
-	<string name="booking_list">Liste</string>
+	<string name="search_in_table">Liste</string>
 	<string name="booking_based_on_reviews">Basierend auf %d Hotelbewertungen</string>
 	<string name="booking_show_more">Mehr anzeigen</string>
 	<string name="booking_reviews">Bewertungen</string>
@@ -1005,4 +1005,57 @@
 	<string name="whatsnew_uber_message">Uber-Taxi direkt über die App bestellen!</string>
 	<string name="dialog_taxi_offline">Das Bestellen eines Taxis ist im Offline-Modus nicht verfügbar.</string>
 	<string name="dialog_taxi_error">Das Bestellen eines Taxis ist vorübergehend nicht verfügbar.</string>
+	<string name="advertisement">Werbung</string>
+	<string name="mobile_data_dialog">Mobiles Internet verwenden, um genauere Informationen anzuzeigen?</string>
+	<string name="mobile_data_option_always">Immer verwenden</string>
+	<string name="mobile_data_option_today">Nur heute</string>
+	<string name="mobile_data_option_not_today">Heute nicht verwenden</string>
+	<string name="mobile_data">Mobiles Internet</string>
+	<string name="mobile_data_description">Mobiles Internet wird benötigt, um genauere Informationen über Orte anzuzeigen, wie Fotos, Preise und Bewertungen.</string>
+	<string name="mobile_data_option_never">Nie verwenden</string>
+	<string name="mobile_data_option_ask">Immer fragen</string>
+	<string name="traffic_update_maps_text">Um Verkehrsdaten anzuzeigen, müssen die Karten aktualisiert werden.</string>
+	<string name="traffic_outdated">Verkehrsdaten sind veraltet.</string>
+	<string name="big_font">Größere Bezeichnungen</string>
+	<string name="traffic_update_app">Bitte aktualisieren Sie MAPS.ME</string>
+	<!-- "traffic" as in road congestion -->
+	<string name="traffic_update_app_message">Um Verkehrsdaten anzuzeigen, muss die Anwendung aktualisiert werden.</string>
+	<!-- "traffic" as in "road congestion" -->
+	<string name="traffic_data_unavailable">Verkehrsdaten sind nicht verfügbar</string>
+	<string name="banner_deliveryclub_title">Essensbringdienst</string>
+	<string name="banner_deliveryclub_message">Schnelle Lieferung von 4000 Restaurants. Bestellen mit Delivery Club.</string>
+	<string name="banner_lamoda_title">Onlinegeschäft für Kleidung und Schuhe</string>
+	<string name="banner_lamoda_message">Über 1000 Marken. Bis zu 70 % Rabatt. Kostenlose Lieferung landesweit.</string>
+	<string name="banner_tutu_title">Zugfahrkarten online</string>
+	<string name="banner_tutu_message">Zugfahrkarten in jede Stadt online – Preise, Suche und Buchung.</string>
+	<string name="banner_geerbest_title">Online-Elektronikgeschäft</string>
+	<string name="banner_geerbest_message">Sofortsuche bei über 50.000 Artikeln zu günstigen Preisen.</string>
+	<string name="banner_rentalcars_title">Autos online mieten</string>
+	<string name="banner_rentalcars_message">800 Autovermietungen mit über 49.000 Mietstationen.</string>
+	<string name="banner_viator_title">Online-Toursuche</string>
+	<string name="banner_viator_message">Suche bei über 50.000 Touren auf der ganzen Welt.</string>
+	<!-- december -->
+	<string name="whatsnew_traffic">Verkehrsdaten in 36 Ländern</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_text">Aktuelle Verkehrsinformationen und darauf basierende schnellste Routen!</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming">Verkehrsinformationen bei Roaming</string>
+	<!-- december -->
+	<string name="whatsnew_traffic_roaming_text">Erfordert weniger als 1 MB mobile Bandbreite pro Fahrt.</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi">Taxi rufen</string>
+	<!-- december -->
+	<string name="whatsnew_order_taxi_text">Die meisten Standortseiten verfügen nun über eine Schaltfläche zum Rufen eines Taxis.</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search">Verbesserte Suche</string>
+	<!-- january -->
+	<string name="whatsnew_improved_search_text">Sogar falsch geschriebene Anfragen liefern präzise Suchergebnisse.</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search">Suchfilter</string>
+	<!-- january -->
+	<string name="whatsnew_filters_in_search_text">Hotels basierend auf Preis und Bewertung suchen.</string>
+	<!-- january -->
+	<string name="whatsnew_font_size">Schriftgröße</string>
+	<!-- january -->
+	<string name="whatsnew_font_size_text">Bezeichnungen auf der Karte können vergrößert werden.</string>
 </resources>

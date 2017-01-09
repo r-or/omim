@@ -1,7 +1,10 @@
 #pragma once
 
 #include "routing/road_graph.hpp"
+#include "routing/road_point.hpp"
 #include "routing/route.hpp"
+
+#include "traffic/traffic_info.hpp"
 
 #include "base/cancellable.hpp"
 
@@ -9,7 +12,6 @@
 
 namespace routing
 {
-
 class IDirectionsEngine
 {
 public:
@@ -18,6 +20,7 @@ public:
   virtual void Generate(IRoadGraph const & graph, vector<Junction> const & path,
                         Route::TTimes & times, Route::TTurns & turns,
                         vector<Junction> & routeGeometry,
+                        vector<traffic::TrafficInfo::RoadSegmentId> & trafficSegs,
                         my::Cancellable const & cancellable) = 0;
 
 protected:
@@ -30,5 +33,4 @@ protected:
   void CalculateTimes(IRoadGraph const & graph, vector<Junction> const & path,
                       Route::TTimes & times) const;
 };
-
 }  // namespace routing

@@ -13,15 +13,20 @@ omim_add_test(${PROJECT_NAME} ${SRC})
 
 omim_link_libraries(
   ${PROJECT_NAME}
-  routing
   traffic
+  routing
   indexer
+  editor
+  pugixml
+  oauthcpp
+  opening_hours
   platform_tests_support
   platform
   coding
   geometry
   base
   stats_client
+  jansson
   ${Qt5Core_LIBRARIES}
   ${LIBZ}
 )
@@ -30,9 +35,6 @@ if (PLATFORM_MAC)
   omim_link_libraries(
     ${PROJECT_NAME}
     ${Qt5Widgets_LIBRARIES}
-    "-framework IOKit"
-    "-framework Cocoa"
-    "-framework SystemConfiguration"
   )
 endif()
 

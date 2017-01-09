@@ -1,6 +1,6 @@
 #import "MWMBottomMenuViewController.h"
 #import <Pushwoosh/PushNotificationManager.h>
-#import "Common.h"
+#import "MWMCommon.h"
 #import "EAGLView.h"
 #import "MWMActivityViewController.h"
 #import "MWMBottomMenuCollectionViewCell.h"
@@ -15,10 +15,11 @@
 #import "MWMSearchManager.h"
 #import "MWMSettingsViewController.h"
 #import "MWMTextToSpeech.h"
+#import "MWMTrafficManager.h"
 #import "MapViewController.h"
 #import "MapsAppDelegate.h"
 #import "Statistics.h"
-#import "TimeUtils.h"
+#import "SwiftBridge.h"
 #import "UIColor+MapsMeColor.h"
 #import "UIFont+MapsMeFonts.h"
 #import "UIImageView+Coloring.h"
@@ -52,7 +53,14 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
   MWMBottomMenuViewCellCount
 };
 
-@interface MWMBottomMenuViewController ()<UICollectionViewDataSource, UICollectionViewDelegate>
+@interface MWMMapViewControlsManager ()
+
+@property(nonatomic) MWMBottomMenuViewController * menuController;
+
+@end
+
+@interface MWMBottomMenuViewController ()<UICollectionViewDataSource, UICollectionViewDelegate,
+                                          MWMTrafficManagerObserver>
 
 @property(weak, nonatomic) MapViewController * controller;
 @property(weak, nonatomic) IBOutlet UICollectionView * buttonsCollectionView;
@@ -86,10 +94,18 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
 @property(weak, nonatomic) IBOutlet UIView * progressView;
 @property(weak, nonatomic) IBOutlet NSLayoutConstraint * routingProgress;
 @property(weak, nonatomic) IBOutlet MWMButton * ttsSoundButton;
+@property(weak, nonatomic) IBOutlet MWMButton * trafficButton;
+
+@property(weak, nonatomic) IBOutlet NSLayoutConstraint * mainButtonsHeight;
 
 @end
 
 @implementation MWMBottomMenuViewController
+
++ (MWMBottomMenuViewController *)controller
+{
+  return [MWMMapViewControlsManager manager].menuController;
+}
 
 - (instancetype)initWithParentController:(MapViewController *)controller
                                 delegate:(id<MWMBottomMenuControllerProtocol>)delegate
@@ -129,6 +145,7 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
          selector:@selector(ttsButtonStatusChanged:)
              name:[MWMTextToSpeech ttsStatusNotificationKey]
            object:nil];
+  [MWMTrafficManager addObserver:self];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -158,7 +175,7 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
   self.navigationInfo = info;
   if (self.routingInfoPageControl.currentPage == 0)
   {
-    self.timeLabel.text = [NSDateFormatter estimatedArrivalTimeWithSeconds:info.timeToTarget];
+    self.timeLabel.text = [NSDateComponentsFormatter etaStringFrom:info.timeToTarget];
   }
   else
   {
@@ -207,13 +224,29 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
 }
 
 - (IBAction)routingStartTouchUpInside { [MWMRouter startRouting]; }
-- (IBAction)routingStopTouchUpInside { [[MWMRouter router] stop]; }
+- (IBAction)routingStopTouchUpInside { [MWMRouter stopRouting]; }
 - (IBAction)soundTouchUpInside:(MWMButton *)sender
 {
-  BOOL const isEnable = sender.selected;
-  [Statistics logEvent:kStatEventName(kStatNavigationDashboard, isEnable ? kStatOn : kStatOff)];
-  sender.coloring = isEnable ? MWMButtonColoringBlue : MWMButtonColoringGray;
-  [MWMTextToSpeech tts].active = isEnable;
+  BOOL const isEnabled = sender.selected;
+  [Statistics logEvent:kStatMenu withParameters:@{kStatTTS : isEnabled ? kStatOn : kStatOff}];
+  [MWMTextToSpeech tts].active = !isEnabled;
+  [self refreshRoutingDiminishTimer];
+}
+
+#pragma mark - MWMTrafficManagerObserver
+
+- (void)onTrafficStateUpdated
+{
+  MWMButton * tb = self.trafficButton;
+  BOOL const enabled = ([MWMTrafficManager state] != TrafficManager::TrafficState::Disabled);
+  tb.selected = enabled;
+}
+
+- (IBAction)trafficTouchUpInside:(MWMButton *)sender
+{
+  BOOL const switchOn = ([MWMTrafficManager state] == TrafficManager::TrafficState::Disabled);
+  [Statistics logEvent:kStatMenu withParameters:@{kStatTraffic : switchOn ? kStatOn : kStatOff}];
+  [MWMTrafficManager enableTraffic:switchOn];
   [self refreshRoutingDiminishTimer];
 }
 
@@ -229,12 +262,6 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
 }
 
 #pragma mark - Layout
-
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
-                                duration:(NSTimeInterval)duration
-{
-  [self.additionalButtons reloadData];
-}
 
 - (void)viewWillTransitionToSize:(CGSize)size
        withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
@@ -260,7 +287,7 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
   MWMButton * ttsButton = self.ttsSoundButton;
   ttsButton.hidden = isPedestrianRouting || ![MWMTextToSpeech isTTSEnabled];
   if (!ttsButton.hidden)
-    ttsButton.selected = ![MWMTextToSpeech tts].active;
+    ttsButton.selected = [MWMTextToSpeech tts].active;
 }
 
 #pragma mark - UICollectionViewDataSource
@@ -403,7 +430,7 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
     if (theApp.routingPlaneMode == MWMRoutingPlaneModeSearchDestination ||
         theApp.routingPlaneMode == MWMRoutingPlaneModeSearchSource)
       self.controller.controlsManager.searchHidden = YES;
-    [[MWMRouter router] stop];
+    [MWMRouter stopRouting];
   }
 }
 
@@ -513,6 +540,9 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
 
 - (void)setState:(MWMBottomMenuState)state
 {
+  runAsyncOnMainQueue(^{
+    [self.controller setNeedsStatusBarAppearanceUpdate];
+  });
   [self refreshRoutingDiminishTimer];
   MWMBottomMenuView * view = (MWMBottomMenuView *)self.view;
   BOOL const menuActive =
@@ -570,11 +600,21 @@ typedef NS_ENUM(NSUInteger, MWMBottomMenuViewCell) {
 - (void)setTtsSoundButton:(MWMButton *)ttsSoundButton
 {
   _ttsSoundButton = ttsSoundButton;
-  [ttsSoundButton setImage:[UIImage imageNamed:@"ic_voice_on"] forState:UIControlStateNormal];
-  [ttsSoundButton setImage:[UIImage imageNamed:@"ic_voice_off"] forState:UIControlStateSelected];
-  [ttsSoundButton setImage:[UIImage imageNamed:@"ic_voice_off"]
+  [ttsSoundButton setImage:[UIImage imageNamed:@"ic_voice_off"] forState:UIControlStateNormal];
+  [ttsSoundButton setImage:[UIImage imageNamed:@"ic_voice_on"] forState:UIControlStateSelected];
+  [ttsSoundButton setImage:[UIImage imageNamed:@"ic_voice_on"]
                   forState:UIControlStateSelected | UIControlStateHighlighted];
   [self ttsButtonStatusChanged:nil];
 }
 
+- (void)setTrafficButton:(MWMButton *)trafficButton
+{
+  _trafficButton = trafficButton;
+  [trafficButton setImage:[UIImage imageNamed:@"ic_setting_traffic_off"] forState:UIControlStateNormal];
+  [trafficButton setImage:[UIImage imageNamed:@"ic_setting_traffic_on"] forState:UIControlStateSelected];
+  [trafficButton setImage:[UIImage imageNamed:@"ic_setting_traffic_on"]
+                  forState:UIControlStateSelected | UIControlStateHighlighted];
+}
+
+- (CGFloat)mainStateHeight { return self.mainButtonsHeight.constant; }
 @end
