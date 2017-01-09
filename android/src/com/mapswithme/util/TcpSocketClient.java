@@ -32,6 +32,7 @@ public class TcpSocketClient {
   private final int mPingUpdateSpeedMs = DEBUG ? 10000 : 5000;
   private final int mTimeSyncRateMs = 60000;
   private final int mOutUpdateSpeedMs = DEBUG ? 3000 : 500;
+  private final int mPortStandard = 33333;
 
   private boolean mConnTimeout;
 
@@ -60,7 +61,8 @@ public class TcpSocketClient {
   public TcpSocketClient() {
     mRun = true;
     mConnecting = false;
-    mAddress = InetSocketAddress.createUnresolved(Config.externalDisplayIp(), Integer.parseInt(Config.externalDisplayPort()));
+    mAddress = InetSocketAddress.createUnresolved(Config.externalDisplayIp(),
+        Config.externalDisplayPort().equals("") ? mPortStandard : Integer.parseInt(Config.externalDisplayPort()));
     mConnTimeout = false;
     mPingScheduled = true;
     mTimeSyncScheduled = true;
@@ -136,7 +138,8 @@ public class TcpSocketClient {
     @Override
     public void run() {
       Log.d(TAG, "ClientThread: Trying to connect to " + Config.externalDisplayIp() + ":" + Config.externalDisplayPort());
-      mAddress = new InetSocketAddress(Config.externalDisplayIp(), Integer.parseInt(Config.externalDisplayPort()));
+      mAddress = new InetSocketAddress(Config.externalDisplayIp(),
+          Config.externalDisplayPort().equals("") ? mPortStandard : Integer.parseInt(Config.externalDisplayPort()));
       if (mAddress.getAddress() != null) {
         mConnecting = true;
         try {
